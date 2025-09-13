@@ -1,0 +1,30 @@
+/* Reset y tipografía global */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #f5f9f8, #e0f2f1);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+}
+
+h1 {
+  color: #00695c;
+  font-size: 26px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+p {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 16px;
+}
