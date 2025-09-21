@@ -3,21 +3,21 @@ sys.path.append("src")
 
 from flask import Flask
 from flask import render_template
+from flask_cors import CORS
 
-from src.view_web import vista_usuarios
-from src.view_web import vista_admin
+from src.routes import vista_usuarios
+
 
 
 app = Flask(__name__)
-
 app.secret_key = 'clave_secreta_super_segura_iper_iper_segura_ecoenergy_123'
 
+#  Permitir peticiones desde Next.js (localhost:3000)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-# Registramos los Blueprints que creamos 
+# Registramos los Blueprints
 app.register_blueprint(vista_usuarios.blueprint)
-app.register_blueprint(vista_admin.bp_admin)
+
 
 if __name__ == '__main__':
-    
-    
-    app.run(debug=True)
+    app.run(debug=True, port=5000)  # aseguramos que corra en 5000

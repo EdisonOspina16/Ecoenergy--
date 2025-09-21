@@ -96,3 +96,9 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Python
+
+__pycache__/
+.venv/
+.vscode/
