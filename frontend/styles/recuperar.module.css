@@ -68,18 +68,29 @@
   font-size: 28px;
   font-weight: 700;
   color: #2c3e50;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   text-align: center;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .container p {
   color: #7f8c8d;
-  margin-bottom: 35px;
+  margin-bottom: 8px;
   text-align: center;
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.descripcion {
+  color: #95a5a6 !important;
+  margin-bottom: 35px !important;
+  text-align: center;
+  font-size: 14px !important;
+  font-weight: 400 !important;
   line-height: 1.5;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Formulario */
@@ -91,24 +102,22 @@
 }
 
 .inputGroup {
-  position: relative;
   text-align: left;
 }
 
-.inputIcon {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #7f8c8d;
-  font-size: 16px;
-  z-index: 2;
-  transition: color 0.3s ease;
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.iconInput {
+.input {
   width: 100%;
-  padding: 15px 15px 15px 50px;
+  padding: 15px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   font-size: 15px;
@@ -120,18 +129,19 @@
   background-color: white;
 }
 
-.iconInput:focus {
+.input:focus {
   outline: none;
   border-color: #00695c;
   box-shadow: 0 0 0 2px rgba(0, 105, 92, 0.2);
 }
 
-.iconInput:focus + .inputIcon,
-.inputGroup:focus-within .inputIcon {
-  color: #00695c;
+.input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
-.iconInput::placeholder {
+.input::placeholder {
   color: #bdc3c7;
   font-style: italic;
   font-weight: 300;
@@ -158,15 +168,58 @@
   font-family: inherit;
 }
 
-.container button[type="submit"]:hover {
+.container button[type="submit"]:hover:not(:disabled) {
   background: linear-gradient(135deg, #00897b, #00796b);
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-.container button[type="submit"]:active {
+.container button[type="submit"]:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container button[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mensaje de respuesta */
+.mensaje {
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 
 /* Contenedor de enlaces */
@@ -219,18 +272,6 @@
   left: -100px;
 }
 
-/* Estados de carga y error */
-.container button[type="submit"]:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.container button[type="submit"]:disabled:hover {
-  transform: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
 /* Media queries */
 @media (max-width: 768px) {
   .container {
@@ -249,20 +290,16 @@
   }
   
   .container p {
-    font-size: 13px;
-  }
-  
-  .inputGroup {
-    margin-bottom: 15px;
-  }
-  
-  .iconInput {
-    padding: 12px 12px 12px 45px;
     font-size: 14px;
   }
   
-  .inputIcon {
-    left: 12px;
+  .descripcion {
+    font-size: 13px !important;
+    max-width: 280px;
+  }
+  
+  .input {
+    padding: 12px;
     font-size: 14px;
   }
   
@@ -271,7 +308,7 @@
     padding: 8px;
   }
 }
-  
+
   .container {
     width: 95%;
     margin: 15px auto;
@@ -291,5 +328,10 @@
   
   .container h1 {
     font-size: 22px;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
+  }
+  
+  .descripcion {
+    font-size: 12px !important;
+    max-width: 250px;
   }
