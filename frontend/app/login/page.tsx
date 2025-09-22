@@ -3,18 +3,44 @@
 import { useState } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
-
+import { API_URL } from "../../config";
 
 export default function Login() {
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Correo:", correo);
-    console.log("Contraseña:", contraseña);
-    // conectar el backend en Node.js
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: correo,
+        password: contraseña,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("token", data.token);
+      window.location.href = "/";  
+      // guardar token en localStorage, cookie, etc.
+      localStorage.setItem("token", data.token);
+    } else {
+      console.error("Error:", data.error);
+      alert("Credenciales inválidas");
+    }
+  } catch (error) {
+    console.error("Error en la petición:", error);
+    alert("Error al conectar con el servidor");
+  }
+};
+
 
   return (
     <>
