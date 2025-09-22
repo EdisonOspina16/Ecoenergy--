@@ -99,22 +99,34 @@ def registrar_usuario(nombre, apellidos, correo, contraseña):
     Registra un usuario nuevo con contraseña hasheada y datos adicionales.
     """
     try:
+        print(f"Intentando registrar usuario: {nombre} {apellidos} - {correo}")
+        
         conn = obtener_conexion()
+        if not conn:
+            print("No se pudo conectar a la base de datos")
+            return False
+            
+        print("Conexión a la base de datos establecida")
         cur = conn.cursor()
 
         hash_contraseña = generate_password_hash(contraseña)
+        print("Contraseña hasheada correctamente")
 
         cur.execute("""
             INSERT INTO usuarios (nombre, apellidos, correo, contraseña)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s)
         """, (nombre, apellidos, correo, hash_contraseña))
 
         conn.commit()
+        print("Usuario insertado en la base de datos")
+        
         cur.close()
         conn.close()
+        print("Conexión cerrada correctamente")
         return True
     except Exception as e:
         print(f"Error al registrar usuario: {e}")
+        print(f"Tipo de error: {type(e).__name__}")
         return False
 
 
@@ -132,7 +144,7 @@ def obtener_usuarios():
 
         for fila in filas:
             usuario = Usuario(
-                id_usuario=fila['id'],
+                id_usuario=fila['id_usuario'],
                 nombre=fila['nombre'],
                 apellidos=fila['apellidos'],
                 correo=fila['correo'],
@@ -164,7 +176,7 @@ def verificar_credenciales(correo, contraseña_input):
 
         if usuario and check_password_hash(usuario['contraseña'], contraseña_input):
             return Usuario(
-                id_usuario=usuario['id'],
+                id_usuario=usuario['id_usuario'],
                 nombre=usuario['nombre'],
                 apellidos=usuario['apellidos'],
                 correo=usuario['correo'],
@@ -214,7 +226,7 @@ def obtener_usuario_por_id(id_usuario):
 
         if fila:
             return Usuario(
-                id=fila['id'],
+                id_usuario=fila['id_usuario'],
                 nombre=fila['nombre'],
                 apellidos=fila['apellidos'],
                 correo=fila['correo'],

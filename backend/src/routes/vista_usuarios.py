@@ -5,7 +5,7 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, session
 from flask_cors import cross_origin
 from controller.controladorUsuarios import registrar_usuario, verificar_credenciales, actualizar_contraseña, obtener_usuario_por_id
-from controller import controladorDispositivos as cd 
+
 
 blueprint = Blueprint('vista_usuarios', __name__)
 
@@ -17,8 +17,6 @@ def login_requerido(f):
         usuario = session.get('usuario')
         if not usuario:               
             return jsonify({"error": "Debes iniciar sesión para acceder a esta página"}), 401
-        if usuario.get('es_admin'):
-            return jsonify({"redirect": "/admin"})
         return f(*args, **kwargs)
     return decorador
 
@@ -35,23 +33,36 @@ def logout():
     return jsonify({"message": "Sesión cerrada exitosamente", "redirect": "/login"})
 
 
-# Ruta para el registro paso 1
-@blueprint.route('/registro/paso1', methods=['POST'])
+# Ruta para el registro
+@blueprint.route('/registro', methods=['POST'])
 @cross_origin()
-def registro_paso1():
+def registro():
     data = request.get_json()
     
-    if not data or not all(key in data for key in ['nombre', 'correo', 'contraseña']):
+    if not data or not all(key in data for key in ['nombre', 'apellidos', 'correo', 'contraseña']):
         return jsonify({"error": "Faltan campos requeridos"}), 400
     
-    # Guardamos en session lo necesario del paso 1
-    session['registro_step1'] = {
-        'nombre':     data['nombre'],
-        'correo':     data['correo'],
-        'contraseña': data['contraseña']
-    }
-    
-    return jsonify({"message": "Paso 1 completado", "redirect": "/registro/paso2"})
+    # Obtener datos del formulario
+    nombre      = data['nombre']
+    apellidos   = data['apellidos']
+    correo      = data['correo']
+    contraseña  = data['contraseña']
+
+    # Guardamos en la BD
+    exito = registrar_usuario(
+        nombre=nombre,
+        apellidos=apellidos,
+        correo=correo,
+        contraseña=contraseña
+    )
+
+    if exito:
+        return jsonify({
+            "message": "Usuario registrado con éxito", 
+            "redirect": "/login"
+        })
+    else:
+        return jsonify({"error": "Error al registrar usuario"}), 500
 
 
 @blueprint.route('/login', methods=['POST'])
@@ -70,18 +81,11 @@ def login():
     if usuario:
         session['usuario'] = usuario.to_dict()
 
-        if usuario.es_admin:
-            return jsonify({
-                "message": "Inicio de sesión exitoso", 
-                "redirect": "/admin",
-                "usuario": usuario.to_dict()
-            })
-        else:
-            return jsonify({
-                "message": "Inicio de sesión exitoso", 
-                "redirect": "/dashboard",
-                "usuario": usuario.to_dict()
-            })
+        return jsonify({
+            "message": "Inicio de sesión exitoso", 
+            "redirect": "/dashboard",
+            "usuario": usuario.to_dict()
+        })
     else:
         return jsonify({"error": "Credenciales inválidas"}), 401    
 
@@ -109,7 +113,7 @@ def recuperar():
 
     
 # -----------------------------------------
-
+"""
 # perfil
 @blueprint.route('/perfil', methods=['GET'])
 @cross_origin()
@@ -136,50 +140,5 @@ def perfil():
     }
     
     return jsonify({"usuario": usuario_data})
-
+"""
 # -----------------------------------------
-
-@blueprint.route('/registro/paso2', methods=['POST'])
-@cross_origin()
-def registro_paso2():
-    datos1 = session.get('registro_step1')
-    if not datos1:
-        return jsonify({"error": "Debes completar el paso 1 primero", "redirect": "/registro"}), 400
-
-    data = request.get_json()
-    
-    if not data:
-        return jsonify({"error": "Faltan datos del paso 2"}), 400
-
-    # 1) Recuperamos paso 1 desde session
-    nombre      = datos1['nombre']
-    correo      = datos1['correo']
-    contraseña  = datos1['contraseña']
-
-    # 2) Recuperamos paso 2 desde el JSON
-    telefono    = data.get('telefono')
-    direccion   = data.get('direccion')
-    ciudad      = data.get('ciudad')
-    estrato     = data.get('estrato')
-
-    # Guardamos en la BD
-    exito = registrar_usuario(
-        nombre=nombre,
-        correo=correo,
-        contraseña=contraseña,
-        telefono=telefono,
-        direccion=direccion,
-        ciudad=ciudad,
-        estrato=estrato
-    )
-
-    # Limpiamos session de los datos temporales
-    session.pop('registro_step1', None)
-
-    if exito:
-        return jsonify({
-            "message": "Usuario registrado con éxito", 
-            "redirect": "/login"
-        })
-    else:
-        return jsonify({"error": "Error al registrar usuario"}), 500

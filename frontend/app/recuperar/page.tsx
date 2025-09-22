@@ -1,42 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Head from "next/head";
-import styles from "../../styles/recuperar.module.css";
-import { API_URL } from "../../config";
+import styles from "../../styles/login.module.css";
 
 export default function Recuperar() {
   const [correo, setCorreo] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [nuevaContraseña, setNuevaContraseña] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError("");
+    setSuccess("");
+    setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/recuperar`, {
+      const response = await fetch("http://localhost:5000/recuperar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          email: correo,
+          correo: correo,
+          nueva_contraseña: nuevaContraseña,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMensaje("Se ha enviado un enlace de recuperación a tu correo electrónico");
+        setSuccess(data.message);
+        setTimeout(() => {
+          window.location.href = data.redirect;
+        }, 2000);
       } else {
-        setMensaje(data.error || "Error al enviar el correo de recuperación");
+        setError(data.error || "Error al recuperar contraseña");
       }
     } catch (error) {
       console.error("Error en la petición:", error);
-      setMensaje("Error al conectar con el servidor");
+      setError("Error al conectar con el servidor");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -64,53 +72,74 @@ export default function Recuperar() {
         <div className={styles.icono}>
           <i
             className="fas fa-key"
-            style={{ color: "#00796b", fontSize: "42px" }}
+            style={{ color: "#FFD700", fontSize: "42px" }}
           ></i>
         </div>
 
-        <h1>¿Has olvidado la contraseña?</h1>
-        <p>Nueva contraseña</p>
-        <p className={styles.descripcion}>
-          Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña
-        </p>
+        <h1>RECUPERAR CONTRASEÑA</h1>
+        <p>Ingresa tu correo y nueva contraseña</p>
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>CORREO ELECTRÓNICO</label>
-            <input
-              type="email"
-              placeholder="TU@CORREO.COM"
-              required
-              className={styles.input}
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          <button type="submit" disabled={isLoading}>
-            <i className="fas fa-paper-plane" style={{ marginRight: "8px" }}></i>
-            {isLoading ? "ENVIANDO..." : "INGRESAR"}
-          </button>
-        </form>
-
-        {mensaje && (
-          <div className={`${styles.mensaje} ${mensaje.includes("Error") ? styles.error : styles.success}`}>
-            <i className={mensaje.includes("Error") ? "fas fa-exclamation-circle" : "fas fa-check-circle"} 
-               style={{ marginRight: "8px" }}></i>
-            {mensaje}
+        {error && (
+          <div style={{ 
+            color: "#ff4444", 
+            backgroundColor: "#ffe6e6", 
+            padding: "10px", 
+            borderRadius: "5px", 
+            marginBottom: "20px",
+            textAlign: "center"
+          }}>
+            {error}
           </div>
         )}
 
+        {success && (
+          <div style={{ 
+            color: "#00aa00", 
+            backgroundColor: "#e6ffe6", 
+            padding: "10px", 
+            borderRadius: "5px", 
+            marginBottom: "20px",
+            textAlign: "center"
+          }}>
+            {success}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className={styles.inputGroup}>
+            <i className={`fas fa-envelope ${styles.inputIcon}`}></i>
+            <input
+              type="email"
+              placeholder="Tu correo electrónico"
+              required
+              className={styles.iconInput}
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <i className={`fas fa-lock ${styles.inputIcon}`}></i>
+            <input
+              type="password"
+              placeholder="Nueva contraseña"
+              required
+              className={styles.iconInput}
+              value={nuevaContraseña}
+              onChange={(e) => setNuevaContraseña(e.target.value)}
+            />
+          </div>
+
+          <button type="submit" disabled={loading}>
+            <i className="fas fa-save" style={{ marginRight: "8px" }}></i>
+            {loading ? "ACTUALIZANDO..." : "ACTUALIZAR CONTRASEÑA"}
+          </button>
+        </form>
+
         <div className={styles.linksContainer}>
           <a href="/login">
-            <i className="fas fa-arrow-left" style={{ marginRight: "5px" }}></i>
+            <i className="fas fa-sign-in-alt" style={{ marginRight: "5px" }}></i>
             Volver al inicio de sesión
-          </a>
-
-          <a href="/registro">
-            <i className="fas fa-user-plus" style={{ marginRight: "5px" }}></i>
-            ¿No tienes cuenta? Regístrate
           </a>
         </div>
       </div>
