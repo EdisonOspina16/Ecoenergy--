@@ -1,0 +1,35 @@
+services:
+  db:
+    image: mysql:latest
+    container_name: db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql123
+      MYSQL_DATABASE: ecoenergy-db
+      MYSQL_USER: ecoenergy
+      MYSQL_PASSWORD: ecoenergy123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+
+  backend:
+    container_name: backend_app
+    depends_on:
+      - db
+    build: ./backend
+    ports:
+      - "8090:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/ecoenergy-db
+      SPRING_DATASOURCE_USERNAME: ecoenergy
+      SPRING_DATASOURCE_PASSWORD: ecoenergy123
+
+  frontend:
+    container_name: frontend_app
+    build: ./frontend
+    ports:
+        - "80:80"
+
+volumes:
+  mysql_data:
