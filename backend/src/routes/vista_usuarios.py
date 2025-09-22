@@ -17,8 +17,6 @@ def login_requerido(f):
         if not usuario:               
             flash("Debes iniciar sesión para acceder a esta página", "warning")
             return redirect(url_for('vista_usuarios.login'))
-        if usuario.get('es_admin'):
-            return redirect(url_for('admin.inicio_admin'))
         return f(*args, **kwargs)
     return decorador
 
@@ -29,10 +27,7 @@ def inicio():
     productos_por_categoria = cd.obtener_dispositivos_por_categoria()
 
     if usuario:
-        if usuario.get('es_admin'):
-            return redirect(url_for('admin.inicio_admin'))
-        else:
-            return render_template('inicio.html', products_by_category=productos_por_categoria, devices=[], usuario=usuario)
+        return render_template('inicio.html', products_by_category=productos_por_categoria, devices=[], usuario=usuario)
     else:
         return render_template('inicio.html', products_by_category=productos_por_categoria, devices=[],usuario=usuario )
 
@@ -73,11 +68,7 @@ def login():
             session['usuario'] = usuario.to_dict()
 
             flash("Inicio de sesión exitoso", "success")
-
-            if usuario.es_admin:
-                return redirect(url_for('admin.inicio_admin'))
-            else:
-                return redirect(url_for('vista_usuarios.inicio'))
+            return redirect(url_for('vista_usuarios.inicio'))
         
         else:
             flash("Credenciales inválidas", "danger")
