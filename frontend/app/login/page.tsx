@@ -22,8 +22,8 @@ export default function Login() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          credentials: "include",
         },
-        credentials: "include", // Importante para mantener la sesión
         body: JSON.stringify({
           correo: correo,
           contraseña: contraseña,

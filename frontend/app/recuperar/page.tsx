@@ -22,8 +22,8 @@ export default function Recuperar() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          credentials: "include",
         },
-        credentials: "include",
         body: JSON.stringify({
           correo: correo,
           nueva_contraseña: nuevaContraseña,
