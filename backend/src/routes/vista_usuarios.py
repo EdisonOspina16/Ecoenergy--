@@ -25,14 +25,6 @@ def login_requerido(f):
 def inicio():
     return {"message": "Hola Mundo, bienvenido a EcoEnergy"}
 
-# Para cerrar sesión
-@blueprint.route('/logout', methods=['POST'])
-@cross_origin()
-def logout():
-    session.clear()
-    return jsonify({"message": "Sesión cerrada exitosamente", "redirect": "/login"})
-
-
 # Ruta para el registro
 @blueprint.route('/registro', methods=['POST'])
 @cross_origin()
@@ -47,6 +39,8 @@ def registro():
     apellidos   = data['apellidos']
     correo      = data['correo']
     contraseña  = data['contraseña']
+    
+    print(f"Registro: {nombre}, {apellidos}, {correo}")
 
     # Guardamos en la BD
     exito = registrar_usuario(
