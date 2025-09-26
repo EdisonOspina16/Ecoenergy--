@@ -1,35 +1,63 @@
 services:
   db:
-    image: mysql:latest
-    container_name: db_mysql
+    image: postgres:latest
+    container_name: db_postgres
     environment:
-      MYSQL_ROOT_PASSWORD: mysql123
-      MYSQL_DATABASE: ecoenergy-db
-      MYSQL_USER: ecoenergy
-      MYSQL_PASSWORD: ecoenergy123
+      POSTGRES_DATABASE: ecoenergy-db
+      POSTGRES_USER: ecoenergy
+      POSTGRES_PASSWORD: ecoenergy123
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     restart: always
+  
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto-broker
+    restart: unless-stopped
+    ports:
+      - "1883:1883"    # MQTT para conectores inteligentes
+      - "9001:9001"    # WebSocket para frontend
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    networks:
+      - ecoenergy-net
 
   backend:
     container_name: backend_app
     depends_on:
       - db
+      - mosquitto
     build: ./backend
     ports:
       - "8090:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/ecoenergy-db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecoenergy-db
       SPRING_DATASOURCE_USERNAME: ecoenergy
       SPRING_DATASOURCE_PASSWORD: ecoenergy123
+      MQTT_BROKER_URL: tcp://mosquitto:1883
+      WAIT_FOR_DB: "true"
+    networks:
+      - ecoenergy-net
 
   frontend:
     container_name: frontend_app
     build: ./frontend
     ports:
         - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ecoenergy-net
 
 volumes:
-  mysql_data:
+  postgres_data:
+  mosquitto_data:
+  mosquitto_log:
+
+networks:
+  ecoenergy-net:
+    driver: bridge
