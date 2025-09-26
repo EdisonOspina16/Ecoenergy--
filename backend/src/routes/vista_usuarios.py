@@ -73,55 +73,6 @@ def login():
     usuario = verificar_credenciales(correo, contraseña)
 
     if usuario:
-<<<<<<< HEAD
-        return render_template('inicio.html', products_by_category=productos_por_categoria, devices=[], usuario=usuario)
-    else:
-        return render_template('inicio.html', products_by_category=productos_por_categoria, devices=[],usuario=usuario )
-
-
-# Para cerrar sesión
-@blueprint.route('/logout')
-def logout():
-    session.clear()
-    flash("Sesión cerrada", "info")
-    return redirect(url_for('vista_usuarios.inicio'))
-
-
-# Ruta para mostrar el formulario de registro
-@blueprint.route('/registro', methods=['GET', 'POST'])
-def registro():
-    if request.method == 'POST':
-        # Guardamos en session lo necesario del paso 1
-        session['registro_step1'] = {
-            'nombre':     request.form['nombre'],
-            'correo':     request.form['correo'],
-            'contraseña': request.form['contraseña']
-        }
-        return redirect(url_for('vista_usuarios.registro_paso2'))
-
-    # GET Mostrar el primer formulario
-    return render_template('registro.html')
-
-
-@blueprint.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        correo = request.form['correo']
-        contraseña = request.form['contraseña']
-
-        usuario = verificar_credenciales(correo, contraseña)
-
-        if usuario:
-            session['usuario'] = usuario.to_dict()
-
-            flash("Inicio de sesión exitoso", "success")
-            return redirect(url_for('vista_usuarios.inicio'))
-        
-        else:
-            flash("Credenciales inválidas", "danger")
-
-    return render_template('login.html')    
-=======
         session['usuario'] = usuario.to_dict()
 
         return jsonify({
@@ -131,7 +82,6 @@ def login():
         })
     else:
         return jsonify({"error": "Credenciales inválidas"}), 401    
->>>>>>> backend
 
 
 
