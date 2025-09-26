@@ -16,8 +16,9 @@ class Usuario:
     def to_dict(self):
 
         return {
-            "id": self.id,
+            "id": self.id_usuario,
             "nombre": self.nombre,
+            "apellidos": self.apellidos,
             "correo": self.correo,
             "contraseña": self.contraseña,
             "fecha_registro": self.fecha_registro.strftime('%Y-%m-%d %H:%M:%S'),

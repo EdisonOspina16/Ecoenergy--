@@ -1,45 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
-import { API_URL } from "../../config";
 
 export default function Login() {
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: correo,
-        password: contraseña,
-      }),
-    });
+    console.log("🔍 Intentando login con:", { correo, contraseña: "***" });
 
-    const data = await response.json();
+    try {
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          credentials: "include",
+        },
+        body: JSON.stringify({
+          correo: correo,
+          contraseña: contraseña,
+        }),
+      });
 
-    if (response.ok) {
-      localStorage.setItem("token", data.token);
-      window.location.href = "/";  
-      // guardar token en localStorage, cookie, etc.
-      localStorage.setItem("token", data.token);
-    } else {
-      console.error("Error:", data.error);
-      alert("Credenciales inválidas");
+      console.log("📊 Response status:", response.status);
+      console.log("📊 Response headers:", response.headers);
+
+      if (!response.ok) {
+        console.error("❌ Error response:", response.status, response.statusText);
+      }
+
+      const data = await response.json();
+      console.log("📊 Response data:", data);
+
+      if (response.ok) {
+        console.log("✅ Login exitoso, redirigiendo a:", data.redirect);
+        // Redirigir según el tipo de usuario
+        window.location.href = data.redirect;
+      } else {
+        console.error("❌ Error en login:", data.error);
+        setError(data.error || "Error al iniciar sesión");
+      }
+    } catch (error) {
+      console.error("❌ Error en la petición:", error);
+      
+      if (error instanceof Error) {
+        console.error("❌ Tipo de error:", error.name);
+        console.error("❌ Mensaje:", error.message);
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          setError("No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:5000");
+        } else {
+          setError("Error al conectar con el servidor: " + error.message);
+        }
+      } else {
+        setError("Error desconocido al conectar con el servidor");
+      }
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error en la petición:", error);
-    alert("Error al conectar con el servidor");
-  }
-};
+  };
 
 
   return (
@@ -73,6 +100,19 @@ const handleSubmit = async (e: React.FormEvent) => {
         <h1>INICIAR SESIÓN</h1>
         <p>Inicia sesión para continuar con tu experiencia sostenible</p>
 
+        {error && (
+          <div style={{ 
+            color: "#ff4444", 
+            backgroundColor: "#ffe6e6", 
+            padding: "10px", 
+            borderRadius: "5px", 
+            marginBottom: "20px",
+            textAlign: "center"
+          }}>
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
             <i className={`fas fa-envelope ${styles.inputIcon}`}></i>
@@ -98,9 +138,9 @@ const handleSubmit = async (e: React.FormEvent) => {
             />
           </div>
 
-          <button type="submit">
+          <button type="submit" disabled={loading}>
             <i className="fas fa-sign-in-alt" style={{ marginRight: "8px" }}></i>
-            INGRESAR
+            {loading ? "INGRESANDO..." : "INGRESAR"}
           </button>
         </form>
 
