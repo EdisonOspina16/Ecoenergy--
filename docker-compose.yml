@@ -3,12 +3,13 @@ services:
     image: postgres:latest
     container_name: db_postgres
     environment:
-      POSTGRES_DATABASE: ecoenergy-db
+      POSTGRES_DB: ecoenergy-db
       POSTGRES_USER: ecoenergy
       POSTGRES_PASSWORD: ecoenergy123
     ports:
       - "5432:5432"
     volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
     restart: always
   
