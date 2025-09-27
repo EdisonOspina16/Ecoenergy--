@@ -4,8 +4,15 @@ import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
 
+interface Usuario {
+  nombre?: string;
+  correo?: string;
+  fecha_registro?: string;
+  [key: string]: any;
+}
+
 export default function Dashboard() {
-  const [usuario, setUsuario] = useState(null);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
