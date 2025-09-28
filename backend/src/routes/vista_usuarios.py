@@ -77,7 +77,7 @@ def login():
 
         return jsonify({
             "message": "Inicio de sesión exitoso", 
-            "redirect": "/dashboard",
+            "redirect": "/home",
             "usuario": usuario.to_dict()
         })
     else:

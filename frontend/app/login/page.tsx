@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Head from "next/head";
+import { useRouter } from "next/navigation"; // Importar useRouter para Next.js 13+
 import styles from "../../styles/login.module.css";
 
 export default function Login() {
@@ -9,6 +10,7 @@ export default function Login() {
   const [contraseña, setContraseña] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter(); // Inicializar el router
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +44,16 @@ export default function Login() {
 
       if (response.ok) {
         console.log("✅ Login exitoso, redirigiendo a:", data.redirect);
-        // Redirigir según el tipo de usuario
-        window.location.href = data.redirect;
+        
+        // Usar la ruta que envía el backend (más flexible y consistente)
+        const redirectPath = data.redirect || "/home";
+        router.push(redirectPath);
+        
+        // También puedes guardar información del usuario si la necesitas
+        if (data.usuario) {
+          console.log("👤 Usuario logueado:", data.usuario);
+          // Aquí podrías guardar en el estado global, localStorage, etc.
+        }
       } else {
         console.error("❌ Error en login:", data.error);
         setError(data.error || "Error al iniciar sesión");
@@ -67,7 +77,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
 
   return (
     <>
