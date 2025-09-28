@@ -1,10 +1,17 @@
-# BASES DE DATOS
+# BASES DE DATOS - POSTGRESQL
+import os
 
-PGHOST='localhost'
-PGDATABASE='ecoenergy'
-PGUSER='postgres'
-PGPASSWORD='Edison#101'
-PORT = 5432 
+if os.getenv("DOCKER") == "1":
+    PGHOST='db'
+    PGDATABASE='ecoenergydb'
+    PGUSER='ecoenergy'
+    PGPASSWORD='ecoenergy123'
+else:
+    PGHOST='localhost'
+    PGDATABASE='ecoenergy'
+    PGUSER='postgres'
+    PGPASSWORD='Edison#101'
+
 
 # GEMINI - LLM
 GEMINI_API_KEY = "AIzaSyBW7a00s23_xMyLt-AlIrQ45l3vQNgxBPk"

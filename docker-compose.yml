@@ -3,7 +3,7 @@ services:
     image: postgres:latest
     container_name: db_postgres
     environment:
-      POSTGRES_DB: ecoenergy-db
+      POSTGRES_DB: ecoenergydb
       POSTGRES_USER: ecoenergy
       POSTGRES_PASSWORD: ecoenergy123
     ports:
@@ -38,8 +38,9 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: postgresql://ecoenergy:ecoenergy123@db:5432/ecoenergy-db
+      DATABASE_URL: postgresql://ecoenergy:ecoenergy123@db:5432/ecoenergydb
       MQTT_BROKER_URL: tcp://mosquitto:1883
+      DOCKER: "1"
     networks:
       - ecoenergy-net
 
@@ -51,7 +52,7 @@ services:
     depends_on:
       - backend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5000 
+      - NEXT_PUBLIC_API_URL=http://backend:5000 
     networks:
       - ecoenergy-net
 
