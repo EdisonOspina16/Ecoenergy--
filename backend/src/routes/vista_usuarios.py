@@ -5,9 +5,10 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, session
 from flask_cors import cross_origin
 from controller.controladorUsuarios import registrar_usuario, verificar_credenciales, actualizar_contraseña, obtener_usuario_por_id
-
+from flasgger import Swagger
 
 blueprint = Blueprint('vista_usuarios', __name__)
+
 
 
 # para que no lo deje ver el perfil si el usario no esta iniciado
@@ -23,12 +24,53 @@ def login_requerido(f):
 
 @blueprint.route('/')
 def inicio():
+    """
+    Mensaje de bienvenida
+    ---
+    tags:
+      - General
+    responses:
+     200:
+      description: Mensaje de bienvenida
+    """
     return {"message": "Hola Mundo, bienvenido a EcoEnergy"}
 
 # Ruta para el registro
 @blueprint.route('/registro', methods=['POST'])
 @cross_origin()
 def registro():
+    """
+    Registro de usuario
+    ---
+    tags:
+      - Usuarios
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nombre:
+                type: string
+                example: Juan
+              apellidos:
+                type: string
+                example: Pérez
+              correo:
+                type: string
+                example: juan@mail.com
+              contraseña:
+                type: string
+                example: 123456
+    responses:
+      200:
+        description: Usuario registrado con éxito
+      400:
+        description: Faltan campos requeridos
+      500:
+        description: Error al registrar usuario
+    """
     data = request.get_json()
     
     if not data or not all(key in data for key in ['nombre', 'apellidos', 'correo', 'contraseña']):
@@ -62,6 +104,32 @@ def registro():
 @blueprint.route('/login', methods=['POST'])
 @cross_origin()
 def login():
+    """
+    Inicio de sesión
+    ---
+    tags:
+      - Usuarios
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              correo:
+                type: string
+                example: juan@mail.com
+              contraseña:
+                type: string
+                example: 123456
+    responses:
+      200:
+        description: Inicio de sesión exitoso
+      400:
+        description: Faltan campos requeridos
+      401:
+        description: Credenciales inválidas
+    """
     data = request.get_json()
     
     if not data or not all(key in data for key in ['correo', 'contraseña']):
@@ -88,6 +156,32 @@ def login():
 @blueprint.route('/recuperar', methods=['POST'])
 @cross_origin()
 def recuperar():
+    """
+    Recuperar contraseña
+    ---
+    tags:
+      - Usuarios
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              correo:
+                type: string
+                example: juan@mail.com
+              nueva_contraseña:
+                type: string
+                example: 654321
+    responses:
+      200:
+        description: Contraseña actualizada correctamente
+      400:
+        description: Faltan campos requeridos
+      404:
+        description: No se encontró el correo
+    """
     data = request.get_json()
     
     if not data or not all(key in data for key in ['correo', 'nueva_contraseña']):
