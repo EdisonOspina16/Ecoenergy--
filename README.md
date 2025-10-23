@@ -9,6 +9,8 @@
 - ✅ Manejo de sesiones con Flask
 
 ### BASE DE DATOS (PostgreSQL)
+- localmente debes de crear y extraer las credenciales de la base de datos(postgresql)
+
 - Desde docker creamos las tablas automaticamente mientras se corre el servicio de bd.
 
 ### Frontend (Next.js)

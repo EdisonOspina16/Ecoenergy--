@@ -1,487 +1,405 @@
+/* home.module.css - VERSIÓN COMPLETA */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background: linear-gradient(135deg, #f5f9f8, #e0f2f1);
-    min-height: 100vh;
-    color: #333;
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
 }
 
 .header {
-    background: linear-gradient(135deg, #00796b, #004d40);
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
 }
 
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.lightbulb {
-    color: #FFD700;
-    font-size: 1.5rem;
+.logoIcon {
+  color: #4ade80;
+  font-size: 2rem;
 }
 
-.auth-links {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 8px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.logoText {
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
-.auth-links:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.page-title {
-    padding: 20px;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    text-align: center;
+.userName {
+  display: none;
 }
 
-.page-title h1 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: #00695c;
-    margin-bottom: 5px;
+@media (min-width: 640px) {
+  .userName {
+    display: block;
+  }
 }
 
-.sub-heading {
-    font-size: 1rem;
-    color: #666;
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: 1px solid #4ade80;
+  color: #4ade80;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.container {
-    display: flex;
-    gap: 30px;
-    padding: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
+.logoutButton:hover {
+  background-color: #4ade80;
+  color: white;
 }
 
-.panel-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #00695c;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.logoutText {
+  display: none;
 }
 
-.panel-icon {
-    font-size: 1.2rem;
-    color: #00695c;
+@media (min-width: 768px) {
+  .logoutText {
+    display: block;
+  }
 }
 
-.device-item {
-    display: flex;
-    margin-bottom: 15px;
-    align-items: center;
-    position: relative;
-    gap: 10px;
+.main {
+  flex: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1.5rem 1rem;
 }
 
-.device-selector, 
-.device-usage-input, 
-.device-time-unit {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s;
-    background-color: white;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
-.device-selector {
-    flex-grow: 1;
-    cursor: pointer;
-    position: relative;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: 3fr 1fr;
+  }
 }
 
-.device-selector:focus, 
-.device-usage-input:focus, 
-.device-time-unit:focus {
-    outline: none;
-    border-color: #00695c;
-    box-shadow: 0 0 0 2px rgba(0, 105, 92, 0.2);
+.leftColumn,
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.arrow-icon {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: #00695c;
+.card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
 }
 
-.delete-btn {
-    background: none;
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #e74c3c;
-    font-size: 1.2rem;
-    transition: all 0.3s;
-    background-color: #fff1f0;
+.summaryValue {
+  font-size: 4.5rem;
+  font-weight: 700;
+  color: #4ade80;
+  margin-top: 0.5rem;
 }
 
-.delete-btn:hover {
-    background-color: #ffdddd;
-    transform: scale(1.05);
+.summaryUnit {
+  font-size: 3rem;
 }
 
-.device-usage-input {
-    width: 120px;
-    text-align: center;
+.updateTime {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.25rem;
 }
 
-.device-time-unit {
-    width: 130px;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    position: relative;
-    text-align: center;
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-.actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 25px;
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
-.action-btn {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.timeRangeButtons {
+  display: flex;
+  gap: 0.25rem;
+  background-color: #f1f5f9;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
 }
 
-.add-device-btn {
-    background-color: white;
-    color: #00695c;
-    border: 1px solid #00695c;
+.timeButton {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.add-device-btn:hover {
-    background-color: #f0f9f7;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+.timeButton:hover {
+  background-color: #e2e8f0;
 }
 
-.calculate-btn {
-    background: linear-gradient(135deg, #00796b, #00695c);
-    color: white;
+.timeButtonActive {
+  background-color: #4ade80 !important;
+  color: white;
 }
 
-.calculate-btn:hover {
-    background: linear-gradient(135deg, #00897b, #00796b);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.chartPlaceholder {
+  height: 16rem;
+  background-color: #f1f5f9;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
 }
 
-.results-section {
-    margin-top: 40px;
-    background-color: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+.deviceList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.results-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #00695c;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.deviceItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f1f5f9;
+  padding: 1rem;
+  border-radius: 0.5rem;
 }
 
-.results-placeholder {
-    background-color: #f9f9f9;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    color: #666;
-    border: 1px dashed #ddd;
+.deviceInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-#results-values {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+.deviceIcon {
+  color: #4ade80;
+  font-size: 2rem;
 }
 
-.result-card {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: all 0.3s;
+.deviceName {
+  font-weight: 500;
 }
 
-.result-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+.deviceConsumption {
+  font-size: 0.875rem;
+  color: #64748b;
 }
 
-.result-icon {
+.deviceActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.deviceStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.statusDot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.statusDotOn {
+  background-color: #22c55e;
+}
+
+.statusDotOff {
+  background-color: #9ca3af;
+}
+
+.powerButton {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.powerButtonOff {
+  background-color: #ef4444;
+  color: white;
+}
+
+.powerButtonOff:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.powerButtonDisabled {
+  background-color: #d1d5db;
+  color: #4b5563;
+  cursor: not-allowed;
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border-left: 4px solid;
+}
+
+.alertDanger {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+
+.alertDangerText {
+  color: #991b1b;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.alertDangerDesc {
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+
+.alertSuccess {
+  background-color: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.alertSuccessText {
+  color: #166534;
+  font-size: 0.875rem;
+}
+
+.bold {
+  font-weight: 700;
+}
+
+.savingsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.savingsCard {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.savingsCardBlue {
+  background-color: #dbeafe;
+}
+
+.savingsCardGreen {
+  background-color: #d1fae5;
+}
+
+.savingsCardAmber {
+  background-color: #fef3c7;
+}
+
+.savingsLabel {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.savingsLabelBlue {
+  color: #1e40af;
+}
+
+.savingsLabelGreen {
+  color: #065f46;
+}
+
+.savingsLabelAmber {
+  color: #78350f;
+}
+
+.savingsValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.savingsValueBlue {
+  color: #2563eb;
+}
+
+.savingsValueGreen {
+  color: #059669;
+}
+
+.savingsValueAmber {
+  color: #d97706;
+}
+
+.exportButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #4ade80;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.exportButton:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .summaryValue {
+    font-size: 3rem;
+  }
+  
+  .summaryUnit {
     font-size: 2rem;
-    color: #00695c;
-    margin-bottom: 10px;
-}
-
-.result-label {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.result-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #00695c;
-}
-
-.left-panel {
-    flex: 1;
-    background-color: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-
-.right-panel {
-    width: 300px;
-    background-color: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    height: fit-content;
-    position: sticky;
-    top: 30px;
-}
-
-.right-panel h3 {
-    color: #00695c;
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.right-panel p {
-    line-height: 1.6;
-    color: #666;
-    margin-bottom: 20px;
-}
-
-.energy-tip {
-    margin-top: 25px;
-    padding-top: 25px;
-    border-top: 1px solid #eee;
-}
-
-.energy-tip h4 {
-    color: #00695c;
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.tip-content {
-    background-color: #f0f9f7;
-    padding: 15px;
-    border-radius: 10px;
-    border-left: 4px solid #00695c;
-}
-
-.select-wrapper {
-    position: relative;
-    flex-grow: 1;
-}
-
-.time-wrapper {
-    position: relative;
-    width: 130px;
-}
-
-@media (max-width: 992px) {
-    .container {
-        flex-direction: column;
-    }
-    
-    .right-panel {
-        width: 100%;
-        position: static;
-    }
-}
-
-@media (max-width: 768px) {
-    .device-item {
-        flex-wrap: wrap;
-    }
-    
-    .device-selector {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-    
-    .device-usage-input, 
-    .device-time-unit {
-        flex-grow: 1;
-    }
-    
-    .delete-btn {
-        position: absolute;
-        right: 0;
-        top: 12px;
-    }
-}
-
-/* ESTILOS DEL MENÚ DESPLEGABLE (fuera del media query) */
-.user-icon {
-    width: 40px;
-    height: 40px;
-    background-color: white;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s;
-}
-
-.user-icon:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.user-icon i {
-    color: #00796b;
-    font-size: 1.2rem;
-}
-
-.dropdown-menu {
-    position: absolute;
-    right: 20px;
-    top: 70px;
-    background-color: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-    width: 250px;
-    overflow: hidden;
-    display: none;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.user-greeting {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border-bottom: 1px solid #eee;
-    background: #f9f9f9;
-}
-
-.greeting-text {
-    color: #444;
-    font-weight: 500;
-}
-
-.menu-options {
-    padding: 10px;
-}
-
-.menu-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.3s;
-    color: #333;
-}
-
-.menu-item:hover {
-    background-color: #f5f5f5;
-}
-
-.menu-item.logout-item {
-    color: #e74c3c;
-}
-
-.menu-item.logout-item:hover {
-    background-color: #fff1f0;
-}
-
-.menu-icon {
-    font-size: 1.2rem;
-    color: #00695c;
-    width: 24px;
-    text-align: center;
-}
-
-.menu-icon.logout-menu-icon {
-    color: #e74c3c;
+  }
+  
+  .deviceActions {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+  }
 }
