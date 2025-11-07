@@ -1,0 +1,437 @@
+/* profile.module.css */
+
+.container {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  flex-direction: column;
+  background-color: #F9FAFB;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Header Styles */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.headerContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .headerContent {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .headerContent {
+    padding: 0 2rem;
+  }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoIcon {
+  color: #10B981;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.logoIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.logoText {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.nav {
+  display: none;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+  }
+}
+
+.navLink {
+  color: #6B7280;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+
+.navLink:hover {
+  color: #10B981;
+}
+
+.navLinkActive {
+  color: #10B981;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.notificationButton {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: #F9FAFB;
+  color: #6B7280;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.notificationButton:hover {
+  background-color: #E5E7EB;
+}
+
+.notificationButton .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+.avatar {
+  background-position: center;
+  background-repeat: no-repeat;
+  aspect-ratio: 1;
+  background-size: cover;
+  border-radius: 9999px;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+}
+
+.mainContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .mainContent {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .mainContent {
+    padding: 3rem 2rem;
+  }
+}
+
+.pageHeading {
+  margin-bottom: 2rem;
+}
+
+.pageTitle {
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.033em;
+  color: #1F2937;
+}
+
+.pageDescription {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #6B7280;
+}
+
+/* Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.rightColumn {
+  position: sticky;
+  top: 6rem;
+}
+
+/* Card Styles */
+.card {
+  background-color: #FFFFFF;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #E5E7EB;
+}
+
+.cardHeader {
+  border-bottom: 1px solid #E5E7EB;
+  padding: 1.5rem;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.cardBody {
+  padding: 1.5rem;
+}
+
+/* Form Styles */
+.profileForm {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .profileForm {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroupFull {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 2;
+}
+
+@media (max-width: 639px) {
+  .formGroupFull {
+    grid-column: span 1;
+  }
+}
+
+.formLabel {
+  display: flex;
+  flex-direction: column;
+}
+
+.labelText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding-bottom: 0.5rem;
+}
+
+.formInput,
+.formSelect {
+  width: 100%;
+  border-radius: 0.5rem;
+  color: #1F2937;
+  border: 1px solid #E5E7EB;
+  background-color: #F9FAFB;
+  height: 3rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  border-color: #10B981;
+  ring: 2px;
+  ring-color: #10B981;
+}
+
+.formInput::placeholder {
+  color: #6B7280;
+}
+
+.formActions {
+  grid-column: span 2;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 639px) {
+  .formActions {
+    grid-column: span 1;
+  }
+}
+
+.primaryButton {
+  display: flex;
+  height: 2.75rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  padding: 0 1.5rem;
+  background-color: #10B981;
+  color: #000000;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.primaryButton:hover {
+  opacity: 0.9;
+}
+
+/* Device List */
+.deviceList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.deviceItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+}
+
+.deviceIcon {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+}
+
+.deviceIconConnected {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+.deviceIconDisconnected {
+  background-color: rgba(107, 114, 128, 0.2);
+  color: #6B7280;
+}
+
+.deviceInfo {
+  flex: 1;
+}
+
+.deviceNameInput {
+  width: 100%;
+  background-color: transparent;
+  padding: 0;
+  border: 0;
+  font-weight: 600;
+  color: #1F2937;
+  font-size: 1rem;
+}
+
+.deviceNameInput:focus {
+  outline: none;
+  ring: 0;
+}
+
+.deviceStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.deviceStatusConnected {
+  color: #10B981;
+}
+
+.deviceStatusDisconnected {
+  color: #6B7280;
+}
+
+.statusDot {
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background-color: currentColor;
+}
+
+.deleteButton {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  color: #6B7280;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.deleteButton .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+/* Register Form */
+.registerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
