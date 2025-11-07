@@ -40,16 +40,16 @@ pipeline {
                 stage('Backend Tests') {
                     steps {
                         dir('backend') {
-                            echo "Ejecutando pruebas Backend"
-                            sh 'python3 -m pytest tests/ -v || echo "No tests found"'
+                            echo "Ejecutando pruebas Backend reales"
+                            sh 'python3 test_basic.py'
                         }
                     }
                 }
                 stage('Frontend Tests') {
                     steps {
                         dir('frontend') {
-                            echo "Ejecutando pruebas Frontend"
-                            sh 'npm test -- --watchAll=false --passWithNoTests || echo "No tests found"'
+                            echo "Ejecutando pruebas Frontend reales"
+                            sh 'npm run test:ci'
                         }
                     }
                 }
