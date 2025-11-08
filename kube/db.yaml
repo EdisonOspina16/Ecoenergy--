@@ -1,0 +1,90 @@
+# =========================================
+# 1️⃣ CONFIGMAP: scripts de inicialización
+# =========================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-db-scripts
+  labels:
+    app: db
+data:
+  01_init.sql: |
+    -- Script de inicialización de la base de datos
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(100),
+        correo VARCHAR(100),
+        fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+---
+# =========================================
+# 2️⃣ SECRET: credenciales de la base de datos
+# =========================================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ecoenergy-secret
+  labels:
+    app: db
+type: Opaque
+stringData:
+  POSTGRES_USER: ecoenergy
+  POSTGRES_PASSWORD: ecoenergy123
+
+---
+# =========================================
+# 3️⃣ DEPLOYMENT DE POSTGRESQL
+# =========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+  labels:
+    app: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: ecoenergy-config
+            - secretRef:
+                name: ecoenergy-secret
+          volumeMounts:
+            - name: init-db
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: init-db
+          configMap:
+            name: init-db-scripts
+
+---
+# =========================================
+# 4️⃣ SERVICE DE POSTGRESQL
+# =========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  labels:
+    app: db
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP

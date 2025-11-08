@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import styles from "../styles/login.module.css";
+import { API_URL } from "../config";
 
 interface Usuario {
   nombre?: string;
@@ -19,7 +20,7 @@ export default function Home() {
 
   useEffect(() => {
     // Obtener mensaje del backend
-    fetch("http://localhost:5000/")
+    fetch(`${API_URL}/`)
       .then(response => response.json())
       .then(data => {
         setMensaje(data.message);
@@ -32,7 +33,7 @@ export default function Home() {
       });
 
     // Verificar si hay usuario logueado
-    fetch("http://localhost:5000/perfil", {
+    fetch(`${API_URL}/perfil`, {
       credentials: "include"
     })
       .then(response => {
@@ -51,7 +52,7 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/logout", {
+      const response = await fetch(`${API_URL}/logout`, {
         method: "POST",
         credentials: "include"
       });

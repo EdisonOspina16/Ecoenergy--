@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
+import { API_URL } from "../../config";
 
 export default function Registro() {
   const [nombre, setNombre] = useState("");
@@ -20,7 +21,7 @@ export default function Registro() {
     console.log("Intentando registro con:", { nombre, apellidos, correo, contraseña: "***" });
 
     try {
-      const response = await fetch("http://localhost:5000/registro", {
+      const response = await fetch(`${API_URL}/registro`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +61,7 @@ export default function Registro() {
         console.error("Mensaje:", error.message);
         
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          setError("No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:5000");
+          setError("No se puede conectar con el servidor. Verifica que el backend esté corriendo en " + API_URL);
         } else {
           setError("Error al conectar con el servidor: " + error.message);
         }

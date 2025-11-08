@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
+import { API_URL } from "../../config";
 
 export default function Recuperar() {
   const [correo, setCorreo] = useState("");
@@ -18,7 +19,7 @@ export default function Recuperar() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/recuperar", {
+      const response = await fetch(`${API_URL}/recuperar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

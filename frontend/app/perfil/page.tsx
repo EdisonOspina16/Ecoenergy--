@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from "../../styles/perfil.module.css";
+import { API_URL } from "../../config";
 
 interface Device {
   id: number;

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/navigation"; // Importar useRouter para Next.js 13+
 import styles from "../../styles/login.module.css";
+import { API_URL } from "../../config";
 
 export default function Login() {
   const [correo, setCorreo] = useState("");
@@ -20,7 +21,7 @@ export default function Login() {
     console.log("🔍 Intentando login con:", { correo, contraseña: "***" });
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,7 +67,7 @@ export default function Login() {
         console.error("❌ Mensaje:", error.message);
         
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          setError("No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:5000");
+          setError("No se puede conectar con el servidor. Verifica que el backend esté corriendo en " + API_URL);
         } else {
           setError("Error al conectar con el servidor: " + error.message);
         }

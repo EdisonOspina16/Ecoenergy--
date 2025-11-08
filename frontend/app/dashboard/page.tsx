@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
+import { API_URL } from "../../config";
 
 interface Usuario {
   nombre?: string;
@@ -18,7 +19,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Verificar si hay usuario logueado
-    fetch("http://localhost:5000/perfil", {
+    fetch(`${API_URL}/perfil`, {
       credentials: "include"
     })
       .then(response => {
@@ -40,7 +41,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/logout", {
+      const response = await fetch(`${API_URL}logout/`, {
         method: "POST",
         credentials: "include"
       });
