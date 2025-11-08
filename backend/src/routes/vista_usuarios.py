@@ -105,34 +105,3 @@ def recuperar():
     else:
         return jsonify({"error": "No se encontró el correo"}), 404
 
-    
-# -----------------------------------------
-"""
-# perfil
-@blueprint.route('/perfil', methods=['GET'])
-@cross_origin()
-@login_requerido
-def perfil():
-    # Obtener datos básicos de la sesión
-    usuario_sesion = session.get('usuario')
-    
-    if not usuario_sesion:
-        return jsonify({"error": "Debes iniciar sesión para acceder a esta página"}), 401
-    
-    # Obtener todos los datos del usuario desde la base de datos
-    usuario_completo = obtener_usuario_por_id(usuario_sesion['id'])
-    
-    if not usuario_completo:
-        return jsonify({"error": "Error al cargar los datos del usuario"}), 500
-    
-    # Crear diccionario con todos los datos
-    usuario_data = {
-        'id': usuario_completo.id,
-        'nombre': usuario_completo.nombre,
-        'correo': usuario_completo.correo,
-        'fecha_registro': usuario_completo.fecha_registro.strftime('%d/%m/%Y %H:%M') if usuario_completo.fecha_registro else 'No disponible',
-    }
-    
-    return jsonify({"usuario": usuario_data})
-"""
-# -----------------------------------------
