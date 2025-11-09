@@ -30,112 +30,31 @@ def login_requerido_perfil(f):
     return decorador
 
 
-
+# ⭐ IMPORTANTE: Agregar supports_credentials=True a TODOS los @cross_origin()
 @blueprint_perfil.route('/perfil', methods=['GET'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 @login_requerido_perfil
-def obtener_perfil_hogar():
-    """Obtiene el perfil del hogar del usuario autenticado"""
+def obtener_perfil_completo():
+    """Obtiene el perfil del hogar y los dispositivos del usuario autenticado"""
     try:
         usuario = session.get('usuario')
         id_usuario = usuario['id']
         
+        # Obtener hogar
         hogar = obtener_hogar_por_usuario(id_usuario)
         
-        if hogar:
-            return jsonify({
-                'success': True,
-                'hogar': hogar.to_dict()
-            }), 200
-        else:
-            return jsonify({
-                'success': True,
-                'hogar': None,
-                'message': 'No se encontró un hogar registrado'
-            }), 200
-            
-    except Exception as e:
-        print(f"Error en obtener_perfil_hogar: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-@blueprint_perfil.route('/perfil', methods=['POST'])
-@cross_origin()
-@login_requerido_perfil
-def guardar_perfil_hogar():
-    """Crea o actualiza el perfil del hogar del usuario"""
-    try:
-        usuario = session.get('usuario')
-        id_usuario = usuario['id']
-        
-        data = request.get_json()
-        
-        # Validar datos requeridos
-        direccion = data.get('address')
-        nombre_hogar = data.get('nombre_hogar')
-        
-        if not direccion or not nombre_hogar:
-            return jsonify({
-                'success': False,
-                'error': 'La dirección y el nombre del hogar son requeridos'
-            }), 400
-        
-        # Crear o actualizar el hogar
-        hogar = crear_o_actualizar_hogar(
-            id_usuario=id_usuario,
-            direccion=direccion,
-            nombre_hogar=nombre_hogar
-        )
-        
-        if hogar:
-            # Verificar si era nuevo o actualización
-            hogar_previo = obtener_hogar_por_usuario(id_usuario)
-            mensaje = 'Perfil actualizado exitosamente' if hogar_previo else 'Perfil creado exitosamente'
-            
-            return jsonify({
-                'success': True,
-                'message': mensaje,
-                'hogar': hogar.to_dict()
-            }), 200
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Error al guardar el perfil'
-            }), 500
-        
-    except Exception as e:
-        print(f"Error en guardar_perfil_hogar: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-
-@blueprint_perfil.route('/perfil', methods=['GET'])
-@cross_origin()
-@login_requerido_perfil
-def obtener_dispositivos():
-    """Obtiene todos los dispositivos del hogar del usuario"""
-    try:
-        usuario = session.get('usuario')
-        id_usuario = usuario['id']
-        
+        # Obtener dispositivos
         dispositivos = obtener_dispositivos_por_usuario(id_usuario)
-        
-        # Convertir a formato esperado por el frontend
         dispositivos_dict = [disp.to_dict() for disp in dispositivos]
         
         return jsonify({
             'success': True,
+            'hogar': hogar.to_dict() if hogar else None,
             'dispositivos': dispositivos_dict
         }), 200
-        
+            
     except Exception as e:
-        print(f"Error en obtener_dispositivos: {e}")
+        print(f"Error en obtener_perfil_completo: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -143,70 +62,108 @@ def obtener_dispositivos():
 
 
 @blueprint_perfil.route('/perfil', methods=['POST'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 @login_requerido_perfil
-def registrar_dispositivo():
-    """Registra un nuevo dispositivo en el hogar"""
+def guardar_perfil_o_dispositivo():
+    """Crea/actualiza el perfil del hogar O registra un nuevo dispositivo según los datos recibidos"""
     try:
         usuario = session.get('usuario')
         id_usuario = usuario['id']
         
         data = request.get_json()
         
-        id_dispositivo_iot = data.get('deviceId')
-        alias = data.get('nickname')
+        # Determinar si es perfil de hogar o dispositivo
+        if 'deviceId' in data and 'nickname' in data:
+            # Es un registro de dispositivo
+            id_dispositivo_iot = data.get('deviceId')
+            alias = data.get('nickname')
+            
+            if not all([id_dispositivo_iot, alias]):
+                return jsonify({
+                    'success': False,
+                    'error': 'ID del dispositivo y alias son requeridos'
+                }), 400
+            
+            # Verificar si el dispositivo ya existe
+            if verificar_dispositivo_existe(id_dispositivo_iot):
+                return jsonify({
+                    'success': False,
+                    'error': 'Este dispositivo ya está registrado'
+                }), 400
+            
+            # Obtener el hogar del usuario
+            hogar = obtener_hogar_por_usuario(id_usuario)
+            
+            if not hogar:
+                return jsonify({
+                    'success': False,
+                    'error': 'Debes crear un perfil de hogar primero'
+                }), 400
+            
+            # Registrar el dispositivo
+            dispositivo = crear_dispositivo(
+                id_hogar=hogar.id_hogar,
+                alias=alias,
+                id_dispositivo_iot=id_dispositivo_iot
+            )
+            
+            if dispositivo:
+                return jsonify({
+                    'success': True,
+                    'message': 'Dispositivo registrado exitosamente',
+                    'dispositivo': dispositivo.to_dict()
+                }), 201
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Error al registrar el dispositivo'
+                }), 500
         
-        if not all([id_dispositivo_iot, alias]):
-            return jsonify({
-                'success': False,
-                'error': 'ID del dispositivo y alias son requeridos'
-            }), 400
-        
-        # Verificar si el dispositivo ya existe
-        if verificar_dispositivo_existe(id_dispositivo_iot):
-            return jsonify({
-                'success': False,
-                'error': 'Este dispositivo ya está registrado'
-            }), 400
-        
-        # Obtener el hogar del usuario
-        hogar = obtener_hogar_por_usuario(id_usuario)
-        
-        if not hogar:
-            return jsonify({
-                'success': False,
-                'error': 'Debes crear un perfil de hogar primero'
-            }), 400
-        
-        # Registrar el dispositivo
-        dispositivo = crear_dispositivo(
-            id_hogar=hogar.id_hogar,
-            alias=alias,
-            id_dispositivo_iot=id_dispositivo_iot
-        )
-        
-        if dispositivo:
-            return jsonify({
-                'success': True,
-                'message': 'Dispositivo registrado exitosamente',
-                'dispositivo': dispositivo.to_dict()
-            }), 201
         else:
-            return jsonify({
-                'success': False,
-                'error': 'Error al registrar el dispositivo'
-            }), 500
+            # Es una actualización de perfil de hogar
+            direccion = data.get('address')
+            nombre_hogar = data.get('nombre_hogar')
+            
+            if not direccion or not nombre_hogar:
+                return jsonify({
+                    'success': False,
+                    'error': 'La dirección y el nombre del hogar son requeridos'
+                }), 400
+            
+            # Verificar si ya existe un hogar
+            hogar_previo = obtener_hogar_por_usuario(id_usuario)
+            
+            # Crear o actualizar el hogar
+            hogar = crear_o_actualizar_hogar(
+                id_usuario=id_usuario,
+                direccion=direccion,
+                nombre_hogar=nombre_hogar
+            )
+            
+            if hogar:
+                mensaje = 'Perfil actualizado exitosamente' if hogar_previo else 'Perfil creado exitosamente'
+                
+                return jsonify({
+                    'success': True,
+                    'message': mensaje,
+                    'hogar': hogar.to_dict()
+                }), 200
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Error al guardar el perfil'
+                }), 500
         
     except Exception as e:
-        print(f"Error en registrar_dispositivo: {e}")
+        print(f"Error en guardar_perfil_o_dispositivo: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
         }), 500
 
 
-@blueprint_perfil.route('/perfil', methods=['PUT'])
-@cross_origin()
+@blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>', methods=['PUT'])
+@cross_origin(supports_credentials=True)
 @login_requerido_perfil
 def actualizar_dispositivo(id_dispositivo):
     """Actualiza el alias de un dispositivo"""
@@ -244,8 +201,8 @@ def actualizar_dispositivo(id_dispositivo):
         }), 500
 
 
-@blueprint_perfil.route('/perfil', methods=['DELETE'])
-@cross_origin()
+@blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>', methods=['DELETE'])
+@cross_origin(supports_credentials=True)
 @login_requerido_perfil
 def eliminar_dispositivo_route(id_dispositivo):
     """Elimina un dispositivo del hogar"""
@@ -272,3 +229,4 @@ def eliminar_dispositivo_route(id_dispositivo):
             'success': False,
             'error': str(e)
         }), 500
+    

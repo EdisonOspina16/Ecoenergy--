@@ -48,32 +48,27 @@ export default function Profile() {
     try {
       setLoading(true);
 
-      // Cargar perfil del hogar
-      const perfilRes = await fetch('http://localhost:5000/perfil', {
+      // Una sola llamada GET para obtener perfil y dispositivos
+      const response = await fetch('http://localhost:5000/perfil', {
         credentials: 'include',
       });
       
-      if (perfilRes.status === 401) {
+      if (response.status === 401) {
         window.location.href = '/login';
         return;
       }
       
-      const perfilData = await perfilRes.json();
+      const data = await response.json();
       
-      if (perfilData.success && perfilData.hogar) {
-        setAddress(perfilData.hogar.direccion || '');
-        setHomeName(perfilData.hogar.nombre_hogar || '');
-      }
-
-      // Cargar dispositivos
-      const dispositivosRes = await fetch('http://localhost:5000/perfil', {
-        credentials: 'include',
-      });
-      
-      const dispositivosData = await dispositivosRes.json();
-      
-      if (dispositivosData.success) {
-        setDevices(dispositivosData.dispositivos);
+      if (data.success) {
+        // Cargar datos del hogar
+        if (data.hogar) {
+          setAddress(data.hogar.direccion || '');
+          setHomeName(data.hogar.nombre_hogar || '');
+        }
+        
+        // Cargar dispositivos
+        setDevices(data.dispositivos || []);
       }
       
     } catch (error) {
@@ -104,8 +99,8 @@ export default function Profile() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          credentials: 'include',
         },
-        credentials: 'include',
         body: JSON.stringify({
           address,
           nombre_hogar: homeName
@@ -142,8 +137,8 @@ export default function Profile() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          credentials: 'include',
         },
-        credentials: 'include',
         body: JSON.stringify({
           deviceId: newDeviceId,
           nickname: newDeviceNickname
@@ -174,7 +169,7 @@ export default function Profile() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/perfil`, {
+      const response = await fetch(`http://localhost:5000/perfil/dispositivo/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -200,12 +195,12 @@ export default function Profile() {
     ));
 
     try {
-      const response = await fetch(`http://localhost:5000/perfil`, {
+      const response = await fetch(`http://localhost:5000/perfil/dispositivo/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          credentials: 'include',
         },
-        credentials: 'include',
         body: JSON.stringify({ name: newName })
       });
 
@@ -261,7 +256,7 @@ export default function Profile() {
             <button className={styles.notificationButton} title="Notificaciones">
               🔔
             </button>
-            <div style={{ position: 'relative' }}>
+            <div className="user-menu-container" style={{ position: 'relative' }}>
               <button 
                 className={styles.avatar}
                 onClick={() => setShowUserMenu(!showUserMenu)}

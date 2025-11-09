@@ -5,8 +5,17 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, session
 from flask_cors import cross_origin
 from controller.controladorUsuarios import registrar_usuario, verificar_credenciales, actualizar_contraseña, obtener_usuario_por_id
-
-
+from controller.controladorDispositivos import (
+    obtener_dispositivos_por_usuario,
+    crear_dispositivo,
+    actualizar_alias_dispositivo,
+    eliminar_dispositivo,
+    verificar_dispositivo_existe
+)
+from controller.controladorHogar import (
+    obtener_hogar_por_usuario, 
+    crear_o_actualizar_hogar
+)
 blueprint = Blueprint('vista_usuarios', __name__)
 
 
@@ -15,8 +24,10 @@ def login_requerido(f):
     @wraps(f)
     def decorador(*args, **kwargs):
         usuario = session.get('usuario')
-        if not usuario:               
+        if not usuario:
+            print("❌ No hay sesión activa - Redirigiendo a login")
             return jsonify({"error": "Debes iniciar sesión para acceder a esta página"}), 401
+        print(f"✅ Sesión activa para usuario: {usuario.get('correo')}")
         return f(*args, **kwargs)
     return decorador
 
@@ -27,7 +38,7 @@ def inicio():
 
 # Ruta para el registro
 @blueprint.route('/registro', methods=['POST'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def registro():
     data = request.get_json()
     
@@ -60,7 +71,7 @@ def registro():
 
 
 @blueprint.route('/login', methods=['POST'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def login():
     data = request.get_json()
     
@@ -73,9 +84,15 @@ def login():
     usuario = verificar_credenciales(correo, contraseña)
 
     if usuario:
+        # ⭐ CRÍTICO: Hacer la sesión permanente
+        session.permanent = True
         session['usuario'] = usuario.to_dict()
+        
+        print(f"✅ Login exitoso para: {correo}")
+        print(f"🍪 Sesión guardada: {session.get('usuario')}")
 
         return jsonify({
+            "success": True,
             "message": "Inicio de sesión exitoso", 
             "redirect": "/home",
             "usuario": usuario.to_dict()
@@ -84,9 +101,18 @@ def login():
         return jsonify({"error": "Credenciales inválidas"}), 401    
 
 
+@blueprint.route('/logout', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def logout():
+    """Cierra la sesión del usuario"""
+    session.clear()
+    return jsonify({
+        'success': True,
+        'message': 'Sesión cerrada exitosamente'
+    }), 200
 
 @blueprint.route('/recuperar', methods=['POST'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def recuperar():
     data = request.get_json()
     
@@ -105,3 +131,42 @@ def recuperar():
     else:
         return jsonify({"error": "No se encontró el correo"}), 404
 
+@blueprint.route('/home', methods=['GET'])
+@cross_origin(supports_credentials=True)
+@login_requerido
+def home_verificar_sesion():
+    """Endpoint para verificar sesión y obtener datos del dashboard"""
+    print(f"📥 Petición a /home recibida")
+    print(f"🍪 Cookies: {request.cookies}")
+    print(f"🔑 Sesión: {session.get('usuario')}")
+    
+    usuario = session['usuario']
+    hogar = obtener_hogar_por_usuario(usuario['id'])
+    dispositivos = obtener_dispositivos_por_usuario(usuario['id'])
+    
+    return jsonify({
+        "success": True,
+        "hogar": hogar.to_dict() if hogar else None,
+        "dispositivos": [d.to_dict() for d in dispositivos]
+    }), 200
+
+
+@blueprint.route('/verificar-sesion', methods=['GET'])
+@cross_origin(supports_credentials=True)
+def verificar_sesion():
+    """Endpoint simple para verificar si hay sesión activa"""
+    usuario = session.get('usuario')
+    
+    if usuario:
+        print(f"✅ Sesión verificada para: {usuario.get('correo')}")
+        return jsonify({
+            'success': True,
+            'autenticado': True,
+            'usuario': usuario
+        }), 200
+    else:
+        print("❌ No hay sesión activa")
+        return jsonify({
+            'success': False,
+            'autenticado': False
+        }), 401
