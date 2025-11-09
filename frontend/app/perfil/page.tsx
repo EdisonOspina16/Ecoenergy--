@@ -249,7 +249,7 @@ export default function Profile() {
             <h1 className={styles.logoText}>EcoEnergy</h1>
           </div>
           <nav className={styles.nav}>
-            <a href="/dashboard" className={styles.navLink}>Dashboard</a>
+            <a href="/home" className={styles.navLink}>Dashboard</a>
             <a href="/reportes" className={styles.navLink}>Reports</a>
             <a href="/perfil" className={styles.navLinkActive}>Profile</a>
           </nav>
@@ -305,7 +305,7 @@ export default function Profile() {
                       ⚙️ Mi Perfil
                     </a>
                     <a 
-                      href="/dashboard" 
+                      href="/home" 
                       style={{ 
                         display: 'block',
                         padding: '0.75rem 1rem',
