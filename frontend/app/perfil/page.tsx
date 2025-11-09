@@ -99,8 +99,9 @@ export default function Profile() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          credentials: 'include',
+          
         },
+        credentials: 'include',
         body: JSON.stringify({
           address,
           nombre_hogar: homeName
@@ -137,8 +138,8 @@ export default function Profile() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          credentials: 'include',
         },
+        credentials: 'include',
         body: JSON.stringify({
           deviceId: newDeviceId,
           nickname: newDeviceNickname
