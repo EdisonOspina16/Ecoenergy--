@@ -65,7 +65,7 @@ export default function Home() {
           </div>
           <nav style={{ display: 'flex', gap: '2rem' }}>
             <a 
-              href="/dashboard" 
+              href="/home" 
               style={{ 
                 color: '#10B981', 
                 textDecoration: 'none', 
@@ -148,7 +148,7 @@ export default function Home() {
                   </div>
                   <div style={{ padding: '0.5rem 0' }}>
                     <a 
-                      href="/dashboard" 
+                      href="/home" 
                       style={{ 
                         display: 'block',
                         padding: '0.75rem 1rem',
