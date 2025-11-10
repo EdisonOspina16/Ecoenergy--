@@ -8,6 +8,7 @@ from datetime import timedelta
 from src.routes import vista_usuarios
 from src.routes.vista_perfil import blueprint_perfil
 from src.routes.vista_consumo import vista_consumo
+from src.controller.controlador_dis import iniciar_simulacion
 
 
 app = Flask(__name__)
@@ -49,5 +50,5 @@ if __name__ == '__main__':
     print("🌐 CORS: Habilitado para http://localhost:3000")
     print("🔓 Credenciales: Permitidas")
     print("="*60)
-    
+    iniciar_simulacion()
     app.run(host="0.0.0.0", debug=True, port=5000)

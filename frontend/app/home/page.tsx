@@ -8,6 +8,9 @@ export default function Home() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [homeName, setHomeName] = useState('Mi Hogar');
   const [address, setAddress] = useState('Sin dirección');
+  const [totalConsumo, setTotalConsumo] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Cerrar menú de usuario al hacer clic fuera
   useEffect(() => {
@@ -52,6 +55,40 @@ export default function Home() {
     };
 
     cargarPerfil();
+  }, []);
+
+  // Cargar datos de consumo
+  useEffect(() => {
+    const cargarConsumo = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:5000/home', {
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al obtener datos de consumo');
+        }
+        
+        const data = await response.json();
+        
+        if (data.total_consumo_kwh !== undefined) {
+          setTotalConsumo(data.total_consumo_kwh);
+          setLastUpdate(new Date().toLocaleString('es-ES'));
+        }
+      } catch (error) {
+        console.error('Error al cargar consumo:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarConsumo();
+
+    // Actualizar cada 30 segundos
+    const interval = setInterval(cargarConsumo, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -228,10 +265,16 @@ export default function Home() {
             {/* Consumption Summary */}
             <div className={styles.card}>
               <h1 className={styles.cardTitle}>Resumen de Consumo [{homeName}]</h1>
-              <p className={styles.summaryValue}>
-                1.25 <span className={styles.summaryUnit}>kWh</span>
+              {loading ? (
+                <p className={styles.summaryValue}>Cargando...</p>
+              ) : (
+                <p className={styles.summaryValue}>
+                  {totalConsumo.toFixed(2)} <span className={styles.summaryUnit}>kWh</span>
+                </p>
+              )}
+              <p className={styles.updateTime}>
+                {lastUpdate ? `Última actualización: ${lastUpdate}` : 'Actualizando...'}
               </p>
-              <p className={styles.updateTime}>Última actualización: hace 3 segundos</p>
             </div>
 
             {/* Consumption Trend */}

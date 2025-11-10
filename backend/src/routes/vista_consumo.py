@@ -13,7 +13,7 @@ def consumo_total():
         cur = conn.cursor()
         # Consulta suma consumo últimos 1 día
         cur.execute("""
-            SELECT COALESCE(SUM(consumo_kwh), 0)
+            SELECT COALESCE(SUM(watts), 0)
             FROM registros_consumo
             WHERE fecha_hora >= NOW() - INTERVAL '1 day';
         """)
