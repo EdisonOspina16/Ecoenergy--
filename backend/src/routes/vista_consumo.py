@@ -3,7 +3,7 @@ from src.database import obtener_conexion
 
 vista_consumo = Blueprint('vista_consumo', __name__)
 
-@vista_consumo.route('/api/consumo-total', methods=['GET'])
+@vista_consumo.route('/home', methods=['GET'])
 def consumo_total():
     conn = obtener_conexion()
     if conn is None:

@@ -43,7 +43,12 @@ CREATE TABLE registros_consumo (
     id_dispositivo INT NOT NULL,
     consumo_kwh DECIMAL(10,2) NOT NULL,
     fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_registro_dispositivo FOREIGN KEY (id_dispositivo)
+    watts DECIMAL(10,2) NOT NULL,
+    voltage DECIMAL(10,2) NOT NULL,
+    current DECIMAL(10,2) NOT NULL,
+
+    CONSTRAINT fk_registro_dispositivo
+        FOREIGN KEY (id_dispositivo)
         REFERENCES dispositivos (id_dispositivos)
         ON DELETE CASCADE
 );
