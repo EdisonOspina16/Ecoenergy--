@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Head from "next/head";
-import { useRouter } from "next/navigation"; // Importar useRouter para Next.js 13+
+import { useRouter } from "next/navigation";
 import styles from "../../styles/login.module.css";
 
 export default function Login() {
@@ -10,7 +10,7 @@ export default function Login() {
   const [contraseña, setContraseña] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter(); // Inicializar el router
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,20 +24,18 @@ export default function Login() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          credentials: "include",
         },
+        credentials: "include",  // ✅ Permite enviar y recibir cookies
         body: JSON.stringify({
           correo: correo,
           contraseña: contraseña,
         }),
       });
 
-      console.log("📊 Response status:", response.status);
-      console.log("📊 Response headers:", response.headers);
+      // 🔍 DEBUG: Ver si se recibió la cookie
+      console.log("🍪 Cookies después del login:", document.cookie);
 
-      if (!response.ok) {
-        console.error("❌ Error response:", response.status, response.statusText);
-      }
+      console.log("📊 Response status:", response.status);
 
       const data = await response.json();
       console.log("📊 Response data:", data);
@@ -45,14 +43,11 @@ export default function Login() {
       if (response.ok) {
         console.log("✅ Login exitoso, redirigiendo a:", data.redirect);
         
-        // Usar la ruta que envía el backend (más flexible y consistente)
-        const redirectPath = data.redirect || "/home";
+        const redirectPath = data.redirect || "/dashboard";
         router.push(redirectPath);
         
-        // También puedes guardar información del usuario si la necesitas
         if (data.usuario) {
           console.log("👤 Usuario logueado:", data.usuario);
-          // Aquí podrías guardar en el estado global, localStorage, etc.
         }
       } else {
         console.error("❌ Error en login:", data.error);
@@ -62,9 +57,6 @@ export default function Login() {
       console.error("❌ Error en la petición:", error);
       
       if (error instanceof Error) {
-        console.error("❌ Tipo de error:", error.name);
-        console.error("❌ Mensaje:", error.message);
-        
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
           setError("No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:5000");
         } else {
