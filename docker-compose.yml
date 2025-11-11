@@ -10,7 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - ./init-db:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     restart: always
     networks:
       - ecoenergy-net
@@ -48,7 +48,7 @@ services:
     container_name: frontend_app
     build: ./frontend
     ports:
-      - "3001:3000"
+      - "3001:3000"   
     depends_on:
       - backend
     environment:
@@ -72,7 +72,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3001:3000"
+      - "3002:3000"   
     networks:
       - ecoenergy-net
     depends_on:
@@ -87,9 +87,6 @@ volumes:
   mosquitto_log:
   grafana-storage:
 
-
 networks:
   ecoenergy-net:
     driver: bridge
-
-    
