@@ -100,3 +100,41 @@ def consumo_historico():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+home_bp = Blueprint('home', __name__)
+
+@home_bp.route('/dispositivos', methods=['GET'])
+
+def obtener_dispositivos():
+    try:
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+
+        
+        cursor.execute("""
+            SELECT d.id_dispositvo, r.watts, d.estado_activo
+            FROM registros_consumo AS r
+            JOIN dispositivos AS d ON r.id_dispositivo = d.id
+        """)
+
+        rows = cursor.fetchall()
+
+        dispositivos = [
+            {
+                "nombre": row[0],
+                "consumo": float(row[1]),
+                "estado": "Encendido" if row[2] else "Apagado"
+            }
+            for row in rows
+        ]
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({"success": True, "dispositivos": dispositivos})
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
