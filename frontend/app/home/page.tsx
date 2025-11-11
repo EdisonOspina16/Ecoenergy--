@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from "../../styles/home.module.css";
 
 export default function Home() {
   const [timeRange, setTimeRange] = useState('day');
@@ -11,15 +10,15 @@ export default function Home() {
   const [totalConsumo, setTotalConsumo] = useState(0);
   const [lastUpdate, setLastUpdate] = useState('');
   const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState([]);
   const [chartLoading, setChartLoading] = useState(false);
-  const [devices, setDevices] = useState<any[]>([]);
+  const [devices, setDevices] = useState([]);
   const [loadingDevices, setLoadingDevices] = useState(true);
 
   // Cerrar menú de usuario al hacer clic fuera
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
+    const handleClickOutside = (event) => {
+      const target = event.target;
       if (!target.closest('.user-menu-container')) {
         setShowUserMenu(false);
       }
@@ -129,8 +128,7 @@ export default function Home() {
         const data = await response.json();
 
         if (data.success) {
-          // Mapear dispositivos a la estructura que espera el frontend
-          const dispositivosMapeados = data.dispositivos.map((d: any) => ({
+          const dispositivosMapeados = data.dispositivos.map((d) => ({
             nombre: d.nombre,
             consumo: d.consumo,
             estado: d.estado,
@@ -155,7 +153,7 @@ export default function Home() {
   const renderChart = () => {
     if (chartLoading) {
       return (
-        <div className={styles.centered}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
           <p>Cargando datos...</p>
         </div>
       );
@@ -163,14 +161,14 @@ export default function Home() {
 
     if (!chartData || chartData.length === 0) {
       return (
-        <div className={styles.centered}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
           <p>No hay datos disponibles para este período</p>
         </div>
       );
     }
 
-    const maxConsumo = Math.max(...chartData.map((d: any) => d.consumo));
-    const minConsumo = Math.min(...chartData.map((d: any) => d.consumo));
+    const maxConsumo = Math.max(...chartData.map((d) => d.consumo));
+    const minConsumo = Math.min(...chartData.map((d) => d.consumo));
     const range = maxConsumo - minConsumo || 1;
 
     return (
@@ -203,7 +201,7 @@ export default function Home() {
             stroke="#10B981"
             strokeWidth="3"
             points={chartData
-              .map((d: any, i: number) => {
+              .map((d, i) => {
                 const x = 50 + (i * (700 / (chartData.length - 1 || 1)));
                 const y = 250 - ((d.consumo - minConsumo) / range) * 200;
                 return `${x},${y}`;
@@ -211,7 +209,7 @@ export default function Home() {
               .join(' ')}
           />
 
-          {chartData.map((d: any, i: number) => {
+          {chartData.map((d, i) => {
             const x = 50 + (i * (700 / (chartData.length - 1 || 1)));
             const y = 250 - ((d.consumo - minConsumo) / range) * 200;
             return (
@@ -263,43 +261,149 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.container}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB' }}>
       {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.logo}>
-            <span className={`material-icons ${styles.logoIcon}`}>lightbulb</span>
-            <span className={styles.logoText}>ECOENERGY</span>
+      <header style={{
+        backgroundColor: 'white',
+        borderBottom: '1px solid #E5E7EB',
+        padding: '1rem 2rem'
+      }}>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '2rem' }}>💡</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#10B981' }}>ECOENERGY</span>
           </div>
 
           <nav style={{ display: 'flex', gap: '2rem' }}>
-            <a href="/home" className={styles.navActive}>Dashboard</a>
-            <a href="/reportes" className={styles.navLink}>Reports</a>
-            <a href="/perfil" className={styles.navLink}>Profile</a>
+            <a href="/home" style={{
+              color: '#10B981',
+              textDecoration: 'none',
+              fontWeight: '600',
+              borderBottom: '2px solid #10B981',
+              paddingBottom: '0.25rem'
+            }}>
+              Dashboard
+            </a>
+            <a href="/reportes" style={{
+              color: '#6B7280',
+              textDecoration: 'none',
+              fontWeight: '500'
+            }}>
+              Reports
+            </a>
+            <a href="/perfil" style={{
+              color: '#6B7280',
+              textDecoration: 'none',
+              fontWeight: '500'
+            }}>
+              Profile
+            </a>
           </nav>
 
-          <div className={styles.headerActions}>
-            <button title="Notificaciones" className={styles.notificationButton}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              padding: '0.5rem'
+            }} title="Notificaciones">
               🔔
             </button>
+            
+            {/* CÍRCULO DEL PERFIL CON POPUP */}
             <div className="user-menu-container" style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className={styles.profileButton}
+                style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  borderRadius: '50%',
+                  backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBqNo8fjfebe_H0I5zh8Fvrbtov-mVmsTd8fa-uhbH9zFVol60RO1YFiXKDnaYuqEvFvzosAfQHITzbl_XnkMOl7Mj6bdHGkiArUnzlzAA-283ck-z-IdS13en693-eVl1R21SdhTnNhGrfR2e4tL8qTaFtvEz782idrxUUqsPXpiFG8AecB3RWIUD8B_4nsKdkyPxIqJPn6Yp8BCLauwRCIpKZU5Iky9mRb27BtIhefRYg6c35py4fXq9x4ctwr81GnuoY51uD47cB")',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
               />
+
+              {/* Menú desplegable */}
               {showUserMenu && (
-                <div className={styles.userMenu}>
-                  <div className={styles.userMenuHeader}>
-                    <p className={styles.userMenuTitle}>{homeName}</p>
-                    <p className={styles.userMenuSubtitle}>{address}</p>
+                <div style={{
+                  position: 'absolute',
+                  top: '3rem',
+                  right: '0',
+                  backgroundColor: 'white',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #E5E7EB',
+                  minWidth: '200px',
+                  zIndex: 50
+                }}>
+                  <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #E5E7EB' }}>
+                    <p style={{ fontWeight: '600', color: '#1F2937', marginBottom: '0.25rem' }}>
+                      {homeName}
+                    </p>
+                    <p style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+                      {address}
+                    </p>
                   </div>
-                  <div className={styles.userMenuBody}>
-                    <a href="/home">📊 Dashboard</a>
-                    <a href="/reportes">📈 Reportes</a>
-                    <a href="/perfil">⚙️ Mi Perfil</a>
+                  <div style={{ padding: '0.5rem 0' }}>
+                    <a href="/home" style={{
+                      display: 'block',
+                      padding: '0.75rem 1rem',
+                      color: '#10B981',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      textDecoration: 'none',
+                      backgroundColor: '#F0FDF4'
+                    }}>
+                      📊 Dashboard
+                    </a>
+                    <a href="/reportes" style={{
+                      display: 'block',
+                      padding: '0.75rem 1rem',
+                      color: '#6B7280',
+                      fontSize: '0.875rem',
+                      textDecoration: 'none'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      📈 Reportes
+                    </a>
+                    <a href="/perfil" style={{
+                      display: 'block',
+                      padding: '0.75rem 1rem',
+                      color: '#6B7280',
+                      fontSize: '0.875rem',
+                      textDecoration: 'none'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      ⚙️ Mi Perfil
+                    </a>
                   </div>
-                  <div className={styles.userMenuFooter}>
-                    <button onClick={() => (window.location.href = '/login')}>
+                  <div style={{ borderTop: '1px solid #E5E7EB', padding: '0.5rem 0' }}>
+                    <button onClick={() => window.location.href = '/login'} style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      color: '#EF4444',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      textAlign: 'left',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FEF2F2'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                       🚪 Cerrar Sesión
                     </button>
                   </div>
@@ -310,103 +414,113 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main */}
-      <main className={styles.main}>
-        <div className={styles.grid}>
+      {/* Main Content */}
+      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
           {/* Left Column */}
-          <div className={styles.leftColumn}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Resumen de Consumo */}
-            <div className={styles.card}>
-              <h1 className={styles.cardTitle}>Resumen de Consumo [{homeName}]</h1>
+            <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>
+                Resumen de Consumo [{homeName}]
+              </h1>
               {loading ? (
-                <p className={styles.summaryValue}>Cargando...</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#10B981' }}>Cargando...</p>
               ) : (
-                <p className={styles.summaryValue}>
-                  {totalConsumo.toFixed(2)} <span className={styles.summaryUnit}>kWh</span>
+                <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#10B981' }}>
+                  {totalConsumo.toFixed(2)} <span style={{ fontSize: '1.5rem', color: '#6B7280' }}>kWh</span>
                 </p>
               )}
-              <p className={styles.updateTime}>
+              <p style={{ fontSize: '0.875rem', color: '#6B7280', marginTop: '0.5rem' }}>
                 {lastUpdate ? `Última actualización: ${lastUpdate}` : 'Actualizando...'}
               </p>
             </div>
 
             {/* Tendencia */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Tendencia de Consumo</h2>
-                <div className={styles.timeRangeButtons}>
+            <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Tendencia de Consumo</h2>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
                   {['day', 'week', 'month'].map((range) => (
                     <button
                       key={range}
                       onClick={() => setTimeRange(range)}
-                      className={`${styles.timeButton} ${
-                        timeRange === range ? styles.timeButtonActive : ''
-                      }`}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.375rem',
+                        border: '1px solid #E5E7EB',
+                        backgroundColor: timeRange === range ? '#10B981' : 'white',
+                        color: timeRange === range ? 'white' : '#6B7280',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
                     >
                       {range === 'day' ? 'Día' : range === 'week' ? 'Semana' : 'Mes'}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className={styles.chartPlaceholder}>{renderChart()}</div>
+              {renderChart()}
             </div>
 
             {/* Consumo por Dispositivo */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Consumo por Dispositivo</h2>
-                <button className={styles.exportButton}>
-                  <span className="material-icons">download</span>
-                  Exportar a Hojas de cálculo
+            <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Consumo por Dispositivo</h2>
+                <button style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#10B981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}>
+                  📥 Exportar a Hojas de cálculo
                 </button>
               </div>
 
-              <div className={styles.deviceList}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {loadingDevices ? (
                   <p>Cargando dispositivos...</p>
                 ) : devices.length === 0 ? (
                   <p>No hay dispositivos registrados.</p>
                 ) : (
                   devices.map((device, index) => (
-                    <div key={index} className={styles.deviceItem}>
-                      <div className={styles.deviceInfo}>
-                        <span className={`material-icons ${styles.deviceIcon}`}>
-                          {device.nombre.toLowerCase().includes('tv')
-                            ? 'tv'
-                            : device.nombre.toLowerCase().includes('nevera')
-                            ? 'kitchen'
-                            : device.nombre.toLowerCase().includes('aire')
-                            ? 'air'
-                            : 'devices'}
+                    <div key={index} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '1rem',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '0.5rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <span style={{ fontSize: '2rem' }}>
+                          {device.nombre.toLowerCase().includes('tv') ? '📺' :
+                           device.nombre.toLowerCase().includes('nevera') ? '🧊' :
+                           device.nombre.toLowerCase().includes('aire') ? '❄️' : '🔌'}
                         </span>
                         <div>
-                          <p className={styles.deviceName}>{device.nombre}</p>
-                          <p className={styles.deviceConsumption}>
+                          <p style={{ fontWeight: '600' }}>{device.nombre}</p>
+                          <p style={{ fontSize: '0.875rem', color: '#6B7280' }}>
                             {device.consumo.toFixed(2)} kWh
                           </p>
                         </div>
                       </div>
-                      <div className={styles.deviceActions}>
-                        <div className={styles.deviceStatus}>
-                          <div
-                            className={`${styles.statusDot} ${
-                              device.estado === 'Encendido'
-                                ? styles.statusDotOn
-                                : styles.statusDotOff
-                            }`}
-                          ></div>
-                          <span>{device.estado}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{
+                            width: '0.5rem',
+                            height: '0.5rem',
+                            borderRadius: '50%',
+                            backgroundColor: device.estado === 'Encendido' ? '#10B981' : '#6B7280'
+                          }}></div>
+                          <span style={{ fontSize: '0.875rem' }}>{device.estado}</span>
                         </div>
-                        <button
-                          className={`${styles.powerButton} ${
-                            device.estado === 'Encendido'
-                              ? styles.powerButtonOff
-                              : styles.powerButtonDisabled
-                          }`}
-                          disabled={device.estado !== 'Encendido'}
-                        >
-                          Apagar
-                        </button>
                       </div>
                     </div>
                   ))
@@ -416,20 +530,32 @@ export default function Home() {
           </div>
 
           {/* Right Column */}
-          <div className={styles.rightColumn}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Recomendaciones */}
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>Recomendaciones</h2>
-              <div className={styles.recommendations}>
-                <div className={`${styles.alert} ${styles.alertDanger}`}>
-                  <p className={styles.alertDangerText}>Pico Inusual Detectado</p>
-                  <p className={styles.alertDangerDesc}>
+            <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Recomendaciones</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FCA5A5',
+                  borderRadius: '0.5rem'
+                }}>
+                  <p style={{ fontWeight: '600', color: '#DC2626', marginBottom: '0.5rem' }}>
+                    Pico Inusual Detectado
+                  </p>
+                  <p style={{ fontSize: '0.875rem', color: '#991B1B' }}>
                     Se detectó un consumo anómalo a las 3:00 AM.
                   </p>
                 </div>
-                <div className={`${styles.alert} ${styles.alertSuccess}`}>
-                  <p className={styles.alertSuccessText}>
-                    Tu <span className={styles.bold}>Nevera</span> está consumiendo 15% más de lo
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#F0FDF4',
+                  border: '1px solid #86EFAC',
+                  borderRadius: '0.5rem'
+                }}>
+                  <p style={{ fontSize: '0.875rem', color: '#166534' }}>
+                    Tu <span style={{ fontWeight: '600' }}>Nevera</span> está consumiendo 15% más de lo
                     esperado. Revisa la temperatura o el sellado de las puertas.
                   </p>
                 </div>
@@ -437,36 +563,58 @@ export default function Home() {
             </div>
 
             {/* Ahorro */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Tu Ahorro</h2>
-                <button className={styles.exportButton}>
-                  <span className="material-icons">download</span>
-                  Exportar
+            <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Tu Ahorro</h2>
+                <button style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#10B981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}>
+                  📥 Exportar
                 </button>
               </div>
-              <div className={styles.savingsGrid}>
-                <div className={`${styles.savingsCard} ${styles.savingsCardBlue}`}>
-                  <p className={`${styles.savingsLabel} ${styles.savingsLabelBlue}`}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#EFF6FF',
+                  borderRadius: '0.5rem'
+                }}>
+                  <p style={{ fontSize: '0.875rem', color: '#1E40AF', marginBottom: '0.5rem' }}>
                     Ahorro Financiero Proyectado
                   </p>
-                  <p className={`${styles.savingsValue} ${styles.savingsValueBlue}`}>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1E3A8A' }}>
                     25.000 COP/mes
                   </p>
                 </div>
-                <div className={`${styles.savingsCard} ${styles.savingsCardGreen}`}>
-                  <p className={`${styles.savingsLabel} ${styles.savingsLabelGreen}`}>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#F0FDF4',
+                  borderRadius: '0.5rem'
+                }}>
+                  <p style={{ fontSize: '0.875rem', color: '#166534', marginBottom: '0.5rem' }}>
                     Impacto Ambiental
                   </p>
-                  <p className={`${styles.savingsValue} ${styles.savingsValueGreen}`}>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#15803D' }}>
                     10 kg CO₂ menos
                   </p>
                 </div>
-                <div className={`${styles.savingsCard} ${styles.savingsCardAmber}`}>
-                  <p className={`${styles.savingsLabel} ${styles.savingsLabelAmber}`}>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#FFFBEB',
+                  borderRadius: '0.5rem'
+                }}>
+                  <p style={{ fontSize: '0.875rem', color: '#92400E', marginBottom: '0.5rem' }}>
                     Indicador Didáctico
                   </p>
-                  <p className={`${styles.savingsValue} ${styles.savingsValueAmber}`}>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#78350F' }}>
                     Equivalente a 5 horas menos de AC
                   </p>
                 </div>

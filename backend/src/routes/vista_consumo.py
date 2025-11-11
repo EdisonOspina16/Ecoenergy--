@@ -100,3 +100,49 @@ def consumo_historico():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+    
+@vista_consumo.route('/dispositivos', methods=['GET'])
+def obtener_dispositivos():
+    """
+    Devuelve la lista de dispositivos con su consumo individual
+    """
+    try:
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+
+        # Dispositivos con su último registro
+        cursor.execute("""
+            SELECT DISTINCT ON (d.id_dispositivos)
+                d.alias,
+                r.watts,
+                d.estado_activo,
+                d.tipo_dispositivo_ia
+            FROM dispositivos AS d
+            LEFT JOIN registros_consumo AS r 
+                ON r.id_dispositivo = d.id_dispositivos
+            ORDER BY d.id_dispositivos, r.fecha_hora DESC
+        """)
+
+        rows = cursor.fetchall()
+        dispositivos = [
+            {
+                "nombre": row[0] or row[3] or "Dispositivo Sin Nombre",
+                "consumo": float(row[1]) / 1000 if row[1] else 0.0,
+                "estado": "Encendido" if row[2] else "Apagado",
+                "watts": float(row[1]) if row[1] else 0.0
+            }
+            for row in rows
+        ]
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "success": True, 
+            "dispositivos": dispositivos
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
