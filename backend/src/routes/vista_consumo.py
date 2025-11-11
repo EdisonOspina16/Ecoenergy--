@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from src.database import obtener_conexion
 
 vista_consumo = Blueprint('vista_consumo', __name__)
@@ -24,6 +24,79 @@ def consumo_total():
         conn.close()
 
         return jsonify({"total_consumo_kwh": float(total_consumo)})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@vista_consumo.route('/consumo-historico', methods=['GET'])
+def consumo_historico():
+    """
+    Endpoint para obtener datos históricos de consumo
+    Query params: rango = 'day' | 'week' | 'month'
+    """
+    conn = obtener_conexion()
+    if conn is None:
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+
+    try:
+        rango = request.args.get('rango', 'day')
+        cur = conn.cursor()
+        
+        if rango == 'day':
+            # Consumo por hora en las últimas 24 horas
+            cur.execute("""
+                SELECT 
+                    TO_CHAR(fecha_hora, 'HH24:00') as periodo,
+                    COALESCE(SUM(watts), 0) as consumo
+                FROM registros_consumo
+                WHERE fecha_hora >= NOW() - INTERVAL '1 day'
+                GROUP BY TO_CHAR(fecha_hora, 'HH24:00'), DATE_TRUNC('hour', fecha_hora)
+                ORDER BY DATE_TRUNC('hour', fecha_hora);
+            """)
+            
+        elif rango == 'week':
+            # Consumo por día en los últimos 7 días
+            cur.execute("""
+                SELECT 
+                    TO_CHAR(fecha_hora, 'Dy DD') as periodo,
+                    COALESCE(SUM(watts), 0) as consumo
+                FROM registros_consumo
+                WHERE fecha_hora >= NOW() - INTERVAL '7 days'
+                GROUP BY TO_CHAR(fecha_hora, 'Dy DD'), DATE_TRUNC('day', fecha_hora)
+                ORDER BY DATE_TRUNC('day', fecha_hora);
+            """)
+            
+        else:  # month
+            # Consumo por día en los últimos 30 días
+            cur.execute("""
+                SELECT 
+                    TO_CHAR(fecha_hora, 'DD/MM') as periodo,
+                    COALESCE(SUM(watts, 0) as consumo
+                FROM registros_consumo
+                WHERE fecha_hora >= NOW() - INTERVAL '30 days'
+                GROUP BY TO_CHAR(fecha_hora, 'DD/MM'), DATE_TRUNC('day', fecha_hora)
+                ORDER BY DATE_TRUNC('day', fecha_hora);
+            """)
+        
+        resultados = cur.fetchall()
+        
+        # Formatear datos para el frontend
+        datos = [
+            {
+                "periodo": row[0],
+                "consumo": float(row[1])
+            }
+            for row in resultados
+        ]
+        
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "rango": rango,
+            "datos": datos
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
