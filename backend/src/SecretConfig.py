@@ -10,7 +10,7 @@ else:
     PGHOST='localhost'
     PGDATABASE='ecoenergy'
     PGUSER='postgres'
-    PGPASSWORD='Edison#101'
+    PGPASSWORD='Luciana-0313'
 
 
 # GEMINI - LLM
