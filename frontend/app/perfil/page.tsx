@@ -21,6 +21,7 @@ export default function Profile() {
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+
   // Cargar datos del perfil y dispositivos al montar el componente
   useEffect(() => {
     cargarDatos();
@@ -186,6 +187,43 @@ export default function Profile() {
     } catch (error) {
       console.error('Error al eliminar dispositivo:', error);
       mostrarMensaje('error', 'Error al conectar con el servidor');
+    }
+  };
+
+  const handleToggleConnection = async (id: number) => {
+    try {
+      // Encontrar el dispositivo actual
+      const device = devices.find((d) => d.id === id);
+      if (!device) return;
+
+      // Cambiar el estado localmente primero
+      const updatedDevices = devices.map((d) =>
+        d.id === id ? { ...d, connected: !d.connected } : d
+      );
+      setDevices(updatedDevices);
+
+      // Enviar la actualización al backend
+      const response = await fetch(`http://localhost:5000/perfil/dispositivo/${id}/estado`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ estado_activo: !device.connected }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        // Si falla, revertir el cambio
+        setDevices(devices);
+        mostrarMensaje("error", data.error || "No se pudo actualizar el estado");
+      } else {
+        mostrarMensaje("success", `Dispositivo ${!device.connected ? "conectado" : "desconectado"}`);
+      }
+    } catch (error) {
+      console.error("Error al cambiar estado:", error);
+      mostrarMensaje("error", "Error al conectar con el servidor");
     }
   };
 
@@ -476,6 +514,25 @@ export default function Profile() {
                             <div className={styles.statusDot}></div>
                             <span>{device.connected ? 'Conectado' : 'Desconectado'}</span>
                           </div>
+
+                          {/* 🔘 Botón para cambiar estado */}
+                          <button
+                            onClick={() => handleToggleConnection(device.id)}
+                            className={styles.toggleButton}
+                            title={device.connected ? "Desconectar" : "Conectar"}
+                            style={{
+                              backgroundColor: device.connected ? "#EF4444" : "#10B981",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "0.5rem",
+                              padding: "0.5rem 1rem",
+                              cursor: "pointer",
+                              fontSize: "0.875rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {device.connected ? "Desconectar" : "Conectar"}
+                          </button>
                           <button
                             className={styles.deleteButton}
                             onClick={() => handleDeleteDevice(device.id)}
@@ -483,6 +540,7 @@ export default function Profile() {
                           >
                             🗑️
                           </button>
+
                         </li>
                       ))}
                     </ul>

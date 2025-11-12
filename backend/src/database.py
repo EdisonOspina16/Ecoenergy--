@@ -2,7 +2,7 @@ import sys
 sys.path.append("src")
 
 import psycopg2
-from SecretConfig import PGHOST, PGDATABASE, PGUSER, PGPASSWORD, GEMINI_API_KEY, GEMINI_PROMPT, GEMINI_MODEL
+from SecretConfig import PGHOST, PGDATABASE, PGUSER, PGPASSWORD
 
 
 def obtener_conexion():

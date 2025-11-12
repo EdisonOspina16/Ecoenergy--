@@ -14,6 +14,8 @@ export default function Home() {
   const [chartLoading, setChartLoading] = useState(false);
   const [devices, setDevices] = useState([]);
   const [loadingDevices, setLoadingDevices] = useState(true);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(true);
 
   // Cerrar menú de usuario al hacer clic fuera
   useEffect(() => {
@@ -119,6 +121,37 @@ export default function Home() {
 
     cargarDatosHistoricos();
   }, [timeRange]);
+
+  // Cargar recomendaciones desde backend
+  useEffect(() => {
+  const cargarRecomendaciones = async () => {
+    try {
+      setLoadingRecommendations(true);
+
+      const resultados = await Promise.all(
+        devices.map(async (device) => {
+          const res = await fetch("http://localhost:5000/recomendacion", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              consumo_watts: device.consumo,
+              dispositivo: device.nombre
+            }),
+          });
+          return await res.json();
+        })
+      );
+
+      setRecommendations(resultados);
+    } catch (error) {
+      console.error("Error al cargar recomendaciones:", error);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
+
+  if (devices.length > 0) cargarRecomendaciones();
+}, [devices]);
 
   // Cargar dispositivos desde backend
   useEffect(() => {
@@ -531,37 +564,42 @@ export default function Home() {
 
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Recomendaciones */}
-            <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Recomendaciones</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: '#FEF2F2',
-                  border: '1px solid #FCA5A5',
-                  borderRadius: '0.5rem'
-                }}>
-                  <p style={{ fontWeight: '600', color: '#DC2626', marginBottom: '0.5rem' }}>
-                    Pico Inusual Detectado
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: '#991B1B' }}>
-                    Se detectó un consumo anómalo a las 3:00 AM.
-                  </p>
-                </div>
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: '#F0FDF4',
-                  border: '1px solid #86EFAC',
-                  borderRadius: '0.5rem'
-                }}>
-                  <p style={{ fontSize: '0.875rem', color: '#166534' }}>
-                    Tu <span style={{ fontWeight: '600' }}>Nevera</span> está consumiendo 15% más de lo
-                    esperado. Revisa la temperatura o el sellado de las puertas.
-                  </p>
-                </div>
-              </div>
-            </div>
+          
+          {/* Recomendaciones */}
+          <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Recomendaciones</h2>
 
+            {loadingRecommendations ? (
+              <p>Cargando recomendaciones...</p>
+            ) : recommendations.length === 0 ? (
+              <p>No hay recomendaciones por ahora.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {recommendations.map((rec, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      padding: '1rem',
+                      backgroundColor: rec.esAlerta ? '#FEF2F2' : '#F0FDF4',
+                      border: rec.esAlerta ? '1px solid #FCA5A5' : '1px solid #86EFAC',
+                      borderRadius: '0.5rem'
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontWeight: '600',
+                        color: rec.esAlerta ? '#DC2626' : '#166534',
+                        marginBottom: rec.esAlerta ? '0.5rem' : '0'
+                      }}
+                    >
+                      {rec.recomendacion}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+            
             {/* Ahorro */}
             <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

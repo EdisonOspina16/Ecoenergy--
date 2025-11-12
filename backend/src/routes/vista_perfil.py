@@ -13,7 +13,8 @@ from controller.controladorDispositivos import (
     crear_dispositivo,
     actualizar_alias_dispositivo,
     eliminar_dispositivo,
-    verificar_dispositivo_existe
+    verificar_dispositivo_existe, 
+    actualizar_estado_dispositivo
 )
 
 blueprint_perfil = Blueprint('vista_perfil', __name__)
@@ -229,4 +230,41 @@ def eliminar_dispositivo_route(id_dispositivo):
             'success': False,
             'error': str(e)
         }), 500
-    
+
+@blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>/estado', methods=['PUT'])
+@cross_origin(supports_credentials=True)
+@login_requerido_perfil
+def cambiar_estado_dispositivo(id_dispositivo):
+    """Cambia el estado activo/inactivo del dispositivo (encendido/apagado)."""
+    try:
+        usuario = session.get('usuario')
+        id_usuario = usuario['id']
+        
+        data = request.get_json()
+        nuevo_estado = data.get('estado_activo')  # True o False desde el front
+        
+        if nuevo_estado is None:
+            return jsonify({
+                'success': False,
+                'error': 'El estado del dispositivo es requerido (True/False)'
+            }), 400
+        
+        exito = actualizar_estado_dispositivo(id_dispositivo, id_usuario, nuevo_estado)
+        
+        if exito:
+            return jsonify({
+                'success': True,
+                'message': f'Dispositivo {"encendido" if nuevo_estado else "apagado"} correctamente'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Dispositivo no encontrado o no autorizado'
+            }), 404
+
+    except Exception as e:
+        print(f"Error en cambiar_estado_dispositivo: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.database import obtener_conexion
+from src.controller.controlador_dis import generar_recomendacion
 
 vista_consumo = Blueprint('vista_consumo', __name__)
 
@@ -146,3 +147,20 @@ def obtener_dispositivos():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@vista_consumo.route("/recomendacion", methods=["POST"])
+def recomendacion():
+    data = request.get_json()
+    consumo = data.get("consumo_watts")
+    dispositivo = data.get("dispositivo")
+    
+    resultado = generar_recomendacion(consumo, dispositivo)
+    
+    # Detectar el tipo de recomendación
+    es_alerta = any(palabra in resultado.lower() for palabra in ['⚠️', 'pico', 'anómalo', 'inusual', 'alerta'])
+    
+    return jsonify({
+        "recomendacion": resultado,
+        "esAlerta": es_alerta,
+        "dispositivo": dispositivo
+    })

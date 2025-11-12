@@ -178,3 +178,34 @@ def verificar_dispositivo_existe(id_dispositivo_iot):
     except Exception as e:
         print(f"Error al verificar dispositivo: {e}")
         return False
+    
+def actualizar_estado_dispositivo(id_dispositivo, id_usuario, nuevo_estado):
+    """
+    Actualiza el estado (activo/inactivo) de un dispositivo, verificando
+    que pertenezca al usuario.
+    """
+    try:
+        conn = obtener_conexion()
+        if not conn:
+            return False
+        
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE dispositivos
+            SET estado_activo = %s
+            WHERE id_dispositivos = %s
+              AND id_hogar IN (
+                  SELECT id_hogar FROM hogares WHERE id_usuario = %s
+              )
+            RETURNING id_dispositivos
+        """, (nuevo_estado, id_dispositivo, id_usuario))
+        
+        fila = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return bool(fila)
+    except Exception as e:
+        print(f"Error al actualizar estado del dispositivo: {e}")
+        return False
