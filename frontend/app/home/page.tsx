@@ -1,6 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import styles from './indicadores.module.css';
+
+interface Indicadores {
+  ahorro_economico: number;
+  reduccion_co2_kg: number;
+  arboles_salvados: number;
+}
+
+interface Device {
+  nombre: string;
+  consumo: number;
+  estado: string;
+}
+
+interface ChartData {
+  consumo: number;
+  periodo: string;
+}
 
 export default function Home() {
   const [timeRange, setTimeRange] = useState('day');
@@ -10,14 +28,31 @@ export default function Home() {
   const [totalConsumo, setTotalConsumo] = useState(0);
   const [lastUpdate, setLastUpdate] = useState('');
   const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [chartLoading, setChartLoading] = useState(false);
-  const [devices, setDevices] = useState([]);
+  const [devices, setDevices] = useState<Device[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(true);
+  const [indicadores, setIndicadores] = useState<any>(null);
+
+  // Actualizar indicadores dinámicamente según el consumo
+  useEffect(() => {
+    if (totalConsumo > 0) {
+      const ahorro_economico = (Number(totalConsumo) * 500).toFixed(0);
+      const reduccion_co2_kg = (Number(totalConsumo) * 0.233).toFixed(2);
+      const arboles_salvados = (Number(reduccion_co2_kg) / 21.77).toFixed(2);
+
+
+      setIndicadores({
+        ahorro_economico,
+        reduccion_co2_kg,
+        arboles_salvados,
+      });
+    }
+  }, [totalConsumo]);
 
   // Cerrar menú de usuario al hacer clic fuera
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: any) => {
       const target = event.target;
       if (!target.closest('.user-menu-container')) {
         setShowUserMenu(false);
@@ -128,7 +163,7 @@ export default function Home() {
         const data = await response.json();
 
         if (data.success) {
-          const dispositivosMapeados = data.dispositivos.map((d) => ({
+          const dispositivosMapeados = data.dispositivos.map((d:any) => ({
             nombre: d.nombre,
             consumo: d.consumo,
             estado: d.estado,
@@ -562,60 +597,149 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Ahorro */}
-            <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Tu Ahorro</h2>
-                <button style={{
+            {/* Tu Ahorro con Indicadores HU */}
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '1rem',
+                padding: '1.5rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              }}
+            >
+              <div
+                style={{
                   display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#10B981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}>
-                  📥 Exportar
+                  marginBottom: '1rem',
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: '1.25rem',
+                    fontWeight: '600',
+                    color: '#111827',
+                  }}
+                >
+                  Tu Ahorro
+                </h2>
+                <button
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#16A34A',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    transition: 'background-color 0.3s',
+                  }}
+                  onMouseEnter={(e) =>
+                    ((e.target as HTMLButtonElement).style.backgroundColor = '#15803D')
+                  }
+                  onMouseLeave={(e) =>
+                    ((e.target as HTMLButtonElement).style.backgroundColor = '#16A34A')
+                  }
+                >
+                  <span className="material-icons">download</span>
+                  Exportar
                 </button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: '#EFF6FF',
-                  borderRadius: '0.5rem'
-                }}>
-                  <p style={{ fontSize: '0.875rem', color: '#1E40AF', marginBottom: '0.5rem' }}>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '1rem',
+                }}
+              >
+                {/* Ahorro Financiero */}
+                <div
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '0.75rem',
+                    backgroundColor: '#EFF6FF',
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: '0.875rem',
+                      color: '#1E3A8A',
+                      marginBottom: '0.5rem',
+                      fontWeight: '500',
+                    }}
+                  >
                     Ahorro Financiero Proyectado
                   </p>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1E3A8A' }}>
-                    25.000 COP/mes
+                  <p
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '700',
+                      color: '#1E3A8A',
+                    }}
+                  >
+                    {indicadores?.ahorro_economico ?? 'Cargando...'} COP/mes
                   </p>
                 </div>
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: '#F0FDF4',
-                  borderRadius: '0.5rem'
-                }}>
-                  <p style={{ fontSize: '0.875rem', color: '#166534', marginBottom: '0.5rem' }}>
+
+                {/* Impacto Ambiental */}
+                <div
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '0.75rem',
+                    backgroundColor: '#F0FDF4',
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: '0.875rem',
+                      color: '#166534',
+                      marginBottom: '0.5rem',
+                      fontWeight: '500',
+                    }}
+                  >
                     Impacto Ambiental
                   </p>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#15803D' }}>
-                    10 kg CO₂ menos
+                  <p
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '700',
+                      color: '#15803D',
+                    }}
+                  >
+                    {indicadores?.reduccion_co2_kg ?? 'Cargando...'} kg CO₂ menos
                   </p>
                 </div>
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: '#FFFBEB',
-                  borderRadius: '0.5rem'
-                }}>
-                  <p style={{ fontSize: '0.875rem', color: '#92400E', marginBottom: '0.5rem' }}>
+
+                {/* Indicador Didáctico */}
+                <div
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '0.75rem',
+                    backgroundColor: '#FFFBEB',
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: '0.875rem',
+                      color: '#92400E',
+                      marginBottom: '0.5rem',
+                      fontWeight: '500',
+                    }}
+                  >
                     Indicador Didáctico
                   </p>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#78350F' }}>
-                    Equivalente a 5 horas menos de AC
+                  <p
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '700',
+                      color: '#78350F',
+                    }}
+                  >
+                    {indicadores?.arboles_salvados ?? 'Cargando...'} árboles salvados
                   </p>
                 </div>
               </div>

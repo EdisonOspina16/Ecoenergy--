@@ -1,0 +1,95 @@
+.card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.exportButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.exportButton:hover {
+  background-color: #15803d;
+}
+
+.savingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.savingsCard {
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.savingsCardBlue {
+  background-color: #eff6ff;
+}
+
+.savingsCardGreen {
+  background-color: #f0fdf4;
+}
+
+.savingsCardAmber {
+  background-color: #fffbeb;
+}
+
+.savingsLabel {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.savingsLabelBlue {
+  color: #1e3a8a;
+}
+
+.savingsLabelGreen {
+  color: #166534;
+}
+
+.savingsLabelAmber {
+  color: #92400e;
+}
+
+.savingsValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.savingsValueBlue {
+  color: #1e3a8a;
+}
+
+.savingsValueGreen {
+  color: #15803d;
+}
+
+.savingsValueAmber {
+  color: #78350f;
+}

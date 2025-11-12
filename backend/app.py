@@ -5,7 +5,7 @@ from flask import Flask
 from flask_cors import CORS
 from datetime import timedelta
 
-from src.routes import vista_usuarios
+from src.routes import vista_usuarios, vista_indicadores
 from src.routes.vista_perfil import blueprint_perfil
 from src.routes.vista_consumo import vista_consumo
 from src.controller.controlador_dis import iniciar_simulacion
@@ -38,6 +38,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)  # 1 hora
 # 📋 REGISTRAR BLUEPRINTS
 # ============================================
 app.register_blueprint(vista_usuarios.blueprint)
+app.register_blueprint(vista_indicadores.blueprint)
 app.register_blueprint(blueprint_perfil)
 app.register_blueprint(vista_consumo)
 

@@ -69,3 +69,18 @@ CREATE TABLE recomendaciones (
         REFERENCES dispositivos (id_dispositivos)
         ON DELETE SET NULL
 );
+
+-- 6. Tabla de indicadores de ahorro e impacto ambiental
+CREATE TABLE IF NOT EXISTS indicadores (
+    id_indicador SERIAL PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    energia_ahorrada_kwh NUMERIC(10,2) DEFAULT 0,
+    reduccion_co2_kg NUMERIC(10,2) DEFAULT 0,
+    arboles_salvados NUMERIC(10,2) DEFAULT 0,
+    ahorro_economico NUMERIC(10,2) DEFAULT 0,
+    periodo DATE DEFAULT CURRENT_DATE,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_indicador_usuario FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id_usuario)
+        ON DELETE CASCADE
+);

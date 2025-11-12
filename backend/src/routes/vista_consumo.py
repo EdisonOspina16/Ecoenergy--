@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
 from src.database import obtener_conexion
+from model.indicadores import Indicadores
+from repository.indicadores_repository import guardar_indicador
 
 vista_consumo = Blueprint('vista_consumo', __name__)
 
@@ -11,7 +13,6 @@ def consumo_total():
 
     try:
         cur = conn.cursor()
-        # Consulta suma consumo últimos 1 día
         cur.execute("""
             SELECT COALESCE(SUM(watts), 0)
             FROM registros_consumo
@@ -19,11 +20,44 @@ def consumo_total():
         """)
         resultado = cur.fetchone()
         total_consumo = resultado[0] if resultado else 0
-
         cur.close()
         conn.close()
 
-        return jsonify({"total_consumo_kwh": float(total_consumo)})
+        # ======= CÁLCULO DE INDICADORES =======
+        usuario_id = 1  # ⚠️ Puedes reemplazarlo por el usuario logueado en sesión
+        energia = float(total_consumo)
+
+        # Factores
+        factor_co2 = 0.233
+        co2_por_arbol = 21.0
+        precio_kwh = 0.15
+
+        reduccion_co2 = round(energia * factor_co2, 3)
+        arboles = round(reduccion_co2 / co2_por_arbol, 3)
+        ahorro = round(energia * precio_kwh, 2)
+
+        # Crear objeto Indicadores
+        indicador = Indicadores(
+            usuario_id=usuario_id,
+            energia_ahorrada_kwh=energia,
+            reduccion_co2_kg=reduccion_co2,
+            arboles_salvados=arboles,
+            ahorro_economico=ahorro
+        )
+
+        # Guardar en la base de datos
+        new_id = guardar_indicador(indicador)
+
+        return jsonify({
+            "total_consumo_kwh": energia,
+            "indicadores": {
+                "id": new_id,
+                "energia_ahorrada_kwh": energia,
+                "reduccion_co2_kg": reduccion_co2,
+                "arboles_salvados": arboles,
+                "ahorro_economico": ahorro
+            }
+        }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

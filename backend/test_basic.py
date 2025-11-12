@@ -6,6 +6,7 @@ No requiere instalación de dependencias adicionales
 
 import sys
 import os
+import requests
 
 def test_imports():
     """Test que verifica imports básicos"""
@@ -89,4 +90,71 @@ if __name__ == "__main__":
     else:
         print(" Algunas pruebas fallaron (esto es normal sin Flask instalado)")
         # Exit con código 0 para no romper el pipeline
+        sys.exit(0)
+        
+def test_endpoint_indicadores_get():
+    """Prueba GET de /api/indicadores"""
+    try:
+        base_url = "http://127.0.0.1:5000"
+        usuario_id = 1  # ajusta según tu BD
+
+        resp = requests.get(f"{base_url}/api/indicadores/{usuario_id}")
+        if resp.status_code == 200:
+            data = resp.json()
+            print(f" ✅ GET /api/indicadores devolvió {len(data)} registros")
+            return True
+        else:
+            print(f" ❌ GET /api/indicadores fallo con código {resp.status_code}")
+            return False
+    except Exception as e:
+        print(f" ❌ Error en test GET indicadores: {e}")
+        return False
+
+
+def test_endpoint_indicadores_post():
+    """Prueba POST de /api/indicadores"""
+    try:
+        base_url = "http://127.0.0.1:5000"
+        payload = {
+            "usuario_id": 1,
+            "energia_ahorrada_kwh": 12.5,
+            "precio_per_kwh": 600
+        }
+
+        resp = requests.post(f"{base_url}/api/indicadores", json=payload)
+        if resp.status_code in [200, 201]:
+            print(" ✅ POST /api/indicadores guardó correctamente un indicador")
+            return True
+        else:
+            print(f" ❌ POST /api/indicadores fallo ({resp.status_code}): {resp.text}")
+            return False
+    except Exception as e:
+        print(f" ❌ Error en test POST indicadores: {e}")
+        return False
+
+
+if __name__ == "__main__":
+    print("🧪 Ejecutando pruebas básicas del backend Ecoenergy...")
+    print("=" * 50)
+    
+    tests = [
+        test_python_environment(),
+        test_requirements_file(),
+        test_app_structure(),
+        test_imports(),
+        test_endpoint_indicadores_post(),  # 👈 agrega esto
+        test_endpoint_indicadores_get()    # 👈 y esto
+    ]
+    
+    passed = sum(tests)
+    total = len(tests)
+    
+    print("=" * 50)
+    print(f"Resultado: {passed}/{total} pruebas pasadas")
+    
+    if passed == total:
+        print(" ¡Todas las pruebas pasaron!")
+        sys.exit(0)
+    else:
+        print(" Algunas pruebas fallaron (esto es normal si el backend no está corriendo o sin datos)")
         sys.exit(0)
