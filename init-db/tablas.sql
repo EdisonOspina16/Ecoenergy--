@@ -69,3 +69,11 @@ CREATE TABLE recomendaciones (
         REFERENCES dispositivos (id_dispositivos)
         ON DELETE SET NULL
 );
+
+--6. Tabla de suscriptores
+CREATE TABLE subscribers (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

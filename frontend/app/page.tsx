@@ -1,10 +1,50 @@
 'use client';
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/page.module.css";
 
+
 export default function Principal() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSubscribe = async () => {
+    if (!email) {
+      setMessage("Por favor ingresa un correo válido");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("http://localhost:5000/subscribe",{
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.error || "Error al registrar el correo");
+      } else {
+        setMessage("¡Gracias por unirte a la comunidad! 🌱");
+        setEmail("");
+      }
+    } catch (error) {
+      setMessage("No se pudo conectar con el servidor");
+    } finally {
+      setLoading(false);
+    }
+  };
+ 
   return (
     <div className={styles.container}>
       {/* TopNavBar */}
@@ -227,15 +267,28 @@ export default function Principal() {
               Muchos usuarios ya están optimizando su hogar y ayudando al planeta. Recibe consejos exclusivos y actualizaciones mensuales.
             </p>
             <div className={styles.emailForm}>
-              <input 
+              <input
                 className={styles.emailInput}
-                placeholder="Tu correo electrónico" 
+                placeholder="Tu correo electrónico"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-              <button className={styles.submitButton}>
-                Unirse a la comunidad
+
+              <button
+                className={styles.submitButton}
+                onClick={handleSubscribe}
+                disabled={loading}
+              >
+                {loading ? "Enviando..." : "Unirse a la comunidad"}
               </button>
             </div>
+
+            {message && (
+              <p style={{ marginTop: "10px", color: "#63861d" }}>
+                {message}
+              </p>
+            )}           
             <div className={styles.communityStats}>
               <div className={styles.avatars}>
                 <div 
@@ -286,3 +339,4 @@ export default function Principal() {
     </div>
   );
 }
+

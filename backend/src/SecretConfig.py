@@ -12,6 +12,12 @@ else:
     PGUSER='postgres'
     PGPASSWORD='Edison#101'
 
+EMAIL_CONFIG = {
+    "HOST": "smtp.gmail.com",
+    "PORT": 587,
+    "USER": "correo_ecoergy@gmail.com",
+    "PASSWORD": "tu_contraseña_de_aplicación"
+}
 
 # GEMINI - LLM
 GEMINI_API_KEY = "AIzaSyBM7PJOFT6G57Mr4jAcD_gAio7EPUESHGc"
@@ -20,3 +26,5 @@ PROMT_BASE =  """
 Eres un asistente energético inteligente. Analiza el consumo de los dispositivos eléctricos.
 Usa un lenguaje claro y breve para dar recomendaciones o alertas.
 """
+
+
