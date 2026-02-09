@@ -8,7 +8,7 @@ from datetime import timedelta
 from src.routes import vista_usuarios
 from src.routes.vista_perfil import blueprint_perfil
 from src.routes.vista_consumo import vista_consumo
-from src.controller.controlador_dis import iniciar_simulacion
+from src.controller.controladorSimulacion import iniciar_simulacion
 from prometheus_flask_exporter import PrometheusMetrics
 
 

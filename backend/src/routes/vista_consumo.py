@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.database import obtener_conexion
-from src.controller.controlador_dis import generar_recomendacion
+from src.controller.controladorSimulacion import generar_recomendacion
 
 vista_consumo = Blueprint('vista_consumo', __name__)
 

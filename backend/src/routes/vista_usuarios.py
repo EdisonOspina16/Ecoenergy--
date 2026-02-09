@@ -5,17 +5,7 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, session
 from flask_cors import cross_origin
 from controller.controladorUsuarios import registrar_usuario, verificar_credenciales, actualizar_contraseña, obtener_usuario_por_id
-from controller.controladorDispositivos import (
-    obtener_dispositivos_por_usuario,
-    crear_dispositivo,
-    actualizar_alias_dispositivo,
-    eliminar_dispositivo,
-    verificar_dispositivo_existe
-)
-from controller.controladorHogar import (
-    obtener_hogar_por_usuario, 
-    crear_o_actualizar_hogar
-)
+
 blueprint = Blueprint('vista_usuarios', __name__)
 
 
