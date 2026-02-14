@@ -23,7 +23,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
-  padding-top: 80px;
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }

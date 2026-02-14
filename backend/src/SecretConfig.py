@@ -15,8 +15,8 @@ else:
 EMAIL_CONFIG = {
     "HOST": "smtp.gmail.com",
     "PORT": 587,
-    "USER": "correo_ecoergy@gmail.com",
-    "PASSWORD": "tu_contraseña_de_aplicación"
+    "USER": "ecoenergy.subscription@gmail.com",
+    "PASSWORD": "gitygifbieuuhkow"
 }
 
 # GEMINI - LLM

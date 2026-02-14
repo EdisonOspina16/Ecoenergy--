@@ -46,8 +46,7 @@ export default function Principal() {
   };
  
   return (
-    <div className={styles.container}>
-      {/* TopNavBar */}
+    <>      {/* TopNavBar */}
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.logo}>
@@ -72,6 +71,8 @@ export default function Principal() {
           </button>
         </div>
       </header>
+
+    <div className={styles.container}>
 
       <main className={styles.main}>
         {/* Section 1: Hero */}
@@ -336,7 +337,7 @@ export default function Principal() {
           </div>
         </footer>
       </main>
-    </div>
+    </div></>
   );
 }
 

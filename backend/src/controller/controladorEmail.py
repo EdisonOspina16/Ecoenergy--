@@ -14,7 +14,7 @@ Hola 👋
 Gracias por registrarte.
 Pronto recibirás más información.
 
-Equipo del sistema
+Equipo del sistema EcoEnergy
 """)
 
     with smtplib.SMTP(EMAIL_CONFIG["HOST"], EMAIL_CONFIG["PORT"]) as server:
