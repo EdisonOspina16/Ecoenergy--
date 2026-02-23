@@ -16,11 +16,11 @@ EMAIL_CONFIG = {
     "HOST": "smtp.gmail.com",
     "PORT": 587,
     "USER": "ecoenergy.subscription@gmail.com",
-    "PASSWORD": "gitygifbieuuhkow"
+    "PASSWORD": "CONTRASEÑA DE APLICACIÓN"
 }
 
 # GEMINI - LLM
-GEMINI_API_KEY = "AIzaSyBM7PJOFT6G57Mr4jAcD_gAio7EPUESHGc"
+GEMINI_API_KEY = "API_KEY_DE_GEMINI"
 GEMINI_MODEL = "gemini-2.0-flash"
 PROMT_BASE =  """
 Eres un asistente energético inteligente. Analiza el consumo de los dispositivos eléctricos.

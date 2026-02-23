@@ -3,6 +3,7 @@ import threading
 import time
 from src.database import obtener_conexion
 from src.SecretConfig import GEMINI_API_KEY, GEMINI_MODEL
+from google.genai.errors import ClientError
 from google import genai
 
 # IDs de los dispositivos (ajústalos a los que tengas en tu tabla 'dispositivos')
@@ -64,46 +65,46 @@ def iniciar_simulacion():
 
 
 #----google gemini----#
+
+client = genai.Client(
+    api_key=GEMINI_API_KEY
+)
+
+GEMINI_MODEL = GEMINI_MODEL
+
 def generar_recomendacion(consumo_watts, dispositivo):
     """
     Genera una recomendación de consumo energético usando la API de Gemini.
     """
-    client = genai.Client(api_key=GEMINI_API_KEY)
-
-    # Combinas el prompt base con los datos del usuario
     prompt = f"""
-    Eres un asistente energético inteligente especializado en analizar el consumo de dispositivos eléctricos en hogares y empresas.
+    Eres un asistente energético inteligente especializado en analizar el consumo de dispositivos eléctricos.
 
-    Analiza los siguientes datos del usuario:
+    Datos del usuario:
     - Dispositivo: {dispositivo}
     - Consumo detectado: {consumo_watts} W
 
+    Reglas:
+    1️⃣ Consumo alto → alerta ⚠️
+    2️⃣ Consumo superior al promedio → recomendación 💡
+    3️⃣ Consumo normal → mensaje positivo ✅
+    4️⃣ Consumo bajo o irregular → sugerencia 🌙
 
-    Tu objetivo es generar una recomendación útil, clara y amigable. 
-    Sigue estas reglas al responder:
-
-    1️⃣ **Si el consumo es anormalmente alto**
-    - Muestra una alerta con tono preventivo y un ícono de advertencia (⚠️).
-    - Ejemplo: "⚠️ Pico de consumo detectado: el {dispositivo} está usando más energía de la habitual. Revisa si quedó encendido por error o si requiere mantenimiento."
-
-    2️⃣ **Si el consumo supera el promedio histórico estimado del dispositivo**
-    - Muestra una recomendación en tono informativo con un ícono verde (💡).
-    - Ejemplo: "💡 Tu {dispositivo} consume un 25% más de lo normal. Verifica la configuración o intenta usarlo en horarios de menor demanda."
-
-    3️⃣ **Si el consumo es estable y normal**
-    - Devuelve un mensaje corto y positivo con un ícono verde (✅).
-    - Ejemplo: "✅ El consumo del {dispositivo} está dentro de los rangos esperados. ¡Buen uso energético!"
-
-    4️⃣ **Si el consumo es muy bajo o irregular**
-    - Sugiere posibles causas o ahorro.
-    - Ejemplo: "🌙 El {dispositivo} está usando poca energía a esta hora. Podrías aprovechar para desconectarlo si no lo necesitas."
-
-    Responde **solo con el texto final de la recomendación**, sin incluir explicaciones, formato JSON ni información adicional.
+    Responde solo con el texto final de la recomendación.
     """
 
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt
-    )
+    try:
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt
+        )
+        return response.text.strip()
 
-    return response.text.strip()
+    except ClientError as e:
+        # Error de API (403, 401, 429, etc.)
+        print(f"Error Gemini: {e}")
+        return "⚠️ No fue posible generar la recomendación en este momento. Intenta más tarde."
+
+    except Exception as e:
+        # Cualquier otro error inesperado
+        print(f"Error inesperado: {e}")
+        return "⚠️ Ocurrió un error interno al generar la recomendación."
