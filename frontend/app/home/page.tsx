@@ -29,6 +29,16 @@ export default function Home() {
   const [loadingDevices, setLoadingDevices] = useState<boolean>(true);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState<boolean>(false);
+  const [savingData, setSavingData] = useState<{
+    ahorro_financiero: string;
+    impacto_ambiental: string;
+    indicador_didactico: string;
+  }>({
+    ahorro_financiero: '',
+    impacto_ambiental: '',
+    indicador_didactico: '',
+  });
+  const [loadingSavingData, setLoadingSavingData] = useState<boolean>(false);
 
   // Cerrar menú de usuario al hacer clic fuera
   useEffect(() => {
@@ -209,6 +219,49 @@ export default function Home() {
     };
 
     cargarDispositivos();
+  }, []);
+
+  // Cargar ahorro estimado desde backend
+  useEffect(() => {
+    const cargarAhorroEstimado = async () => {
+      try {
+        setLoadingSavingData(true);
+        const response = await fetch('http://localhost:5000/ahorro-estimado', {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener ahorro estimado');
+        }
+
+        const data = await response.json();
+
+        if (data?.success && data.data) {
+          setSavingData({
+            ahorro_financiero: data.data.ahorro_financiero || '',
+            impacto_ambiental: data.data.impacto_ambiental || '',
+            indicador_didactico: data.data.indicador_didactico || '',
+          });
+        } else {
+          setSavingData({
+            ahorro_financiero: '',
+            impacto_ambiental: '',
+            indicador_didactico: '',
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar ahorro estimado:', error);
+        setSavingData({
+          ahorro_financiero: '',
+          impacto_ambiental: '',
+          indicador_didactico: '',
+        });
+      } finally {
+        setLoadingSavingData(false);
+      }
+    };
+
+    cargarAhorroEstimado();
   }, []);
 
   // Render del gráfico SVG
@@ -619,15 +672,27 @@ export default function Home() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ padding: '1rem', backgroundColor: '#EFF6FF', borderRadius: '0.5rem' }}>
                   <p style={{ fontSize: '0.875rem', color: '#1E40AF', marginBottom: '0.5rem' }}>Ahorro Financiero Proyectado</p>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1E3A8A' }}>25.000 COP/mes</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1E3A8A' }}>
+                    {loadingSavingData
+                      ? 'Calculando...'
+                      : savingData.ahorro_financiero || 'No disponible'}
+                  </p>
                 </div>
                 <div style={{ padding: '1rem', backgroundColor: '#F0FDF4', borderRadius: '0.5rem' }}>
                   <p style={{ fontSize: '0.875rem', color: '#166534', marginBottom: '0.5rem' }}>Impacto Ambiental</p>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#15803D' }}>10 kg CO₂ menos</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#15803D' }}>
+                    {loadingSavingData
+                      ? 'Calculando...'
+                      : savingData.impacto_ambiental || 'No disponible'}
+                  </p>
                 </div>
                 <div style={{ padding: '1rem', backgroundColor: '#FFFBEB', borderRadius: '0.5rem' }}>
                   <p style={{ fontSize: '0.875rem', color: '#92400E', marginBottom: '0.5rem' }}>Indicador Didáctico</p>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#78350F' }}>Equivalente a 5 horas menos de AC</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#78350F' }}>
+                    {loadingSavingData
+                      ? 'Calculando...'
+                      : savingData.indicador_didactico || 'No disponible'}
+                  </p>
                 </div>
               </div>
             </div>

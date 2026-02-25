@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.database import obtener_conexion
-from src.controller.controladorSimulacion import generar_recomendacion
+from src.controller.controladorSimulacion import generar_recomendacion, generar_ahorro_estimado
 
 vista_consumo = Blueprint('vista_consumo', __name__)
 
@@ -72,7 +72,7 @@ def consumo_historico():
             cur.execute("""
                 SELECT 
                     TO_CHAR(fecha_hora, 'DD/MM') as periodo,
-                    COALESCE(SUM(watts, 0) as consumo
+                    COALESCE(SUM(watts), 0) as consumo
                 FROM registros_consumo
                 WHERE fecha_hora >= NOW() - INTERVAL '30 days'
                 GROUP BY TO_CHAR(fecha_hora, 'DD/MM'), DATE_TRUNC('day', fecha_hora)
@@ -147,6 +147,61 @@ def obtener_dispositivos():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@vista_consumo.route('/ahorro-estimado', methods=['GET'])
+def ahorro_estimado():
+    """
+    Calcula el ahorro estimado usando la IA a partir
+    de los dispositivos registrados y su último consumo en watts.
+    """
+    try:
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT DISTINCT ON (d.id_dispositivos)
+                d.alias,
+                r.watts,
+                d.estado_activo,
+                d.tipo_dispositivo_ia
+            FROM dispositivos AS d
+            LEFT JOIN registros_consumo AS r 
+                ON r.id_dispositivo = d.id_dispositivos
+            ORDER BY d.id_dispositivos, r.fecha_hora DESC
+        """)
+
+        rows = cursor.fetchall()
+
+        dispositivos_para_ia = [
+            {
+                "nombre": row[0] or row[3] or "Dispositivo Sin Nombre",
+                "consumo_watts": float(row[1]) if row[1] else 0.0,
+            }
+            for row in rows
+        ]
+
+        cursor.close()
+        conn.close()
+
+        if not dispositivos_para_ia:
+            return jsonify({
+                "success": False,
+                "error": "No hay dispositivos registrados para calcular el ahorro"
+            }), 400
+
+        resultado = generar_ahorro_estimado(dispositivos_para_ia)
+
+        return jsonify({
+            "success": True,
+            "data": resultado
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @vista_consumo.route("/recomendacion", methods=["POST"])
 def recomendacion():
