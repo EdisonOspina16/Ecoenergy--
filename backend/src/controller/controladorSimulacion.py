@@ -27,7 +27,7 @@ def simular_consumo():
     """
     conn = obtener_conexion()
     if conn is None:
-        print("❌ No se pudo conectar a la base de datos.")
+        print(" No se pudo conectar a la base de datos.")
         return
 
     try:
@@ -48,11 +48,11 @@ def simular_consumo():
                     """, (id_disp, consumo_kwh, watts, voltage, current))
 
             conn.commit()
-            print("✅ Datos insertados correctamente en registros_consumo.")
+            print(" Datos insertados correctamente en registros_consumo.")
             time.sleep(5)
 
     except Exception as e:
-        print(f"⚠️ Error en la simulación: {e}")
+        print(f" Error en la simulación: {e}")
     finally:
         conn.close()
 
@@ -103,12 +103,12 @@ def generar_recomendacion(consumo_watts, dispositivo):
     except ClientError as e:
         # Error de API (403, 401, 429, etc.)
         print(f"Error Gemini: {e}")
-        return "⚠️ No fue posible generar la recomendación en este momento. Intenta más tarde."
+        return " No fue posible generar la recomendación en este momento. Intenta más tarde."
 
     except Exception as e:
         # Cualquier otro error inesperado
         print(f"Error inesperado: {e}")
-        return "⚠️ Ocurrió un error interno al generar la recomendación."
+        return " Ocurrió un error interno al generar la recomendación."
     
 
 def generar_ahorro_estimado(dispositivos: list[dict]) -> dict:
@@ -203,23 +203,23 @@ Reglas:
     except json.JSONDecodeError as e:
         print(f"Error parseando JSON de Gemini: {e}\nRespuesta raw: {raw}")
         return {
-            "ahorro_financiero": "⚠️ No disponible",
-            "impacto_ambiental": "⚠️ No disponible",
-            "indicador_didactico": "⚠️ No fue posible generar la estimación.",
+            "ahorro_financiero": " No disponible",
+            "impacto_ambiental": " No disponible",
+            "indicador_didactico": " No fue posible generar la estimación.",
         }
 
     except ClientError as e:
         print(f"Error Gemini API: {e}")
         return {
-            "ahorro_financiero": "⚠️ Error de conexión",
-            "impacto_ambiental": "⚠️ Error de conexión",
-            "indicador_didactico": "⚠️ No fue posible conectar con el servicio de IA.",
+            "ahorro_financiero": " Error de conexión",
+            "impacto_ambiental": " Error de conexión",
+            "indicador_didactico": " No fue posible conectar con el servicio de IA.",
         }
 
     except Exception as e:
         print(f"Error inesperado: {e}")
         return {
-            "ahorro_financiero": "⚠️ Error interno",
-            "impacto_ambiental": "⚠️ Error interno",
-            "indicador_didactico": "⚠️ Ocurrió un error interno al generar la estimación.",
+            "ahorro_financiero": " Error interno",
+            "impacto_ambiental": " Error interno",
+            "indicador_didactico": " Ocurrió un error interno al generar la estimación.",
         }
