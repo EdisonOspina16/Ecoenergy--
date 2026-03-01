@@ -62,7 +62,7 @@ def iniciar_simulacion():
     """
     hilo = threading.Thread(target=simular_consumo, daemon=True)
     hilo.start()
-    print("🚀 Simulación de consumo iniciada.")
+    print(" Simulación de consumo iniciada.")
 
 
 #----google gemini----#
@@ -157,7 +157,7 @@ Tu tarea es generar UNA estimación de ahorro si el usuario aplica buenas práct
 Debes responder ÚNICAMENTE con un JSON válido con exactamente estas 3 claves, sin texto adicional, sin markdown, sin explicaciones:
 
 {{
-  "ahorro_financiero": "<monto en COP por mes, ej: 25.000 COP/mes>",
+  "ahorro_financiero": "<monto en COP por mes, ej: 5.000 COP/mes>",
   "impacto_ambiental": "<kg de CO2 reducidos, ej: 10 kg CO₂ menos>",
   "indicador_didactico": "<analogía cotidiana creativa y corta>"
 }}

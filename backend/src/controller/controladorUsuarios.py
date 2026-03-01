@@ -5,6 +5,7 @@ from psycopg2.extras import RealDictCursor
 from werkzeug.security import check_password_hash, generate_password_hash
 from model.usuario import Usuario
 from src.database import obtener_conexion
+import re
 
 
 # -----------------------------------------
@@ -94,13 +95,95 @@ def eliminar_usuario(correo):
 # FUNCIONES DEL REGISTRO, LOGIN, RECUPERAR
 # -----------------------------------------
 
+# ---- Validaciones de datos de registro ----
+
+def es_nombre_valido(nombre: str) -> bool:
+    """
+    Valida el nombre:
+    - No nulo ni vacío
+    - Entre 2 y 50 caracteres
+    - Solo letras (incluye tildes) y espacios.
+    """
+    if not isinstance(nombre, str):
+        return False
+    nombre = nombre.strip()
+    if len(nombre) < 2 or len(nombre) > 50:
+        return False
+    patron = r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+    return re.match(patron, nombre) is not None
+
+
+def es_apellido_valido(apellidos: str) -> bool:
+    """
+    Valida el apellido:
+    - No nulo ni vacío
+    - Mínimo 2 caracteres
+    - Letras (incluye tildes), espacios y guion.
+    """
+    if not isinstance(apellidos, str):
+        return False
+    apellidos = apellidos.strip()
+    if len(apellidos) < 2:
+        return False
+    patron = r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\-]+$"
+    return re.match(patron, apellidos) is not None
+
+
+def es_correo_valido(correo: str) -> bool:
+    """
+    Valida el correo:
+    - No nulo ni vacío
+    - Sin espacios
+    - Longitud máxima 254 caracteres
+    - Formato básico RFC (local@dominio.tld)
+    """
+    if not isinstance(correo, str):
+        return False
+    correo = correo.strip()
+    if not correo:
+        return False
+    if " " in correo:
+        return False
+    if len(correo) > 254:
+        return False
+    patron = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+    return re.match(patron, correo) is not None
+
+
+def es_contraseña_valida(contraseña: str) -> bool:
+    """
+    Valida la contraseña:
+    - String no vacío
+    - Entre 8 y 128 caracteres
+    - Sin espacios
+    - Sin caracteres no ASCII (evita emojis)
+    - Debe contener al menos: una mayúscula, una minúscula,
+      un dígito y un carácter especial.
+    """
+    if not isinstance(contraseña, str):
+        return False
+    if contraseña == "":
+        return False
+    if len(contraseña) < 8 or len(contraseña) > 128:
+        return False
+    if any(ch.isspace() for ch in contraseña):
+        return False
+    if any(ord(ch) > 126 for ch in contraseña):
+        return False
+
+    tiene_mayus = any(c.isupper() for c in contraseña)
+    tiene_minus = any(c.islower() for c in contraseña)
+    tiene_digito = any(c.isdigit() for c in contraseña)
+    tiene_especial = any(not c.isalnum() and not c.isspace() for c in contraseña)
+
+    return tiene_mayus and tiene_minus and tiene_digito and tiene_especial
+
+
 def registrar_usuario(nombre, apellidos, correo, contraseña):
     """
     Registra un usuario nuevo con contraseña hasheada y datos adicionales.
     """
     try:
-        print(f"Intentando registrar usuario: {nombre} {apellidos} - {correo}")
-        
         conn = obtener_conexion()
         if not conn:
             print("No se pudo conectar a la base de datos")
