@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Dashboard from "../app/dashboard/page";
 
-// Helper para configurar window.location.href
+// Aquí configuramos window.location.href
 const hrefSpy = vi.fn();
 const installLocationMock = () => {
   const loc: any = {
