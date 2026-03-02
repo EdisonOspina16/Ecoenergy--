@@ -83,7 +83,7 @@ def test_cp_tom_001_registro_valido(client):
     assert data["dispositivo"]["id_dispositivo_iot"] == "TOM001"
 
 
-def test_cp_tom_002_campos_vacios(client):
+def test_cp_campos_vacios(client):
     _seed_session(client)
     resp = client.post("/perfil", json={"deviceId": "", "nickname": ""})
     data = resp.get_json()

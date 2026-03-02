@@ -24,8 +24,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("Perfil | registro de tomacorriente", () => {
-  it("CP-TOM-FR-001 registra tomacorriente válido", async () => {
+describe("Registro de tomacorriente", () => {
+  it("CP-TOM-FR-001 registro tomacorriente válido", async () => {
     const fetchSpy = setupFetch(
       makeResponse({ success: true, hogar: {}, dispositivos: [] }),
       makeResponse(
@@ -64,7 +64,7 @@ describe("Perfil | registro de tomacorriente", () => {
     expect(screen.getByDisplayValue("Nevera")).toBeInTheDocument();
   });
 
-  it("CP-TOM-FR-005 dispositivo existente muestra error", async () => {
+  it("CP-FR dispositivo existente muestra error", async () => {
     setupFetch(
       makeResponse({ success: true, hogar: {}, dispositivos: [] }),
       makeResponse(
@@ -91,7 +91,7 @@ describe("Perfil | registro de tomacorriente", () => {
     await waitFor(() => screen.getByText(/ya está registrado/i));
   });
 
-  it("CP-TOM-FR-007 apodo demasiado largo produce error genérico", async () => {
+  it("CP-FR apodo demasiado largo produce error genérico", async () => {
     setupFetch(
       makeResponse({ success: true, hogar: {}, dispositivos: [] }),
       makeResponse({ success: false, error: "Apodo demasiado largo" }, 500),
@@ -101,7 +101,7 @@ describe("Perfil | registro de tomacorriente", () => {
     await waitForFormulario();
 
     const apodoLargo =
-      "Este es un apodo extremadamente largo que supera los cincuenta caracteres permitidos por el sistema";
+      "Este es un apodo extremadamente largo que supera los cincuenta caracteres permitidos por el sistema jijiji";
 
     await userEvent.type(
       screen.getByPlaceholderText("Ingresa el código del dispositivo"),
@@ -118,7 +118,7 @@ describe("Perfil | registro de tomacorriente", () => {
     await waitFor(() => screen.getByText(/apodo demasiado largo/i));
   });
 
-  it("CP-TOM-FR-008 registra múltiples dispositivos consecutivos", async () => {
+  it("CP-FR registra múltiples dispositivos consecutivos", async () => {
     setupFetch(
       makeResponse({ success: true, hogar: {}, dispositivos: [] }),
       makeResponse(
@@ -194,7 +194,7 @@ describe("Perfil | registro de tomacorriente", () => {
     expect(screen.getByDisplayValue("Lavadora")).toBeInTheDocument();
   });
 
-  it("CP-TOM-FR-009 apodo con caracteres especiales se muestra", async () => {
+  it("CP-FR apodo con caracteres especiales se muestra", async () => {
     setupFetch(
       makeResponse({ success: true, hogar: {}, dispositivos: [] }),
       makeResponse(
