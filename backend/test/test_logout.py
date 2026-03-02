@@ -46,7 +46,7 @@ def test_logout_es_idempotente(client):
     first = client.post("/logout")
     assert first.status_code == 200
 
-    # Segunda vez sin sesión: sigue devolviendo 200
+    # Segunda vez sin sesión: se sigue devolviendo 200
     second = client.post("/logout")
     assert second.status_code == 200
     data = second.get_json()
@@ -55,10 +55,10 @@ def test_logout_es_idempotente(client):
 
 def test_no_acceso_perfil_tras_logout(client):
     _seed_session(client)
-    # Cierra sesión
+    # se cierra sesión
     client.post("/logout")
 
-    # Intento de acceder a /perfil debe dar 401
+    # el intento de acceder a /perfil debe dar 401
     resp = client.get("/perfil")
     assert resp.status_code == 401
     data = resp.get_json()
@@ -89,7 +89,7 @@ def test_logout_y_luego_perfil_y_luego_logout(client):
     first = client.post("/logout")
     assert first.status_code == 200
 
-    # Intento de acceder a /perfil tras logout
+    # Intento de acceder a /perfil después de hacer logout
     resp_perfil = client.get("/perfil")
     assert resp_perfil.status_code == 401
 
@@ -100,11 +100,11 @@ def test_logout_y_luego_perfil_y_luego_logout(client):
 
 
 def test_logout_no_rehabilita_sesion_en_refresh(client):
-    """Después de hacer logout, un nuevo request sigue sin sesión (aqui simulamos un refresh o un back)."""
+    """Después de hacer logout, una nuevo request sigue sin sesión (aqui simulamos un refresh o un back)."""
     _seed_session(client)
     client.post("/logout")
 
-    # "Refresh" con un GET público (/) no debe re-crear usuario en sesión
+    # un Refresh con un GET público o vacío (/) no debe recrear usuario en sesión
     resp_root = client.get("/")
     assert resp_root.status_code == 200
     with client.session_transaction() as sess:
