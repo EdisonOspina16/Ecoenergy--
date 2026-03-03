@@ -1,8 +1,22 @@
-from flask import Blueprint, jsonify, request
+from functools import wraps
+from flask import Blueprint, jsonify, request, session
 from src.database import obtener_conexion
 from src.controller.controladorSimulacion import generar_recomendacion, generar_ahorro_estimado
+from src.controller.controladorHogar import obtener_hogar_por_usuario
+from src.controller.controladorDispositivos import obtener_dispositivos_por_usuario
 
 vista_consumo = Blueprint('vista_consumo', __name__)
+
+
+def login_requerido(f):
+    """Decorador para verificar que el usuario esté autenticado."""
+    @wraps(f)
+    def decorador(*args, **kwargs):
+        usuario = session.get('usuario')
+        if not usuario:
+            return jsonify({"success": False, "error": "Debes iniciar sesión"}), 401
+        return f(*args, **kwargs)
+    return decorador
 
 @vista_consumo.route('/home', methods=['GET'])
 def consumo_total():
@@ -219,3 +233,189 @@ def recomendacion():
         "esAlerta": es_alerta,
         "dispositivo": dispositivo
     })
+
+
+# ---- Recomendación y ahorro diario (una vez por usuario por día) ----
+
+@vista_consumo.route("/recomendacion-diaria", methods=["GET"])
+@login_requerido
+def obtener_recomendacion_diaria():
+    """
+    Devuelve la recomendación y ahorro estimado del día para el hogar del usuario.
+    Si no hay registro para hoy, devuelve vacío (el front puede pedir generar con POST).
+    """
+    try:
+        usuario = session.get("usuario")
+        id_usuario = usuario["id"]
+        hogar = obtener_hogar_por_usuario(id_usuario)
+        if not hogar:
+            return jsonify({
+                "success": True,
+                "recomendaciones": [],
+                "ahorro_financiero": None,
+                "impacto_ambiental": None,
+                "indicador_didactico": None,
+            })
+
+        conn = obtener_conexion()
+        if not conn:
+            return jsonify({"success": False, "error": "Error de conexión"}), 500
+
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT recomendaciones, ahorro_financiero, impacto_ambiental, indicador_didactico
+            FROM recomendacion_ahorro_diaria
+            WHERE id_hogar = %s AND fecha = CURRENT_DATE
+            """,
+            (hogar.id_hogar,),
+        )
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not row:
+            return jsonify({
+                "success": True,
+                "recomendaciones": [],
+                "ahorro_financiero": None,
+                "impacto_ambiental": None,
+                "indicador_didactico": None,
+            })
+
+        import json as _json
+        recs = row[0] if row[0] is not None else []
+        if isinstance(recs, str):
+            recs = _json.loads(recs) if recs else []
+
+        return jsonify({
+            "success": True,
+            "recomendaciones": recs,
+            "ahorro_financiero": row[1],
+            "impacto_ambiental": row[2],
+            "indicador_didactico": row[3],
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@vista_consumo.route("/recomendacion-diaria/generar", methods=["POST"])
+@login_requerido
+def generar_recomendacion_diaria():
+    """
+    Genera recomendación y ahorro estimado para hoy y los guarda.
+    Si ya existe registro para hoy, devuelve el guardado sin volver a llamar a la IA.
+    """
+    try:
+        usuario = session.get("usuario")
+        id_usuario = usuario["id"]
+        hogar = obtener_hogar_por_usuario(id_usuario)
+        if not hogar:
+            return jsonify({"success": False, "error": "No tienes un hogar registrado"}), 400
+
+        conn = obtener_conexion()
+        if not conn:
+            return jsonify({"success": False, "error": "Error de conexión"}), 500
+
+        cur = conn.cursor()
+
+        # Si ya hay registro para hoy, devolverlo
+        cur.execute(
+            """
+            SELECT recomendaciones, ahorro_financiero, impacto_ambiental, indicador_didactico
+            FROM recomendacion_ahorro_diaria
+            WHERE id_hogar = %s AND fecha = CURRENT_DATE
+            """,
+            (hogar.id_hogar,),
+        )
+        row = cur.fetchone()
+        if row:
+            import json as _json
+            recs = row[0] if row[0] is not None else []
+            if isinstance(recs, str):
+                recs = _json.loads(recs) if recs else []
+            cur.close()
+            conn.close()
+            return jsonify({
+                "success": True,
+                "recomendaciones": recs,
+                "ahorro_financiero": row[1],
+                "impacto_ambiental": row[2],
+                "indicador_didactico": row[3],
+            })
+
+        # Obtener dispositivos del hogar del usuario con último consumo (watts)
+        cur.execute(
+            """
+            SELECT DISTINCT ON (d.id_dispositivos)
+                COALESCE(d.alias, d.tipo_dispositivo_ia, 'Dispositivo') AS nombre,
+                COALESCE(r.watts, 0)::float AS watts
+            FROM dispositivos d
+            INNER JOIN hogares h ON d.id_hogar = h.id_hogar
+            LEFT JOIN registros_consumo r ON r.id_dispositivo = d.id_dispositivos
+            WHERE h.id_usuario = %s
+            ORDER BY d.id_dispositivos, r.fecha_hora DESC NULLS LAST
+            """,
+            (id_usuario,),
+        )
+        dispositivos_rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        dispositivos_para_ia = [{"nombre": r[0], "consumo_watts": r[1] or 0} for r in dispositivos_rows]
+        if not dispositivos_para_ia:
+            return jsonify({
+                "success": False,
+                "error": "No hay dispositivos registrados para generar la recomendación"
+            }), 400
+
+        # Generar recomendación por dispositivo
+        recomendaciones_list = []
+        for d in dispositivos_para_ia:
+            texto = generar_recomendacion(d["consumo_watts"], d["nombre"])
+            es_alerta = any(
+                p in texto.lower() for p in ["⚠️", "pico", "anómalo", "inusual", "alerta"]
+            )
+            recomendaciones_list.append({
+                "recomendacion": texto,
+                "esAlerta": es_alerta,
+                "dispositivo": d["nombre"],
+            })
+
+        # Generar ahorro estimado
+        ahorro = generar_ahorro_estimado(dispositivos_para_ia)
+
+        # Guardar en BD
+        import json as _json
+        conn = obtener_conexion()
+        if not conn:
+            return jsonify({"success": False, "error": "Error de conexión"}), 500
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO recomendacion_ahorro_diaria
+                (id_hogar, fecha, recomendaciones, ahorro_financiero, impacto_ambiental, indicador_didactico)
+            VALUES (%s, CURRENT_DATE, %s::jsonb, %s, %s, %s)
+            ON CONFLICT (id_hogar, fecha) DO NOTHING
+            """,
+            (
+                hogar.id_hogar,
+                _json.dumps(recomendaciones_list),
+                ahorro.get("ahorro_financiero"),
+                ahorro.get("impacto_ambiental"),
+                ahorro.get("indicador_didactico"),
+            ),
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "recomendaciones": recomendaciones_list,
+            "ahorro_financiero": ahorro.get("ahorro_financiero"),
+            "impacto_ambiental": ahorro.get("impacto_ambiental"),
+            "indicador_didactico": ahorro.get("indicador_didactico"),
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500

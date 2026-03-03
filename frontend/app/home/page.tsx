@@ -39,6 +39,7 @@ export default function Home() {
     indicador_didactico: '',
   });
   const [loadingSavingData, setLoadingSavingData] = useState<boolean>(false);
+  const [generandoRecomendacion, setGenerandoRecomendacion] = useState<boolean>(false);
 
   // Cerrar menú de usuario al hacer clic fuera
   useEffect(() => {
@@ -154,40 +155,69 @@ export default function Home() {
     cargarDatosHistoricos();
   }, [timeRange]);
 
-  // Cargar recomendaciones desde backend
+  // Cargar recomendación y ahorro diario (una vez por día por usuario; no se actualiza con los datos en vivo)
   useEffect(() => {
-    const cargarRecomendaciones = async () => {
+    const cargarRecomendacionDiaria = async () => {
       try {
         setLoadingRecommendations(true);
-
-        const resultados = await Promise.all(
-          devices.map(async (device) => {
-            const res = await fetch('http://localhost:5000/recomendacion', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                consumo_watts: Number(device.consumo) || 0,
-                dispositivo: device.nombre,
-              }),
-            });
-
-            if (!res.ok) return { error: 'no response' };
-            return await res.json();
-          })
-        );
-
-        setRecommendations(resultados);
+        setLoadingSavingData(true);
+        const response = await fetch('http://localhost:5000/recomendacion-diaria', {
+          credentials: 'include',
+        });
+        if (response.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        const data = await response.json();
+        if (data?.success) {
+          setRecommendations(Array.isArray(data.recomendaciones) ? data.recomendaciones : []);
+          setSavingData({
+            ahorro_financiero: data.ahorro_financiero ?? '',
+            impacto_ambiental: data.impacto_ambiental ?? '',
+            indicador_didactico: data.indicador_didactico ?? '',
+          });
+        } else {
+          setRecommendations([]);
+          setSavingData({ ahorro_financiero: '', impacto_ambiental: '', indicador_didactico: '' });
+        }
       } catch (error) {
-        console.error('Error al cargar recomendaciones:', error);
+        console.error('Error al cargar recomendación diaria:', error);
         setRecommendations([]);
+        setSavingData({ ahorro_financiero: '', impacto_ambiental: '', indicador_didactico: '' });
       } finally {
         setLoadingRecommendations(false);
+        setLoadingSavingData(false);
       }
     };
+    cargarRecomendacionDiaria();
+  }, []);
 
-    if (devices.length > 0) cargarRecomendaciones();
-  }, [devices]);
+  const generarRecomendacionHoy = async () => {
+    try {
+      setGenerandoRecomendacion(true);
+      const response = await fetch('http://localhost:5000/recomendacion-diaria/generar', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (response.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
+      const data = await response.json();
+      if (data?.success) {
+        setRecommendations(Array.isArray(data.recomendaciones) ? data.recomendaciones : []);
+        setSavingData({
+          ahorro_financiero: data.ahorro_financiero ?? '',
+          impacto_ambiental: data.impacto_ambiental ?? '',
+          indicador_didactico: data.indicador_didactico ?? '',
+        });
+      }
+    } catch (error) {
+      console.error('Error al generar recomendación:', error);
+    } finally {
+      setGenerandoRecomendacion(false);
+    }
+  };
 
   // Cargar dispositivos desde backend
   useEffect(() => {
@@ -219,49 +249,6 @@ export default function Home() {
     };
 
     cargarDispositivos();
-  }, []);
-
-  // Cargar ahorro estimado desde backend
-  useEffect(() => {
-    const cargarAhorroEstimado = async () => {
-      try {
-        setLoadingSavingData(true);
-        const response = await fetch('http://localhost:5000/ahorro-estimado', {
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          throw new Error('Error al obtener ahorro estimado');
-        }
-
-        const data = await response.json();
-
-        if (data?.success && data.data) {
-          setSavingData({
-            ahorro_financiero: data.data.ahorro_financiero || '',
-            impacto_ambiental: data.data.impacto_ambiental || '',
-            indicador_didactico: data.data.indicador_didactico || '',
-          });
-        } else {
-          setSavingData({
-            ahorro_financiero: '',
-            impacto_ambiental: '',
-            indicador_didactico: '',
-          });
-        }
-      } catch (error) {
-        console.error('Error al cargar ahorro estimado:', error);
-        setSavingData({
-          ahorro_financiero: '',
-          impacto_ambiental: '',
-          indicador_didactico: '',
-        });
-      } finally {
-        setLoadingSavingData(false);
-      }
-    };
-
-    cargarAhorroEstimado();
   }, []);
 
   // Render del gráfico SVG
@@ -621,14 +608,32 @@ export default function Home() {
 
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Recomendaciones */}
+            {/* Recomendaciones (una por día; no cambian con las actualizaciones de consumo) */}
             <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Recomendaciones</h2>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Recomendaciones del día</h2>
 
               {loadingRecommendations ? (
                 <p>Cargando recomendaciones...</p>
               ) : recommendations.length === 0 ? (
-                <p>No hay recomendaciones por ahora.</p>
+                <div>
+                  <p style={{ marginBottom: '1rem' }}>Aún no tienes recomendación para hoy. Genera una y se mantendrá en pantalla hasta mañana.</p>
+                  <button
+                    type="button"
+                    onClick={generarRecomendacionHoy}
+                    disabled={generandoRecomendacion}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      backgroundColor: generandoRecomendacion ? '#9CA3AF' : '#10B981',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      cursor: generandoRecomendacion ? 'not-allowed' : 'pointer',
+                      fontWeight: '500',
+                    }}
+                  >
+                    {generandoRecomendacion ? 'Generando...' : 'Obtener mi recomendación de hoy'}
+                  </button>
+                </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {recommendations.map((rec, index) => (
@@ -648,10 +653,10 @@ export default function Home() {
               )}
             </div>
 
-            {/* Ahorro */}
+            {/* Ahorro (estimado del día; no cambia con las actualizaciones de consumo) */}
             <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Tu Ahorro</h2>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Tu Ahorro del día</h2>
                 <button
                   style={{
                     display: 'flex',

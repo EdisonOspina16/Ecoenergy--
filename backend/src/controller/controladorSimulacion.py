@@ -16,9 +16,9 @@ DISPOSITIVOS = {
 
 # Rango de consumo realista en kWh cada 5 segundos
 RANGOS_CONSUMO = {
-    "televisor": (0.00002, 0.00005),
-    "nevera": (0.00005, 0.00015),
-    "aire_acondicionado": (0.00015, 0.00030)
+    "televisor": (0.000167, 0.000433),
+    "nevera": (0.000417, 0.001),
+    "aire_acondicionado": (0.002083, 0.005167)
 }
 
 def simular_consumo():
@@ -49,20 +49,20 @@ def simular_consumo():
 
             conn.commit()
             print(" Datos insertados correctamente en registros_consumo.")
-            time.sleep(5)
+            time.sleep(5) 
 
     except Exception as e:
         print(f" Error en la simulación: {e}")
     finally:
         conn.close()
 
-def iniciar_simulacion():
+def iniciar_simulacion(): 
     """
     Inicia la simulación en un hilo separado para no bloquear Flask.
     """
     hilo = threading.Thread(target=simular_consumo, daemon=True)
     hilo.start()
-    print(" Simulación de consumo iniciada.")
+    print(" Simulación de consumo iniciada.") 
 
 
 #----google gemini----#
