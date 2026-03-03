@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify, session
 from functools import wraps
 from flask_cors import cross_origin
 from controller.controladorHogar import (
-    obtener_hogar_por_usuario, 
+    obtener_hogar_por_usuario,
     crear_o_actualizar_hogar
 )
 from controller.controladorDispositivos import (
@@ -13,7 +13,7 @@ from controller.controladorDispositivos import (
     crear_dispositivo,
     actualizar_alias_dispositivo,
     eliminar_dispositivo,
-    verificar_dispositivo_existe, 
+    verificar_dispositivo_existe,
     actualizar_estado_dispositivo
 )
 
@@ -40,20 +40,20 @@ def obtener_perfil_completo():
     try:
         usuario = session.get('usuario')
         id_usuario = usuario['id']
-        
+
         # Obtenenemos hogar
         hogar = obtener_hogar_por_usuario(id_usuario)
-        
+
         # Obtenenemos dispositivos
         dispositivos = obtener_dispositivos_por_usuario(id_usuario)
         dispositivos_dict = [disp.to_dict() for disp in dispositivos]
-        
+
         return jsonify({
             'success': True,
             'hogar': hogar.to_dict() if hogar else None,
             'dispositivos': dispositivos_dict
         }), 200
-            
+
     except Exception as e:
         print(f"Error en obtener_perfil_completo: {e}")
         return jsonify({
@@ -70,44 +70,44 @@ def guardar_perfil_o_dispositivo():
     try:
         usuario = session.get('usuario')
         id_usuario = usuario['id']
-        
+
         data = request.get_json()
-        
+
         # Determinamos si creará o actualizará un perfil de hogar o dispositivo
         if 'deviceId' in data and 'nickname' in data:
             # En este caso es un registro de dispositivo
             id_dispositivo_iot = data.get('deviceId')
             alias = data.get('nickname')
-            
+
             if not all([id_dispositivo_iot, alias]):
                 return jsonify({
                     'success': False,
                     'error': 'ID del dispositivo y alias son requeridos'
                 }), 400
-            
+
             # Verificamos si el dispositivo ya existe
             if verificar_dispositivo_existe(id_dispositivo_iot):
                 return jsonify({
                     'success': False,
                     'error': 'Este dispositivo ya está registrado'
                 }), 400
-            
+
             # Obtenenemos el hogar del usuario
             hogar = obtener_hogar_por_usuario(id_usuario)
-            
+
             if not hogar:
                 return jsonify({
                     'success': False,
                     'error': 'Debes crear un perfil de hogar primero'
                 }), 400
-            
+
             # Registramos el dispositivo
             dispositivo = crear_dispositivo(
                 id_hogar=hogar.id_hogar,
                 alias=alias,
                 id_dispositivo_iot=id_dispositivo_iot
             )
-            
+
             if dispositivo:
                 return jsonify({
                     'success': True,
@@ -119,31 +119,31 @@ def guardar_perfil_o_dispositivo():
                     'success': False,
                     'error': 'Error al registrar el dispositivo'
                 }), 500
-        
+
         else:
             # En este caso es una actualización de perfil de hogar
             direccion = data.get('address')
             nombre_hogar = data.get('nombre_hogar')
-            
+
             if not direccion or not nombre_hogar:
                 return jsonify({
                     'success': False,
                     'error': 'La dirección y el nombre del hogar son requeridos'
                 }), 400
-            
+
             # Verificamos si este usuario ya tiene un hogar creado
             hogar_previo = obtener_hogar_por_usuario(id_usuario)
-            
+
             # Creamos o actualizamos el hogar
             hogar = crear_o_actualizar_hogar(
                 id_usuario=id_usuario,
                 direccion=direccion,
                 nombre_hogar=nombre_hogar
             )
-            
+
             if hogar:
                 mensaje = 'Perfil actualizado exitosamente' if hogar_previo else 'Perfil creado exitosamente'
-                
+
                 return jsonify({
                     'success': True,
                     'message': mensaje,
@@ -154,7 +154,7 @@ def guardar_perfil_o_dispositivo():
                     'success': False,
                     'error': 'Error al guardar el perfil del hogar'
                 }), 500
-        
+
     except Exception as e:
         print(f"Error en guardar_perfil_o_dispositivo: {e}")
         return jsonify({
@@ -171,18 +171,18 @@ def actualizar_dispositivo(id_dispositivo):
     try:
         usuario = session.get('usuario')
         id_usuario = usuario['id']
-        
+
         data = request.get_json()
         nuevo_alias = data.get('name')
-        
+
         if not nuevo_alias:
             return jsonify({
                 'success': False,
                 'error': 'El alias es requerido'
             }), 400
-        
+
         exito = actualizar_alias_dispositivo(id_dispositivo, id_usuario, nuevo_alias)
-        
+
         if exito:
             return jsonify({
                 'success': True,
@@ -193,7 +193,7 @@ def actualizar_dispositivo(id_dispositivo):
                 'success': False,
                 'error': 'Dispositivo no encontrado o no autorizado'
             }), 404
-        
+
     except Exception as e:
         print(f"Error en actualizar_dispositivo: {e}")
         return jsonify({
@@ -210,9 +210,9 @@ def eliminar_dispositivo_route(id_dispositivo):
     try:
         usuario = session.get('usuario')
         id_usuario = usuario['id']
-        
+
         exito = eliminar_dispositivo(id_dispositivo, id_usuario)
-        
+
         if exito:
             return jsonify({
                 'success': True,
@@ -223,7 +223,7 @@ def eliminar_dispositivo_route(id_dispositivo):
                 'success': False,
                 'error': 'Dispositivo no encontrado o no autorizado'
             }), 404
-        
+
     except Exception as e:
         print(f"Error en eliminar_dispositivo: {e}")
         return jsonify({
@@ -239,18 +239,18 @@ def cambiar_estado_dispositivo(id_dispositivo):
     try:
         usuario = session.get('usuario')
         id_usuario = usuario['id']
-        
+
         data = request.get_json()
         nuevo_estado = data.get('estado_activo')  # True o False desde el front
-        
+
         if nuevo_estado is None:
             return jsonify({
                 'success': False,
                 'error': 'El estado del dispositivo es requerido (True/False)'
             }), 400
-        
+
         exito = actualizar_estado_dispositivo(id_dispositivo, id_usuario, nuevo_estado)
-        
+
         if exito:
             return jsonify({
                 'success': True,
