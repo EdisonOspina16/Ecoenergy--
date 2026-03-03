@@ -22,7 +22,7 @@ class DummyCursor:
         # Desempaquetar parámetros esperados: (nombre, apellidos, correo, contraseña_hash)
         _, _, correo, _ = params
 
-        # CP-013 - correo duplicado -> simulamos error de unicidad en BD
+        # correo duplicado -> simulamos error de unicidad en BD
         if correo == "duplicado@gmail.com":
             raise Exception("duplicate key value violates unique constraint usuarios_correo_key")
 
