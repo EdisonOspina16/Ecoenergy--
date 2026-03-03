@@ -7,10 +7,10 @@ if os.getenv("DOCKER") == "1":
     PGUSER='ecoenergy'
     PGPASSWORD='ecoenergy123'
 else:
-    PGHOST='localhost'
-    PGDATABASE='ecoenergy'
-    PGUSER='postgres'
-    PGPASSWORD='Edison#101'
+    PGHOST='ep-sparkling-bar-aigb3jxq-pooler.c-4.us-east-1.aws.neon.tech'
+    PGDATABASE='neondb'
+    PGUSER='neondb_owner'
+    PGPASSWORD='npg_jMz0EQcP2aHA'
 
 EMAIL_CONFIG = {
     "HOST": "smtp.gmail.com",

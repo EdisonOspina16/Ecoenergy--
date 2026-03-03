@@ -4,23 +4,34 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build", 
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "echo 'Pruebas frontend ejecutadas correctamente' && exit 0",
-    "test:ci": "echo ' Ejecutando pruebas en CI/CD' && exit 0"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ci": "vitest run --reporter=dot"
   },
   "dependencies": {
     "next": "13.5.6",
-    "react": "18.2.0", 
+    "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "6.4.2",
+    "@testing-library/react": "14.2.1",
+    "@testing-library/user-event": "14.6.1",
     "typescript": "5.2.2",
     "@types/react": "18.2.28",
     "@types/react-dom": "18.2.13",
-    "@types/node": "20.4.9", 
+    "@types/node": "20.4.9",
     "eslint": "8.50.0",
-    "eslint-config-next": "13.5.6"
+    "eslint-config-next": "13.5.6",
+    "jsdom": "23.2.0",
+    "vitest": "1.6.0",
+    "whatwg-fetch": "3.6.20"
+  },
+  "vitest": {
+    "environment": "jsdom",
+    "setupFiles": "./test/setupTests.ts"
   }
 }
