@@ -9,13 +9,13 @@ export default function Registro() {
   const [nombre, setNombre] = useState("");
   const [apellidos, setApellidos] = useState("");
   const [correo, setCorreo] = useState("");
-  const [contraseña, setContraseña] = useState("");
+  const [contrasena, setcontrasena] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await registrarUsuarioFn(nombre, apellidos, correo, contraseña, { setLoading, setError });
+    await registrarUsuarioFn(nombre, apellidos, correo, contrasena, { setLoading, setError });
   };
 
   return (
@@ -103,11 +103,11 @@ export default function Registro() {
             <i className={`fas fa-lock ${styles.inputIcon}`}></i>
             <input
               type="password"
-              placeholder="Tu contraseña"
+              placeholder="Tu contrasena"
               required
               className={styles.iconInput}
-              value={contraseña}
-              onChange={(e) => setContraseña(e.target.value)}
+              value={contrasena}
+              onChange={(e) => setcontrasena(e.target.value)}
             />
           </div>
 

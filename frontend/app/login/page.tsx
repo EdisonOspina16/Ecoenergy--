@@ -7,7 +7,7 @@ import styles from "../../styles/login.module.css";
 
 export default function Login() {
   const [correo, setCorreo] = useState("");
-  const [contraseña, setContraseña] = useState("");
+  const [contrasena, setcontrasena] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function Login() {
     setError("");
     setLoading(true);
 
-    console.log("🔍 Intentando login con:", { correo, contraseña: "***" });
+    console.log("🔍 Intentando login con:", { correo, contrasena: "***" });
 
     try {
       const response = await fetch("http://localhost:5000/login", {
@@ -28,7 +28,7 @@ export default function Login() {
         credentials: "include",  // ✅ Permite enviar y recibir cookies
         body: JSON.stringify({
           correo: correo,
-          contraseña: contraseña,
+          contrasena: contrasena,
         }),
       });
 
@@ -131,11 +131,11 @@ export default function Login() {
             <i className={`fas fa-lock ${styles.inputIcon}`}></i>
             <input
               type="password"
-              placeholder="Tu contraseña"
+              placeholder="Tu contrasena"
               required
               className={styles.iconInput}
-              value={contraseña}
-              onChange={(e) => setContraseña(e.target.value)}
+              value={contrasena}
+              onChange={(e) => setcontrasena(e.target.value)}
             />
           </div>
 
@@ -153,7 +153,7 @@ export default function Login() {
 
           <a href="/recuperar">
             <i className="fas fa-key" style={{ marginRight: "5px" }}></i>
-            ¿Olvidaste tu contraseña?
+            ¿Olvidaste tu contrasena?
           </a>
         </div>
       </div>

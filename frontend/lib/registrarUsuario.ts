@@ -14,13 +14,13 @@ export async function registrarUsuario(
   nombre: string,
   apellidos: string,
   correo: string,
-  contraseña: string,
+  contrasena: string,
   { setLoading, setError }: RegistrarUsuarioSetters
 ): Promise<void> {
   setError("");
   setLoading(true);
 
-  console.log("Intentando registro con:", { nombre, apellidos, correo, contraseña: "***" });
+  console.log("Intentando registro con:", { nombre, apellidos, correo, contrasena: "***" });
 
   try {
     const response = await fetch(`${API_URL}/registro`, {
@@ -33,7 +33,7 @@ export async function registrarUsuario(
         nombre,
         apellidos,
         correo,
-        contraseña,
+        contrasena,
       }),
     });
 

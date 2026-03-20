@@ -4,9 +4,10 @@ from functools import wraps
 
 from flask import Blueprint, request, jsonify, session
 from flask_cors import cross_origin
-from controller.controladorUsuarios import registrar_usuario, verificar_credenciales, actualizar_contraseña, obtener_usuario_por_id
+from controller.controladorUsuarios import registrar_usuario, verificar_credenciales, actualizar_contrasena, obtener_usuario_por_id
 
 blueprint = Blueprint('vista_usuarios', __name__)
+ERROR_CAMPOS_REQUERIDOS = {"error": "Faltan campos requeridos"}
 
 
 # para que no lo deje ver el perfil si el usario no esta iniciado
@@ -15,14 +16,14 @@ def login_requerido(f):
     def decorador(*args, **kwargs):
         usuario = session.get('usuario')
         if not usuario:
-            print("❌ No hay sesión activa - Redirigiendo a login")
+            print("No hay sesión activa - Redirigiendo a login")
             return jsonify({"error": "Debes iniciar sesión para acceder a esta página"}), 401
-        print(f"✅ Sesión activa para usuario: {usuario.get('correo')}")
+        print(f"Sesión activa para usuario: {usuario.get('correo')}")
         return f(*args, **kwargs)
     return decorador
 
 
-@blueprint.route('/')
+@blueprint.route('/', methods=['GET', 'POST'])
 def inicio():
     return {"message": "Hola Mundo, bienvenido a EcoEnergy"}
 
@@ -32,14 +33,14 @@ def inicio():
 def registro():
     data = request.get_json()
     
-    if not data or not all(key in data for key in ['nombre', 'apellidos', 'correo', 'contraseña']):
-        return jsonify({"error": "Faltan campos requeridos"}), 400
+    if not data or not all(key in data for key in ['nombre', 'apellidos', 'correo', 'contrasena']):
+        return jsonify(ERROR_CAMPOS_REQUERIDOS), 400
     
     # Obtener datos del formulario
     nombre      = data['nombre']
     apellidos   = data['apellidos']
     correo      = data['correo']
-    contraseña  = data['contraseña']
+    contrasena  = data['contrasena']
     
     print(f"Registro: {nombre}, {apellidos}, {correo}")
 
@@ -48,7 +49,7 @@ def registro():
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
-        contraseña=contraseña
+        contrasena=contrasena
     )
 
     if exito:
@@ -65,21 +66,21 @@ def registro():
 def login():
     data = request.get_json()
     
-    if not data or not all(key in data for key in ['correo', 'contraseña']):
-        return jsonify({"error": "Faltan campos requeridos"}), 400
+    if not data or not all(key in data for key in ['correo', 'contrasena']):
+        return jsonify(ERROR_CAMPOS_REQUERIDOS), 400
     
     correo = data['correo']
-    contraseña = data['contraseña']
+    contrasena = data['contrasena']
 
-    usuario = verificar_credenciales(correo, contraseña)
+    usuario = verificar_credenciales(correo, contrasena)
 
     if usuario:
-        # ⭐ CRÍTICO: Hacer la sesión permanente
+        #  CRÍTICO: Hacer la sesión permanente
         session.permanent = True
         session['usuario'] = usuario.to_dict()
         
-        print(f"✅ Login exitoso para: {correo}")
-        print(f"🍪 Sesión guardada: {session.get('usuario')}")
+        print(f"Login exitoso para: {correo}")
+        print(f"Sesión guardada: {session.get('usuario')}")
 
         return jsonify({
             "success": True,
@@ -106,16 +107,16 @@ def logout():
 def recuperar():
     data = request.get_json()
     
-    if not data or not all(key in data for key in ['correo', 'nueva_contraseña']):
-        return jsonify({"error": "Faltan campos requeridos"}), 400
+    if not data or not all(key in data for key in ['correo', 'nueva_contrasena']):
+        return jsonify(ERROR_CAMPOS_REQUERIDOS), 400
     
     correo = data['correo']
-    nueva_contraseña = data['nueva_contraseña']
+    nueva_contrasena = data['nueva_contrasena']
 
-    exito = actualizar_contraseña(correo, nueva_contraseña)
+    exito = actualizar_contrasena(correo, nueva_contrasena)
     if exito:
         return jsonify({
-            "message": "Contraseña actualizada correctamente", 
+            "message": "contrasena actualizada correctamente", 
             "redirect": "/login"
         })
     else:
