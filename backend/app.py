@@ -5,13 +5,13 @@ from flask import Flask
 from flask_cors import CORS
 from datetime import timedelta
 
-from src.routes import vista_usuarios
+from src.routes.vista_usuarios import blueprint_Usuarios
 from src.routes.vista_perfil import blueprint_perfil
 from src.routes.vista_consumo import vista_consumo
 from src.routes.vista_email import email_bp
+
 from src.controller.controladorSimulacion import iniciar_simulacion
 from prometheus_flask_exporter import PrometheusMetrics
-
 
 
 app = Flask(__name__)
@@ -28,7 +28,7 @@ CORS(app,
 # ============================================
 # 🍪 CONFIGURACIÓN DE SESIONES
 # ============================================
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CORRECTO para localhost
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'   # CORRECTO para localhost
 app.config['SESSION_COOKIE_SECURE'] = False     # False porque estamos en HTTP
 app.config['SESSION_COOKIE_HTTPONLY'] = True    # Protección contra XSS
 app.config['SESSION_COOKIE_DOMAIN'] = None      # Importante para localhost
@@ -38,7 +38,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)  # 1 hora
 # ============================================
 # 📋 REGISTRAR BLUEPRINTS
 # ============================================
-app.register_blueprint(vista_usuarios.blueprint)
+app.register_blueprint(blueprint_Usuarios)
 app.register_blueprint(blueprint_perfil)
 app.register_blueprint(vista_consumo)
 app.register_blueprint(email_bp)

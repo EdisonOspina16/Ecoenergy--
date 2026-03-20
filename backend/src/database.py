@@ -7,7 +7,7 @@ from SecretConfig import PGHOST, PGDATABASE, PGUSER, PGPASSWORD
 
 def obtener_conexion():
     try:
-        print(f"   Intentando conectar a la base de datos...")
+        print("   Intentando conectar a la base de datos...")
         print(f"   Host: {PGHOST}")
         print(f"   Database: {PGDATABASE}")
         print(f"   User: {PGUSER}")

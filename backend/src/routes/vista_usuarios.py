@@ -4,9 +4,11 @@ from functools import wraps
 
 from flask import Blueprint, request, jsonify, session
 from flask_cors import cross_origin
-from controller.controladorUsuarios import registrar_usuario, verificar_credenciales, actualizar_contrasena, obtener_usuario_por_id
+from controller.controladorUsuarios import verificar_credenciales, actualizar_contrasena, obtener_usuario_por_id
+from aplication.service.usuario_service import registrar_usuario
 
-blueprint = Blueprint('vista_usuarios', __name__)
+
+blueprint_Usuarios = Blueprint('vista_usuarios', __name__)
 ERROR_CAMPOS_REQUERIDOS = {"error": "Faltan campos requeridos"}
 
 
@@ -23,12 +25,8 @@ def login_requerido(f):
     return decorador
 
 
-@blueprint.route('/', methods=['GET', 'POST'])
-def inicio():
-    return {"message": "Hola Mundo, bienvenido a EcoEnergy"}
-
 # Ruta para el registro
-@blueprint.route('/registro', methods=['POST'])
+@blueprint_Usuarios.route('/registro', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def registro():
     data = request.get_json()
@@ -61,7 +59,7 @@ def registro():
         return jsonify({"error": "Error al registrar usuario"}), 500
 
 
-@blueprint.route('/login', methods=['POST'])
+@blueprint_Usuarios.route('/login', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def login():
     data = request.get_json()
@@ -92,7 +90,7 @@ def login():
         return jsonify({"error": "Credenciales inválidas"}), 401    
 
 
-@blueprint.route('/logout', methods=['POST'])
+@blueprint_Usuarios.route('/logout', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def logout():
     """Cierra la sesión del usuario"""
@@ -102,7 +100,7 @@ def logout():
         'message': 'Sesión cerrada exitosamente'
     }), 200
 
-@blueprint.route('/recuperar', methods=['POST'])
+@blueprint_Usuarios.route('/recuperar', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def recuperar():
     data = request.get_json()
