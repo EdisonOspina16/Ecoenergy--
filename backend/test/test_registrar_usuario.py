@@ -1,7 +1,11 @@
+from sys import exc_info
+
+import psycopg2
 import pytest
 from typing import Any
-from src.controller import controladorUsuarios as cu
-
+from src.aplication.service import usuario_service as us
+from src.domain.errors import PersistenciaError, CorreoDuplicadoError
+from psycopg2 import Error as DatabaseError
 
 # ==============================================================
 # INFRAESTRUCTURA DE PRUEBA (Objetos Dummy y Fixture)
@@ -12,19 +16,24 @@ class DummyCursor:
 
     def __init__(self) -> None:
         self.last_query: str | None = None
-        self.last_params: tuple[Any, ...] | None = None
+        self.last_params: tuple | None = None
 
-    def execute(self, query: str, params: tuple[Any, ...]) -> None:
+    def execute(self, query: str, params: tuple) -> None:
         self.last_query = query
         self.last_params = params
+
         _, _, correo, _ = params
+
         if correo == "duplicado@gmail.com":
-            raise ValueError("correo ya registrado")
+            raise DatabaseError("duplicate key value violates unique constraint")
+        
+        if correo == "error@gmail.com":
+            raise psycopg2.Error("connection lost")
 
     def close(self) -> None:
         """limpia el estado del cursor (no hace nada en este dummy)"""
         pass
-
+    
 
 class DummyConnection:
     """Conexión falsa que registra commit y cierre."""
@@ -43,6 +52,9 @@ class DummyConnection:
     def close(self) -> None:
         self.closed = True
 
+    def rollback(self):
+        pass
+
 
 @pytest.fixture(autouse=True)
 def fake_db(monkeypatch: pytest.MonkeyPatch) -> DummyConnection:
@@ -53,8 +65,8 @@ def fake_db(monkeypatch: pytest.MonkeyPatch) -> DummyConnection:
     Se aplica automáticamente a todas las pruebas del módulo.
     """
     conn = DummyConnection()
-    monkeypatch.setattr(cu, "obtener_conexion", lambda: conn)
-    monkeypatch.setattr(cu, "generate_password_hash", lambda pwd: f"hashed-{pwd}")
+    monkeypatch.setattr(us, "obtener_conexion", lambda: conn)
+    monkeypatch.setattr(us, "generate_password_hash", lambda pwd: f"hashed-{pwd}")
     return conn
 
 
@@ -71,7 +83,7 @@ def test_nombre_valido_simple() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -91,7 +103,7 @@ def test_nombre_vacio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -111,7 +123,7 @@ def test_nombre_con_numeros() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -131,7 +143,7 @@ def test_nombre_dos_caracteres_minimo_valido() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -151,7 +163,7 @@ def test_nombre_51_caracteres_excede_maximo() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -175,7 +187,7 @@ def test_apellido_simple_valido() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -195,7 +207,7 @@ def test_apellido_con_guion() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -215,7 +227,7 @@ def test_apellido_vacio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -235,7 +247,7 @@ def test_apellido_dos_caracteres_minimo_valido() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -255,7 +267,7 @@ def test_apellido_nulo() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -279,7 +291,7 @@ def test_correo_valido_estandar() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -299,7 +311,7 @@ def test_correo_sin_arroba() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -315,19 +327,43 @@ def test_correo_duplicado() -> None:
     # Arrange
     nombre = "Carlos"
     apellidos = "Gómez"
-    correo = "duplicado@gmail.com"   # DummyCursor lanza ValueError para este valor
+    correo = "duplicado@gmail.com"
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
-        nombre=nombre,
-        apellidos=apellidos,
-        correo=correo,
-        contrasena=contrasena,
-    )
+    with pytest.raises(CorreoDuplicadoError) as exc_info:
+        us.registrar_usuario(
+            nombre=nombre,
+            apellidos=apellidos,
+            correo=correo,
+            contrasena=contrasena,
+        )
+    
+    # Assert
+    assert "el correo ya está registrado" in str(exc_info.value).lower()
+
+
+def test_error_generico_base_datos() -> None:
+    """verificamos el manejo de un error genérico de base de datos (no relacionado con unicidad)
+    durante la creación de usuario."""
+
+    # Arrange
+    nombre = "Carlos"
+    apellidos = "Gómez"
+    correo = "error@gmail.com"  # Este disparará error genérico
+    contrasena = "Abc123!@"
+
+    # Act
+    with pytest.raises(PersistenciaError) as exc_info:
+        us.registrar_usuario(
+            nombre=nombre,
+            apellidos=apellidos,
+            correo=correo,
+            contrasena=contrasena,
+        )
 
     # Assert
-    assert resultado is False, "CP-013: Correo duplicado debería retornar False"
+    assert "error en base de datos" in str(exc_info.value).lower()
 
 
 def test_correo_vacio() -> None:
@@ -339,7 +375,7 @@ def test_correo_vacio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -359,7 +395,7 @@ def test_correo_mayor_254_caracteres() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -379,7 +415,7 @@ def test_correo_sin_dominio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -399,7 +435,7 @@ def test_correo_sin_extension() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -419,7 +455,7 @@ def test_correo_doble_arroba() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -439,7 +475,7 @@ def test_correo_con_espacios() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -459,7 +495,7 @@ def test_correo_con_mayusculas() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -483,7 +519,7 @@ def test_contrasena_valida_fuerte() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -503,7 +539,7 @@ def test_contrasena_solo_minusculas() -> None:
     contrasena = "abcdefgh"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -523,7 +559,7 @@ def test_contrasena_solo_numeros() -> None:
     contrasena = "12345678"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado =us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -543,7 +579,7 @@ def test_contrasena_solo_mayusculas() -> None:
     contrasena = "ABCDEFGH"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -563,7 +599,7 @@ def test_contrasena_vacia() -> None:
     contrasena = ""
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -583,7 +619,7 @@ def test_contrasena_nula() -> None:
     contrasena = None
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -603,7 +639,7 @@ def test_contrasena_menos_de_8_caracteres() -> None:
     contrasena = "Abc1!"   # 5 caracteres
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -623,7 +659,7 @@ def test_contrasena_exactamente_8_caracteres() -> None:
     contrasena = "Abc123!@"   # exactamente 8 caracteres
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -643,7 +679,7 @@ def test_contrasena_con_espacios() -> None:
     contrasena = "Abc 123!"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -663,7 +699,7 @@ def test_contrasena_caracteres_especiales_validos() -> None:
     contrasena = "P@ssw0rd#"
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -683,7 +719,7 @@ def test_contrasena_mayor_128_caracteres() -> None:
     contrasena = "A" * 130   # 130 caracteres, supera el máximo
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -703,7 +739,7 @@ def test_contrasena_con_emoji() -> None:
     contrasena = "Abc123\U0001f600"   # carácter fuera del rango ASCII permitido
 
     # Act
-    resultado = cu.registrar_usuario(
+    resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,

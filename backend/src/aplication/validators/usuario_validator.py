@@ -1,4 +1,4 @@
-from domain.errors import ValidacionError
+from src.domain.errors import ValidacionError
 from werkzeug.security import check_password_hash, generate_password_hash
 from model.usuario import Usuario
 from src.database import obtener_conexion

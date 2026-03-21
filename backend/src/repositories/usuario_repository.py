@@ -1,5 +1,6 @@
-from domain.errors import PersistenciaError, CorreoDuplicadoError
+from src.domain.errors import PersistenciaError, CorreoDuplicadoError
 from psycopg2 import Error as DatabaseError
+
 
 class UsuarioRepository:
 
@@ -8,11 +9,11 @@ class UsuarioRepository:
 
     def crear_usuario(self, nombre, apellidos, correo, hash_contrasena):
         try:
-            with self.conn.cursor() as cur:
-                cur.execute("""
-                    INSERT INTO usuarios (nombre, apellidos, correo, contrasena)
-                    VALUES (%s, %s, %s, %s)
-                """, (nombre, apellidos, correo, hash_contrasena))
+            cur = self.conn.cursor()
+            cur.execute("""
+                INSERT INTO usuarios (nombre, apellidos, correo, contrasena)
+                VALUES (%s, %s, %s, %s)
+            """, (nombre, apellidos, correo, hash_contrasena))
 
             self.conn.commit()
 

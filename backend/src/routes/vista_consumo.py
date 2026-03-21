@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Blueprint, app, jsonify, request, session
+from flask import Blueprint, jsonify, request, session
 from src.database import obtener_conexion
 from src.controller.controladorSimulacion import generar_recomendacion, generar_ahorro_estimado
 from src.controller.controladorHogar import obtener_hogar_por_usuario
@@ -9,7 +9,7 @@ from domain.errors import ConexionError
 vista_consumo = Blueprint('vista_consumo', __name__)
 
 
-@app.errorhandler(ConexionError)
+@vista_consumo.errorhandler(ConexionError)
 def handle_conexion_error(e):
     return jsonify({"success": False, "error": str(e)}), 500
 

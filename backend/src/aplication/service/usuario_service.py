@@ -18,7 +18,7 @@ def registrar_usuario(nombre, apellidos, correo, contrasena):
 
         repo = UsuarioRepository(conn)
         repo.crear_usuario(nombre, apellidos, correo, hash_contrasena)
-
+        return True
     finally:
         conn.close()
 
