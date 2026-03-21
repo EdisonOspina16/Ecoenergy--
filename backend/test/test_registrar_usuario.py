@@ -4,7 +4,7 @@ import psycopg2
 import pytest
 from typing import Any
 from src.aplication.service import usuario_service as us
-from src.domain.errors import PersistenciaError, CorreoDuplicadoError
+from src.domain.errors import PersistenciaError, CorreoDuplicadoError, ValidacionError
 from psycopg2 import Error as DatabaseError
 
 # ==============================================================
@@ -53,6 +53,7 @@ class DummyConnection:
         self.closed = True
 
     def rollback(self):
+        """simula un rollback (no hace nada en este dummy)"""
         pass
 
 
@@ -91,7 +92,7 @@ def test_nombre_valido_simple() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-001: Nombre válido simple debería retornar True"
+    assert resultado is True
 
 
 def test_nombre_vacio() -> None:
@@ -103,7 +104,8 @@ def test_nombre_vacio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -111,7 +113,7 @@ def test_nombre_vacio() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-002: Nombre vacío debería retornar False"
+    assert "nombre inválido" in str(exc_info.value).lower()
 
 
 def test_nombre_con_numeros() -> None:
@@ -123,7 +125,8 @@ def test_nombre_con_numeros() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -131,7 +134,7 @@ def test_nombre_con_numeros() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-003: Nombre con números debería retornar False"
+    assert "nombre inválido" in str(exc_info.value).lower()
 
 
 def test_nombre_dos_caracteres_minimo_valido() -> None:
@@ -163,7 +166,8 @@ def test_nombre_51_caracteres_excede_maximo() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -171,7 +175,7 @@ def test_nombre_51_caracteres_excede_maximo() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-005: Nombre de 51 caracteres debería retornar False"
+    assert "nombre inválido" in str(exc_info.value).lower()
 
 
 # ==============================================================
@@ -215,7 +219,7 @@ def test_apellido_con_guion() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-007: Apellido con guion debería retornar True"
+    assert resultado is True
 
 
 def test_apellido_vacio() -> None:
@@ -227,7 +231,8 @@ def test_apellido_vacio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -235,7 +240,7 @@ def test_apellido_vacio() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-008: Apellido vacío debería retornar False"
+    assert "apellidos inválidos" in str(exc_info.value).lower()
 
 
 def test_apellido_dos_caracteres_minimo_valido() -> None:
@@ -255,7 +260,7 @@ def test_apellido_dos_caracteres_minimo_valido() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-009: Apellido de 2 caracteres debería retornar True"
+    assert resultado is True
 
 
 def test_apellido_nulo() -> None:
@@ -267,7 +272,8 @@ def test_apellido_nulo() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -275,7 +281,7 @@ def test_apellido_nulo() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-010: Apellido nulo debería retornar False"
+    assert "apellidos inválidos" in str(exc_info.value).lower()
 
 
 # ==============================================================
@@ -311,7 +317,8 @@ def test_correo_sin_arroba() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -319,7 +326,7 @@ def test_correo_sin_arroba() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-012: Correo sin @ debería retornar False"
+    assert "correo inválido" in str(exc_info.value).lower()
 
 
 def test_correo_duplicado() -> None:
@@ -375,7 +382,8 @@ def test_correo_vacio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -383,7 +391,7 @@ def test_correo_vacio() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-014: Correo vacío debería retornar False"
+    assert "correo inválido" in str(exc_info.value).lower()
 
 
 def test_correo_mayor_254_caracteres() -> None:
@@ -395,7 +403,8 @@ def test_correo_mayor_254_caracteres() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -403,7 +412,7 @@ def test_correo_mayor_254_caracteres() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-015: Correo >254 caracteres debería retornar False"
+    assert "correo inválido" in str(exc_info.value).lower()
 
 
 def test_correo_sin_dominio() -> None:
@@ -415,7 +424,8 @@ def test_correo_sin_dominio() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -423,7 +433,7 @@ def test_correo_sin_dominio() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-016: Correo sin dominio debería retornar False"
+    assert "correo inválido" in str(exc_info.value).lower()
 
 
 def test_correo_sin_extension() -> None:
@@ -435,7 +445,8 @@ def test_correo_sin_extension() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -443,7 +454,7 @@ def test_correo_sin_extension() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-017: Correo sin extensión debería retornar False"
+    assert "correo inválido" in str(exc_info.value).lower()
 
 
 def test_correo_doble_arroba() -> None:
@@ -454,8 +465,8 @@ def test_correo_doble_arroba() -> None:
     correo = "user@@gmail.com"
     contrasena = "Abc123!@"
 
-    # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -463,7 +474,7 @@ def test_correo_doble_arroba() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-018: Correo con doble @ debería retornar False"
+    assert "correo inválido" in str(exc_info.value).lower()
 
 
 def test_correo_con_espacios() -> None:
@@ -475,7 +486,8 @@ def test_correo_con_espacios() -> None:
     contrasena = "Abc123!@"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -483,7 +495,7 @@ def test_correo_con_espacios() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-019: Correo con espacios debería retornar False"
+    assert "correo inválido" in str(exc_info.value).lower()
 
 
 def test_correo_con_mayusculas() -> None:
@@ -503,7 +515,7 @@ def test_correo_con_mayusculas() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-020: Correo con mayúsculas debería retornar True"
+    assert resultado is True
 
 
 # ==============================================================
@@ -527,7 +539,7 @@ def test_contrasena_valida_fuerte() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-021: Contraseña válida fuerte debería retornar True"
+    assert resultado is True
 
 
 def test_contrasena_solo_minusculas() -> None:
@@ -539,7 +551,8 @@ def test_contrasena_solo_minusculas() -> None:
     contrasena = "abcdefgh"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -547,7 +560,7 @@ def test_contrasena_solo_minusculas() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-022: Contraseña solo minúsculas debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_solo_numeros() -> None:
@@ -559,7 +572,8 @@ def test_contrasena_solo_numeros() -> None:
     contrasena = "12345678"
 
     # Act
-    resultado =us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -567,7 +581,7 @@ def test_contrasena_solo_numeros() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-023: Contraseña solo números debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_solo_mayusculas() -> None:
@@ -579,7 +593,8 @@ def test_contrasena_solo_mayusculas() -> None:
     contrasena = "ABCDEFGH"
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -587,7 +602,7 @@ def test_contrasena_solo_mayusculas() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-024: Contraseña solo mayúsculas debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_vacia() -> None:
@@ -599,7 +614,8 @@ def test_contrasena_vacia() -> None:
     contrasena = ""
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -607,7 +623,7 @@ def test_contrasena_vacia() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-025: Contraseña vacía debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_nula() -> None:
@@ -618,8 +634,9 @@ def test_contrasena_nula() -> None:
     correo = "usuario@gmail.com"
     contrasena = None
 
-    # Act
-    resultado = us.registrar_usuario(
+     # Act
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -627,7 +644,7 @@ def test_contrasena_nula() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-026: Contraseña nula debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_menos_de_8_caracteres() -> None:
@@ -639,7 +656,8 @@ def test_contrasena_menos_de_8_caracteres() -> None:
     contrasena = "Abc1!"   # 5 caracteres
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -647,7 +665,7 @@ def test_contrasena_menos_de_8_caracteres() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-027: Contraseña menor a 8 caracteres debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_exactamente_8_caracteres() -> None:
@@ -667,7 +685,7 @@ def test_contrasena_exactamente_8_caracteres() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-028: Contraseña de exactamente 8 caracteres debería retornar True"
+    assert resultado is True
 
 
 def test_contrasena_con_espacios() -> None:
@@ -678,8 +696,9 @@ def test_contrasena_con_espacios() -> None:
     correo = "usuario@gmail.com"
     contrasena = "Abc 123!"
 
-    # Act
-    resultado = us.registrar_usuario(
+     # Act
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -687,7 +706,7 @@ def test_contrasena_con_espacios() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-029: Contraseña con espacios debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_caracteres_especiales_validos() -> None:
@@ -698,7 +717,7 @@ def test_contrasena_caracteres_especiales_validos() -> None:
     correo = "usuario@gmail.com"
     contrasena = "P@ssw0rd#"
 
-    # Act
+     # Act
     resultado = us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
@@ -707,7 +726,7 @@ def test_contrasena_caracteres_especiales_validos() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-030: Contraseña con caracteres especiales válidos debería retornar True"
+    assert resultado is True
 
 
 def test_contrasena_mayor_128_caracteres() -> None:
@@ -719,7 +738,8 @@ def test_contrasena_mayor_128_caracteres() -> None:
     contrasena = "A" * 130   # 130 caracteres, supera el máximo
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -727,7 +747,7 @@ def test_contrasena_mayor_128_caracteres() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-031: Contraseña >128 caracteres debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
 
 
 def test_contrasena_con_emoji() -> None:
@@ -739,7 +759,8 @@ def test_contrasena_con_emoji() -> None:
     contrasena = "Abc123\U0001f600"   # carácter fuera del rango ASCII permitido
 
     # Act
-    resultado = us.registrar_usuario(
+    with pytest.raises(ValidacionError) as exc_info:
+        us.registrar_usuario(
         nombre=nombre,
         apellidos=apellidos,
         correo=correo,
@@ -747,4 +768,4 @@ def test_contrasena_con_emoji() -> None:
     )
 
     # Assert
-    assert resultado is False, "CP-032: Contraseña con emoji debería retornar False"
+    assert "contraseña inválida" in str(exc_info.value).lower()
