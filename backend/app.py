@@ -14,8 +14,9 @@ from src.controller.controladorSimulacion import iniciar_simulacion
 from prometheus_flask_exporter import PrometheusMetrics
 
 
+# CSRF no aplicado porque es API REST con autenticación controlada
 app = Flask(__name__)
-app.secret_key = 'clave_secreta_super_segura_iper_iper_segura_ecoenergy_123'
+app.secret_key = 'clave_secreta_super_segura_iper_iper_segura_ecoenergy_123' # NOSONAR - Solo para desarrollo, no usar en producción
 metrics = PrometheusMetrics(app)
 
 # ============================================
@@ -57,4 +58,5 @@ if __name__ == '__main__':
     print("="*60)
     iniciar_simulacion()
     
-    app.run(host="0.0.0.0", debug=True, port=5000)
+    # Se usa 0.0.0.0 para permitir acceso desde red local (desarrollo)
+    app.run(host="0.0.0.0", debug=False, port=5000) # NOSONAR

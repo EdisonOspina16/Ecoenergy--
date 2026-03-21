@@ -1,11 +1,19 @@
 from functools import wraps
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, app, jsonify, request, session
 from src.database import obtener_conexion
 from src.controller.controladorSimulacion import generar_recomendacion, generar_ahorro_estimado
 from src.controller.controladorHogar import obtener_hogar_por_usuario
 from src.controller.controladorDispositivos import obtener_dispositivos_por_usuario
+from domain.errors import ConexionError
 
 vista_consumo = Blueprint('vista_consumo', __name__)
+
+
+@app.errorhandler(ConexionError)
+def handle_conexion_error(e):
+    return jsonify({"success": False, "error": str(e)}), 500
+
+ERROR_DE_CONEXION = "Error de conexión a la base de datos"
 
 
 def login_requerido(f):
@@ -22,7 +30,7 @@ def login_requerido(f):
 def consumo_total():
     conn = obtener_conexion()
     if conn is None:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+        raise ConexionError(ERROR_DE_CONEXION)
 
     try:
         cur = conn.cursor()
@@ -51,7 +59,7 @@ def consumo_historico():
     """
     conn = obtener_conexion()
     if conn is None:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+        raise ConexionError(ERROR_DE_CONEXION)
 
     try:
         rango = request.args.get('rango', 'day')
@@ -259,7 +267,7 @@ def obtener_recomendacion_diaria():
 
         conn = obtener_conexion()
         if not conn:
-            return jsonify({"success": False, "error": "Error de conexión"}), 500
+            raise ConexionError(ERROR_DE_CONEXION)
 
         cur = conn.cursor()
         cur.execute(
@@ -315,7 +323,7 @@ def generar_recomendacion_diaria():
 
         conn = obtener_conexion()
         if not conn:
-            return jsonify({"success": False, "error": "Error de conexión"}), 500
+            raise ConexionError(ERROR_DE_CONEXION)
 
         cur = conn.cursor()
 
@@ -389,7 +397,7 @@ def generar_recomendacion_diaria():
         import json as _json
         conn = obtener_conexion()
         if not conn:
-            return jsonify({"success": False, "error": "Error de conexión"}), 500
+            raise ConexionError(ERROR_DE_CONEXION)
         cur = conn.cursor()
         cur.execute(
             """
