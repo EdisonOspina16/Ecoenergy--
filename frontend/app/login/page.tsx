@@ -7,7 +7,7 @@ import styles from "../../styles/login.module.css";
 
 export default function Login() {
   const [correo, setCorreo] = useState("");
-  const [contraseña, setContraseña] = useState("");
+  const [contrasena, setcontrasena] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function Login() {
     setError("");
     setLoading(true);
 
-    console.log("🔍 Intentando login con:", { correo, contraseña: "***" });
+    console.log("🔍 Intentando login con:", { correo, contrasena: "***" });
 
     try {
       const response = await fetch("http://localhost:5000/login", {
@@ -25,10 +25,10 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",  // ✅ Permite enviar y recibir cookies
+        credentials: "include", // ✅ Permite enviar y recibir cookies
         body: JSON.stringify({
           correo: correo,
-          contraseña: contraseña,
+          contrasena: contrasena,
         }),
       });
 
@@ -42,10 +42,10 @@ export default function Login() {
 
       if (response.ok) {
         console.log("✅ Login exitoso, redirigiendo a:", data.redirect);
-        
+
         const redirectPath = data.redirect || "/dashboard";
         router.push(redirectPath);
-        
+
         if (data.usuario) {
           console.log("👤 Usuario logueado:", data.usuario);
         }
@@ -55,10 +55,12 @@ export default function Login() {
       }
     } catch (error) {
       console.error("❌ Error en la petición:", error);
-      
+
       if (error instanceof Error) {
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          setError("No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:5000");
+        if (error.name === "TypeError" && error.message.includes("fetch")) {
+          setError(
+            "No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:5000",
+          );
         } else {
           setError("Error al conectar con el servidor: " + error.message);
         }
@@ -102,14 +104,16 @@ export default function Login() {
         <p>Inicia sesión para continuar con tu experiencia sostenible</p>
 
         {error && (
-          <div style={{ 
-            color: "#ff4444", 
-            backgroundColor: "#ffe6e6", 
-            padding: "10px", 
-            borderRadius: "5px", 
-            marginBottom: "20px",
-            textAlign: "center"
-          }}>
+          <div
+            style={{
+              color: "#ff4444",
+              backgroundColor: "#ffe6e6",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
             {error}
           </div>
         )}
@@ -131,16 +135,19 @@ export default function Login() {
             <i className={`fas fa-lock ${styles.inputIcon}`}></i>
             <input
               type="password"
-              placeholder="Tu contraseña"
+              placeholder="Tu contrasena"
               required
               className={styles.iconInput}
-              value={contraseña}
-              onChange={(e) => setContraseña(e.target.value)}
+              value={contrasena}
+              onChange={(e) => setcontrasena(e.target.value)}
             />
           </div>
 
           <button type="submit" disabled={loading}>
-            <i className="fas fa-sign-in-alt" style={{ marginRight: "8px" }}></i>
+            <i
+              className="fas fa-sign-in-alt"
+              style={{ marginRight: "8px" }}
+            ></i>
             {loading ? "INGRESANDO..." : "INGRESAR"}
           </button>
         </form>
@@ -153,7 +160,7 @@ export default function Login() {
 
           <a href="/recuperar">
             <i className="fas fa-key" style={{ marginRight: "5px" }}></i>
-            ¿Olvidaste tu contraseña?
+            ¿Olvidaste tu contrasena?
           </a>
         </div>
       </div>

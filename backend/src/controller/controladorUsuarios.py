@@ -178,7 +178,7 @@ def actualizar_contrasena(correo, nueva_contrasena):
         return False
 
 
-#para mostrar los datos del usuario 
+#para mostrar los datos del usuario
 def obtener_usuario_por_id(id_usuario):
     try:
         conn = obtener_conexion()
@@ -229,4 +229,3 @@ def actualizar_datos_adicionales(correo, telefono, direccion, ciudad, estrato):
     except Exception as e:
         print(f"Error al actualizar datos adicionales: {e}")
         return False
-    

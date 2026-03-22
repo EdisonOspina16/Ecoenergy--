@@ -6,7 +6,7 @@ import styles from "../../styles/login.module.css";
 
 export default function Recuperar() {
   const [correo, setCorreo] = useState("");
-  const [nuevaContraseña, setNuevaContraseña] = useState("");
+  const [nuevacontrasena, setNuevacontrasena] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function Recuperar() {
         },
         body: JSON.stringify({
           correo: correo,
-          nueva_contraseña: nuevaContraseña,
+          nueva_contrasena: nuevacontrasena,
         }),
       });
 
@@ -38,7 +38,7 @@ export default function Recuperar() {
           window.location.href = data.redirect;
         }, 2000);
       } else {
-        setError(data.error || "Error al recuperar contraseña");
+        setError(data.error || "Error al recuperar contrasena");
       }
     } catch (error) {
       console.error("Error en la petición:", error);
@@ -51,7 +51,7 @@ export default function Recuperar() {
   return (
     <>
       <Head>
-        <title>Recuperar Contraseña - EcoEnergy</title>
+        <title>Recuperar contrasena - EcoEnergy</title>
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
           rel="stylesheet"
@@ -76,31 +76,35 @@ export default function Recuperar() {
           ></i>
         </div>
 
-        <h1>RECUPERAR CONTRASEÑA</h1>
-        <p>Ingresa tu correo y nueva contraseña</p>
+        <h1>RECUPERAR contrasena</h1>
+        <p>Ingresa tu correo y nueva contrasena</p>
 
         {error && (
-          <div style={{ 
-            color: "#ff4444", 
-            backgroundColor: "#ffe6e6", 
-            padding: "10px", 
-            borderRadius: "5px", 
-            marginBottom: "20px",
-            textAlign: "center"
-          }}>
+          <div
+            style={{
+              color: "#ff4444",
+              backgroundColor: "#ffe6e6",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
             {error}
           </div>
         )}
 
         {success && (
-          <div style={{ 
-            color: "#00aa00", 
-            backgroundColor: "#e6ffe6", 
-            padding: "10px", 
-            borderRadius: "5px", 
-            marginBottom: "20px",
-            textAlign: "center"
-          }}>
+          <div
+            style={{
+              color: "#00aa00",
+              backgroundColor: "#e6ffe6",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
             {success}
           </div>
         )}
@@ -122,23 +126,26 @@ export default function Recuperar() {
             <i className={`fas fa-lock ${styles.inputIcon}`}></i>
             <input
               type="password"
-              placeholder="Nueva contraseña"
+              placeholder="Nueva contrasena"
               required
               className={styles.iconInput}
-              value={nuevaContraseña}
-              onChange={(e) => setNuevaContraseña(e.target.value)}
+              value={nuevacontrasena}
+              onChange={(e) => setNuevacontrasena(e.target.value)}
             />
           </div>
 
           <button type="submit" disabled={loading}>
             <i className="fas fa-save" style={{ marginRight: "8px" }}></i>
-            {loading ? "ACTUALIZANDO..." : "ACTUALIZAR CONTRASEÑA"}
+            {loading ? "ACTUALIZANDO..." : "ACTUALIZAR CONTRASENA"}
           </button>
         </form>
 
         <div className={styles.linksContainer}>
           <a href="/login">
-            <i className="fas fa-sign-in-alt" style={{ marginRight: "5px" }}></i>
+            <i
+              className="fas fa-sign-in-alt"
+              style={{ marginRight: "5px" }}
+            ></i>
             Volver al inicio de sesión
           </a>
         </div>

@@ -3,6 +3,10 @@
 /backend/.scannerwork
 /frontend/.scannerwork
 /frontend/.sonar
+/backend/sonar-project.properties
+
+# Conexiones a DB, Emails, API Keys, IA
+/backend/src/SecretConfig.py
 
 # Dependencies
 node_modules/
