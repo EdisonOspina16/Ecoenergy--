@@ -112,8 +112,8 @@ def test_login_valido(monkeypatch, client):
 def test_login_sin_body(client):
     resp = client.post("/login")
 
-    # request.get_json() devuelve None -> 400 campos requeridos
-    assert resp.status_code == 400
+    # request.get_json() devuelve None -> 415 campos requeridos
+    assert resp.status_code == 415
 
 
 def test_login_contraseña_vacia(client):
