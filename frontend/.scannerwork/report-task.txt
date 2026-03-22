@@ -1,0 +1,6 @@
+projectKey=EcoEnergy-Frontend
+serverUrl=http://localhost:9000
+serverVersion=26.3.0.120487
+dashboardUrl=http://localhost:9000/dashboard?id=EcoEnergy-Frontend
+ceTaskId=15b4f106-cb54-44c0-bba4-1a041bfa24ec
+ceTaskUrl=http://localhost:9000/api/ce/task?id=15b4f106-cb54-44c0-bba4-1a041bfa24ec

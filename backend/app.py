@@ -5,17 +5,18 @@ from flask import Flask
 from flask_cors import CORS
 from datetime import timedelta
 
-from src.routes import vista_usuarios
+from src.routes.vista_usuarios import blueprint_Usuarios
 from src.routes.vista_perfil import blueprint_perfil
 from src.routes.vista_consumo import vista_consumo
 from src.routes.vista_email import email_bp
+
 from src.controller.controladorSimulacion import iniciar_simulacion
 from prometheus_flask_exporter import PrometheusMetrics
 
 
-
+# CSRF no aplicado porque es API REST con autenticación controlada
 app = Flask(__name__)
-app.secret_key = 'clave_secreta_super_segura_iper_iper_segura_ecoenergy_123'
+app.secret_key = 'clave_secreta_super_segura_iper_iper_segura_ecoenergy_123' # NOSONAR - Solo para desarrollo, no usar en producción
 metrics = PrometheusMetrics(app)
 
 # ============================================
@@ -28,7 +29,7 @@ CORS(app,
 # ============================================
 # 🍪 CONFIGURACIÓN DE SESIONES
 # ============================================
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CORRECTO para localhost
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'   # CORRECTO para localhost
 app.config['SESSION_COOKIE_SECURE'] = False     # False porque estamos en HTTP
 app.config['SESSION_COOKIE_HTTPONLY'] = True    # Protección contra XSS
 app.config['SESSION_COOKIE_DOMAIN'] = None      # Importante para localhost
@@ -38,7 +39,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)  # 1 hora
 # ============================================
 # 📋 REGISTRAR BLUEPRINTS
 # ============================================
-app.register_blueprint(vista_usuarios.blueprint)
+app.register_blueprint(blueprint_Usuarios)
 app.register_blueprint(blueprint_perfil)
 app.register_blueprint(vista_consumo)
 app.register_blueprint(email_bp)
@@ -57,4 +58,5 @@ if __name__ == '__main__':
     print("="*60)
     iniciar_simulacion()
     
-    app.run(host="0.0.0.0", debug=True, port=5000)
+    # Se usa 0.0.0.0 para permitir acceso desde red local (desarrollo)
+    app.run(host="0.0.0.0", debug=False, port=5000) # NOSONAR

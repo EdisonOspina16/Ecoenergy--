@@ -3,13 +3,13 @@ sys.path.append("src")
 from datetime import datetime
 
 class Usuario:
-    def __init__(self, id_usuario, nombre,apellidos, correo, contraseña, fecha_registro=None):
+    def __init__(self, id_usuario, nombre,apellidos, correo, contrasena, fecha_registro=None):
 
         self.id_usuario = id_usuario
         self.nombre = nombre
         self.apellidos = apellidos
         self.correo = correo
-        self.contraseña = contraseña
+        self.contrasena = contrasena
         self.fecha_registro = fecha_registro if fecha_registro else datetime.now()
 
 
@@ -20,7 +20,7 @@ class Usuario:
             "nombre": self.nombre,
             "apellidos": self.apellidos,
             "correo": self.correo,
-            "contraseña": self.contraseña,
+            "contrasena": self.contrasena,
             "fecha_registro": self.fecha_registro.strftime('%Y-%m-%d %H:%M:%S'),
         }
 

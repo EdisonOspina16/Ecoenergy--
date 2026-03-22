@@ -5,7 +5,7 @@
 ### Backend (Flask)
 
 - ✅ API REST para autenticación de usuarios
-- ✅ Endpoints para login, registro, recuperar contraseña
+- ✅ Endpoints para login, registro, recuperar contrasena
 - ✅ Configuración CORS para Next.js
 - ✅ Manejo de sesiones con Flask
 
@@ -20,7 +20,7 @@
 - ✅ Página de inicio (/) - Muestra mensaje del backend
 - ✅ Página de login (/login) - Conectada con backend
 - ✅ Página de registro (/registro) - Conectada con backend (formulario completo)
-- ✅ Página de recuperar contraseña (/recuperar) - Conectada con backend
+- ✅ Página de recuperar contrasena (/recuperar) - Conectada con backend
 - ✅ Página de dashboard (/dashboard) - Para usuarios autenticados
 
 ## 🚀 Cómo Probar la Integración desde la consola
@@ -92,7 +92,7 @@ http://localhost:3000/
 
 #### Registro (/registro)
 
-1. Ingresa los datos básicos: nombre, apellidos, correo y contraseña
+1. Ingresa los datos básicos: nombre, apellidos, correo y contrasena
 2. Todos los campos son obligatorios
 3. Si es exitoso, redirige a `/login`
 
@@ -103,14 +103,14 @@ http://localhost:3000/
 | GET    | `/`          | Mensaje de bienvenida |
 | POST   | `/login`     | Iniciar sesión        |
 | POST   | `/registro`  | Registro completo     |
-| POST   | `/recuperar` | Recuperar contraseña  |
+| POST   | `/recuperar` | Recuperar contrasena  |
 
 ## 🎯 Flujo de Usuario
 
 1. **Usuario nuevo**:
    - Visita `/` → Ve mensaje del backend
    - Hace clic en "Registrarse" → Va a `/registro`
-   - Completa los datos básicos (nombre, apellidos, correo, contraseña) → Va a `/login`
+   - Completa los datos básicos (nombre, apellidos, correo, contrasena) → Va a `/login`
    - Inicia sesión → Va a `/dashboard`
 
 2. **Usuario existente**:

@@ -12,18 +12,18 @@ import re
 # CRUD USUARIOS
 # -----------------------------------------
 
-def crear_usuario(nombre, correo, contraseña):
+def crear_usuario(nombre, correo, contrasena):
     """
-    Crea un nuevo usuario con la contraseña hasheada.
+    Crea un nuevo usuario con la contrasena hasheada.
     """
     conn = obtener_conexion()
     if conn:
         try:
-            hash_contraseña = generate_password_hash(contraseña)
+            hash_contrasena = generate_password_hash(contrasena)
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO usuarios (nombre, correo, contraseña) VALUES (%s, %s, %s)",
-                    (nombre, correo, hash_contraseña)
+                    "INSERT INTO usuarios (nombre, correo, contrasena) VALUES (%s, %s, %s)",
+                    (nombre, correo, hash_contrasena)
                 )
                 conn.commit()
                 return True
@@ -45,7 +45,7 @@ def obtener_usuario_por_correo(correo):
                         'id_usuario': usuario['id_usuario'],
                         'nombre': usuario['nombre'],
                         'correo': usuario['correo'],
-                        'contraseña': usuario['contraseña'],
+                        'contrasena': usuario['contrasena'],
                         'fecha_registro': usuario['fecha_registro']
                     }
                 return None
@@ -55,18 +55,18 @@ def obtener_usuario_por_correo(correo):
             conn.close()
     return None
 
-def actualizar_usuario(correo, nuevo_nombre, nueva_contraseña):
+def actualizar_usuario(correo, nuevo_nombre, nueva_contrasena):
     """
-    Actualiza nombre y contraseña (la contraseña será hasheada).
+    Actualiza nombre y contrasena (la contrasena será hasheada).
     """
     conn = obtener_conexion()
     if conn:
         try:
-            hash_contraseña = generate_password_hash(nueva_contraseña)
+            hash_contrasena = generate_password_hash(nueva_contrasena)
             with conn.cursor() as cur:
                 cur.execute(
-                    "UPDATE usuarios SET nombre = %s, contraseña = %s WHERE correo = %s",
-                    (nuevo_nombre, hash_contraseña, correo)
+                    "UPDATE usuarios SET nombre = %s, contrasena = %s WHERE correo = %s",
+                    (nuevo_nombre, hash_contrasena, correo)
                 )
                 conn.commit()
                 return True
@@ -95,123 +95,6 @@ def eliminar_usuario(correo):
 # FUNCIONES DEL REGISTRO, LOGIN, RECUPERAR
 # -----------------------------------------
 
-# ---- Validaciones de datos de registro ----
-
-def es_nombre_valido(nombre: str) -> bool:
-    """
-    Valida el nombre:
-    - No nulo ni vacío
-    - Entre 2 y 50 caracteres
-    - Solo letras (incluye tildes) y espacios.
-    """
-    if not isinstance(nombre, str):
-        return False
-    nombre = nombre.strip()
-    if len(nombre) < 2 or len(nombre) > 50:
-        return False
-    patron = r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
-    return re.match(patron, nombre) is not None
-
-
-def es_apellido_valido(apellidos: str) -> bool:
-    """
-    Valida el apellido:
-    - No nulo ni vacío
-    - Mínimo 2 caracteres
-    - Letras (incluye tildes), espacios y guion.
-    """
-    if not isinstance(apellidos, str):
-        return False
-    apellidos = apellidos.strip()
-    if len(apellidos) < 2:
-        return False
-    patron = r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\-]+$"
-    return re.match(patron, apellidos) is not None
-
-
-def es_correo_valido(correo: str) -> bool:
-    """
-    Valida el correo:
-    - No nulo ni vacío
-    - Sin espacios
-    - Longitud máxima 254 caracteres
-    - Formato básico RFC (local@dominio.tld)
-    """
-    if not isinstance(correo, str):
-        return False
-    correo = correo.strip()
-    if not correo:
-        return False
-    if " " in correo:
-        return False
-    if len(correo) > 254:
-        return False
-    patron = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-    return re.match(patron, correo) is not None
-
-
-def es_contraseña_valida(contraseña: str) -> bool:
-    """
-    Valida la contraseña:
-    - String no vacío
-    - Entre 8 y 128 caracteres
-    - Sin espacios
-    - Sin caracteres no ASCII (evita emojis)
-    - Debe contener al menos: una mayúscula, una minúscula,
-      un dígito y un carácter especial.
-    """
-    if not isinstance(contraseña, str):
-        return False
-    if contraseña == "":
-        return False
-    if len(contraseña) < 8 or len(contraseña) > 128:
-        return False
-    if any(ch.isspace() for ch in contraseña):
-        return False
-    if any(ord(ch) > 126 for ch in contraseña):
-        return False
-
-    tiene_mayus = any(c.isupper() for c in contraseña)
-    tiene_minus = any(c.islower() for c in contraseña)
-    tiene_digito = any(c.isdigit() for c in contraseña)
-    tiene_especial = any(not c.isalnum() and not c.isspace() for c in contraseña)
-
-    return tiene_mayus and tiene_minus and tiene_digito and tiene_especial
-
-
-def registrar_usuario(nombre, apellidos, correo, contraseña):
-    """
-    Registra un usuario nuevo con contraseña hasheada y datos adicionales.
-    """
-    try:
-        conn = obtener_conexion()
-        if not conn:
-            print("No se pudo conectar a la base de datos")
-            return False
-            
-        print("Conexión a la base de datos establecida")
-        cur = conn.cursor()
-
-        hash_contraseña = generate_password_hash(contraseña)
-        print("Contraseña hasheada correctamente")
-
-        cur.execute("""
-            INSERT INTO usuarios (nombre, apellidos, correo, contraseña)
-            VALUES (%s, %s, %s, %s)
-        """, (nombre, apellidos, correo, hash_contraseña))
-
-        conn.commit()
-        print("Usuario insertado en la base de datos")
-        
-        cur.close()
-        conn.close()
-        print("Conexión cerrada correctamente")
-        return True
-    except Exception as e:
-        print(f"Error al registrar usuario: {e}")
-        print(f"Tipo de error: {type(e).__name__}")
-        return False
-
 
 def obtener_usuarios():
     """
@@ -231,7 +114,7 @@ def obtener_usuarios():
                 nombre=fila['nombre'],
                 apellidos=fila['apellidos'],
                 correo=fila['correo'],
-                contraseña=fila['contraseña'],
+                contrasena=fila['contrasena'],
                 fecha_registro=fila['fecha_registro']
             )
             usuarios.append(usuario)
@@ -242,9 +125,9 @@ def obtener_usuarios():
         print(f"Error al obtener usuarios: {e}")
     return usuarios
 
-def verificar_credenciales(correo, contraseña_input):
+def verificar_credenciales(correo, contrasena_input):
     """
-    Verifica si el correo y la contraseña (comparada con hash) coinciden.
+    Verifica si el correo y la contrasena (comparada con hash) coinciden.
     Retorna objeto Usuario con todos los campos.
     """
     try:
@@ -257,31 +140,31 @@ def verificar_credenciales(correo, contraseña_input):
         cur.close()
         conn.close()
 
-        if usuario and check_password_hash(usuario['contraseña'], contraseña_input):
+        if usuario and check_password_hash(usuario['contrasena'], contrasena_input):
             return Usuario(
                 id_usuario=usuario['id_usuario'],
                 nombre=usuario['nombre'],
                 apellidos=usuario['apellidos'],
                 correo=usuario['correo'],
-                contraseña=usuario['contraseña']
+                contrasena=usuario['contrasena']
             )
         return None
     except Exception as e:
         print(f"Error en login: {e}")
         return None
 
-def actualizar_contraseña(correo, nueva_contraseña):
+def actualizar_contrasena(correo, nueva_contrasena):
     """
-    Actualiza la contraseña de un usuario con hashing.
+    Actualiza la contrasena de un usuario con hashing.
     """
     try:
         conn = obtener_conexion()
         cur = conn.cursor()
-        nueva_hash = generate_password_hash(nueva_contraseña)
+        nueva_hash = generate_password_hash(nueva_contrasena)
 
         cur.execute("""
             UPDATE usuarios
-            SET contraseña = %s
+            SET contrasena = %s
             WHERE correo = %s
         """, (nueva_hash, correo))
 
@@ -291,7 +174,7 @@ def actualizar_contraseña(correo, nueva_contraseña):
 
         return cur.rowcount > 0
     except Exception as e:
-        print(f"Error al actualizar contraseña: {e}")
+        print(f"Error al actualizar contrasena: {e}")
         return False
 
 
@@ -313,7 +196,7 @@ def obtener_usuario_por_id(id_usuario):
                 nombre=fila['nombre'],
                 apellidos=fila['apellidos'],
                 correo=fila['correo'],
-                contraseña=fila['contraseña'],
+                contrasena=fila['contrasena'],
                 fecha_registro=fila['fecha_registro'],
             )
     except Exception as e:
