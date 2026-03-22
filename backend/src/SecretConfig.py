@@ -21,10 +21,9 @@ EMAIL_CONFIG = {
 
 # GEMINI - LLM
 GEMINI_API_KEY = "sofiaculiona"
+GEMINI_API_KEY = "Uy blanquita"
 GEMINI_MODEL = "gemini-3-flash-preview"
 PROMT_BASE =  """
 Eres un asistente energético inteligente. Analiza el consumo de los dispositivos eléctricos.
 Usa un lenguaje claro y breve para dar recomendaciones o alertas.
 """
-
-

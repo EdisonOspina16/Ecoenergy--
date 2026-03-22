@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
 
-# Stub Gemini client before importing app to avoid real credentials
 with patch("google.genai.Client") as FakeClient:
     fake_models = Mock()
     fake_models.generate_content.return_value = Mock(text="{}")
