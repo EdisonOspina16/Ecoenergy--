@@ -1,3 +1,9 @@
+# SonarQube
+/backend/.sonar
+/backend/.scannerwork
+/frontend/.scannerwork
+/frontend/.sonar
+
 # Dependencies
 node_modules/
 */node_modules/
