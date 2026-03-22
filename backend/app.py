@@ -9,6 +9,7 @@ from src.routes.vista_usuarios import blueprint_Usuarios
 from src.routes.vista_perfil import blueprint_perfil
 from src.routes.vista_consumo import vista_consumo
 from src.routes.vista_email import email_bp
+from src.routes.vista_dispositivos import blueprint_dispositivos
 
 from src.controller.controladorSimulacion import iniciar_simulacion
 from prometheus_flask_exporter import PrometheusMetrics
@@ -43,6 +44,7 @@ app.register_blueprint(blueprint_Usuarios)
 app.register_blueprint(blueprint_perfil)
 app.register_blueprint(vista_consumo)
 app.register_blueprint(email_bp)
+app.register_blueprint(blueprint_dispositivos)
 
 # ============================================
 # 🚀 INICIAR APLICACIÓN
