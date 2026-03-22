@@ -38,7 +38,7 @@ class TestLlamarRecomendacion:
     def test_llamar_recomendacion_error_api(self, mock_generate_content):
         # Arrange
         # Stub: Forzamos la caída de la API de Gemini (simulamos 403, 429, etc)
-        mock_generate_content.side_effect = ClientError("API Key inválida")
+        mock_generate_content.side_effect = ClientError("API Key inválida", 403)
         
         # Act
         resultado = llamar_recomendacion(500, "nevera")
