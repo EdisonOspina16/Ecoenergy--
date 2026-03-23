@@ -33,9 +33,9 @@ class TestConsumoRepository:
         
         assert len(resultado) == 2
         assert resultado[0]["nombre"] == "Nevera"
-        assert resultado[0]["consumo_watts"] == 150.5
+        assert resultado[0]["consumo_watts"] == pytest.approx(150.5)
         assert resultado[1]["nombre"] == "Aire"
-        assert resultado[1]["consumo_watts"] == 0.0
+        assert resultado[1]["consumo_watts"] == pytest.approx(0.0)
 
     # ---------------------------------------------------------
     # Test: obtener_dispositivos_por_usuario
@@ -60,7 +60,7 @@ class TestConsumoRepository:
         resultado = obtener_dispositivos_por_usuario(1)
         assert len(resultado) == 1
         assert resultado[0]["nombre"] == "TV"
-        assert resultado[0]["consumo_watts"] == 100.0
+        assert resultado[0]["consumo_watts"] == pytest.approx(100.0)
 
     # ---------------------------------------------------------
     # Test: obtener_recomendacion_diaria
