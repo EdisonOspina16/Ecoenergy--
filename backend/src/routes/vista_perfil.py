@@ -159,7 +159,7 @@ def eliminar_dispositivo_route(id_dispositivo):
 
     except Exception as e:
         print(f"Error en eliminar_dispositivo: {e}")
-        retornar_jsonify_fallido(e)
+        return retornar_jsonify_fallido(e)
 
 @blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>/estado', methods=['PUT'])
 @cross_origin(supports_credentials=True)
