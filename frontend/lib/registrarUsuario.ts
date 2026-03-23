@@ -44,6 +44,13 @@ export async function registrarUsuario(
       console.error("Error response:", response.status, response.statusText);
     }
 
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      console.error("Respuesta no es JSON:", text.substring(0, 200));
+      throw new Error(`El servidor respondió con un formato de respuesta incorrecto (Estado: ${response.status})`);
+    }
+
     const data = await response.json();
     console.log("Response data:", data);
 
