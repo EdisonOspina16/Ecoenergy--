@@ -75,8 +75,8 @@ def obtener_perfil_completo_y_listar_tomacorrientes():
 @blueprint_perfil.route('/perfil', methods=['POST'])
 @cross_origin(supports_credentials=True)
 @login_requerido_perfil
-def guardar_perfil_o_dispositivo():
-    """Crea/actualiza el perfil del hogar O registra un nuevo dispositivo según los datos recibidos"""
+def registrar_tomacorriente_o_guardar_perfil_de_hogar():
+    """Registra un nuevo tomacorriente/dispositivo O crea/actualiza el perfil del hogar según los datos recibidos"""
     usuario = session.get('usuario')
     id_usuario = usuario['id']
 
@@ -159,10 +159,7 @@ def eliminar_dispositivo_route(id_dispositivo):
 
     except Exception as e:
         print(f"Error en eliminar_dispositivo: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return retornar_jsonify_fallido(e)
 
 @blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>/estado', methods=['PUT'])
 @cross_origin(supports_credentials=True)
