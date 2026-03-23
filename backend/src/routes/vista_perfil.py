@@ -19,6 +19,11 @@ from controller.controladorDispositivos import (
 
 blueprint_perfil = Blueprint('vista_perfil', __name__)
 
+def retornar_jsonify_fallido(e):
+    return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 def login_requerido_perfil(f):
     """Decorador para verificar que el usuario esté autenticado"""
@@ -35,7 +40,7 @@ def login_requerido_perfil(f):
 @blueprint_perfil.route('/perfil', methods=['GET'])
 @cross_origin(supports_credentials=True)
 @login_requerido_perfil
-def obtener_perfil_completo():
+def obtener_perfil_completo_y_listar_tomacorrientes():
     """Obtiene el perfil del hogar y los dispositivos del usuario autenticado"""
     try:
         usuario = session.get('usuario')
@@ -55,11 +60,8 @@ def obtener_perfil_completo():
         }), 200
 
     except Exception as e:
-        print(f"Error en obtener_perfil_completo: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        print(f"Error en obtener perfil completo: {e}")
+        retornar_jsonify_fallido(e)
 
 
 @blueprint_perfil.route('/perfil', methods=['POST'])
@@ -157,11 +159,7 @@ def guardar_perfil_o_dispositivo():
 
     except Exception as e:
         print(f"Error en guardar_perfil_o_dispositivo: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
+        retornar_jsonify_fallido(e)
 
 @blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>', methods=['PUT'])
 @cross_origin(supports_credentials=True)
@@ -196,10 +194,7 @@ def actualizar_dispositivo(id_dispositivo):
 
     except Exception as e:
         print(f"Error en actualizar_dispositivo: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        retornar_jsonify_fallido(e)
 
 
 @blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>', methods=['DELETE'])
@@ -264,7 +259,4 @@ def cambiar_estado_dispositivo(id_dispositivo):
 
     except Exception as e:
         print(f"Error en cambiar_estado_dispositivo: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        retornar_jsonify_fallido(e)
