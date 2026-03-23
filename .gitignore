@@ -4,6 +4,8 @@
 /frontend/.scannerwork
 /frontend/.sonar
 /backend/sonar-project.properties
+/frontend/sonar-project.properties
+
 
 /backend/.coverage
 /backend/coverage.xml
