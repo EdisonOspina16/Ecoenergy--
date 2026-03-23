@@ -1,11 +1,10 @@
 from typing import Dict, Any
 
-from application.service.response_builder import success_response, error_response
-from application.validators.perfil_validators import (
+from aplication.service.response_builder import success_response, error_response
+from aplication.validators.perfil_validators import (
     validate_device_payload,
     validate_profile_payload,
 )
-from domain.errors import ValidationError, ConflictError, NotFoundError
 from repositories.perfil_repository import PerfilRepository
 
 

@@ -16,15 +16,15 @@ from controller.controladorDispositivos import (
     verificar_dispositivo_existe,
     actualizar_estado_dispositivo
 )
-from application.validators.perfil_validators import (
+from aplication.validators.perfil_validators import (
     is_device_payload,
     is_profile_payload,
 )
-from application.service.perfil_service import (
+from aplication.service.perfil_service import (
     registrar_tomacorriente,
     seleccionar_accion_perfil,
 )
-from application.service.response_builder import error_response
+from aplication.service.response_builder import error_response
 from repositories.perfil_repository import PerfilRepository
 
 blueprint_perfil = Blueprint('vista_perfil', __name__)
