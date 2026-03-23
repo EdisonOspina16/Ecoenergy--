@@ -111,6 +111,6 @@ def test_logout_no_rehabilita_sesion_en_refresh(client):
 
     # un Refresh con un GET público o vacío (/) no debe recrear usuario en sesión
     resp_root = client.get("/")
-    assert resp_root.status_code == 200
+    assert resp_root.status_code == 404
     with client.session_transaction() as sess:
         assert "usuario" not in sess

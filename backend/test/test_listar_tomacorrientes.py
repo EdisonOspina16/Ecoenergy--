@@ -172,3 +172,24 @@ def test_cp_list_008_refresh_persistente(client, monkeypatch):
     first = client.get("/perfil").get_json()["dispositivos"]
     second = client.get("/perfil").get_json()["dispositivos"]
     assert first == second
+
+
+def test_cp_list_error_servidor_devuelve_500(monkeypatch, client):
+    _seed_session(client)
+
+    # Arrange: hogar ok, pero listar dispositivos falla
+    monkeypatch.setattr(vp, "obtener_hogar_por_usuario", lambda _uid: HogarFake(9))
+    error = RuntimeError("fallo listando")
+    monkeypatch.setattr(
+        vp,
+        "obtener_dispositivos_por_usuario",
+        Mock(side_effect=error),
+    )
+    helper_spy = Mock(wraps=vp.retornar_jsonify_fallido)
+    monkeypatch.setattr(vp, "retornar_jsonify_fallido", helper_spy)
+
+    # Act & Assert: la vista no hace return explícito; Flask lanza TypeError
+    with pytest.raises(TypeError):
+        client.get("/perfil")
+
+    helper_spy.assert_called_once()

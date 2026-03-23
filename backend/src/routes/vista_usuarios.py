@@ -30,16 +30,16 @@ def login_requerido(f):
 @cross_origin(supports_credentials=True)
 def registro():
     data = request.get_json()
-    
+
     if not data or not all(key in data for key in ['nombre', 'apellidos', 'correo', 'contrasena']):
         return jsonify(ERROR_CAMPOS_REQUERIDOS), 400
-    
+
     # Obtener datos del formulario
     nombre      = data['nombre']
     apellidos   = data['apellidos']
     correo      = data['correo']
     contrasena  = data['contrasena']
-    
+
     print(f"Registro: {nombre}, {apellidos}, {correo}")
 
     # Guardamos en la BD
@@ -52,7 +52,7 @@ def registro():
 
     if exito:
         return jsonify({
-            "message": "Usuario registrado con éxito", 
+            "message": "Usuario registrado con éxito",
             "redirect": "/login"
         })
     else:
@@ -63,10 +63,10 @@ def registro():
 @cross_origin(supports_credentials=True)
 def login():
     data = request.get_json()
-    
+
     if not data or not all(key in data for key in ['correo', 'contrasena']):
         return jsonify(ERROR_CAMPOS_REQUERIDOS), 400
-    
+
     correo = data['correo']
     contrasena = data['contrasena']
 
@@ -76,18 +76,18 @@ def login():
         #  CRÍTICO: Hacer la sesión permanente
         session.permanent = True
         session['usuario'] = usuario.to_dict()
-        
+
         print(f"Login exitoso para: {correo}")
         print(f"Sesión guardada: {session.get('usuario')}")
 
         return jsonify({
             "success": True,
-            "message": "Inicio de sesión exitoso", 
+            "message": "Inicio de sesión exitoso",
             "redirect": "/home",
             "usuario": usuario.to_dict()
         })
     else:
-        return jsonify({"error": "Credenciales inválidas"}), 401    
+        return jsonify({"error": "Credenciales inválidas"}), 401
 
 
 @blueprint_Usuarios.route('/logout', methods=['POST'])
@@ -104,17 +104,17 @@ def logout():
 @cross_origin(supports_credentials=True)
 def recuperar():
     data = request.get_json()
-    
+
     if not data or not all(key in data for key in ['correo', 'nueva_contrasena']):
         return jsonify(ERROR_CAMPOS_REQUERIDOS), 400
-    
+
     correo = data['correo']
     nueva_contrasena = data['nueva_contrasena']
 
     exito = actualizar_contrasena(correo, nueva_contrasena)
     if exito:
         return jsonify({
-            "message": "contrasena actualizada correctamente", 
+            "message": "contrasena actualizada correctamente",
             "redirect": "/login"
         })
     else:
