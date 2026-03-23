@@ -161,3 +161,21 @@ def test_no_aparece_despues_de_eliminar(client, dispositivo_state):
     assert "Lavadora" not in [d["alias"] for d in data["dispositivos"]]
 
     assert data["success"] is True
+
+
+def test_eliminar_dispositivo_error_500(monkeypatch, client):
+    # Arrange
+    _seed_session(client)
+    error = RuntimeError("fallo eliminando")
+    eliminar_mock = Mock(side_effect=error)
+    monkeypatch.setattr(vp, "eliminar_dispositivo", eliminar_mock)
+
+    # Act
+    resp = client.delete("/perfil/dispositivo/123")
+    data = resp.get_json()
+
+    # Assert
+    assert resp.status_code == 500
+    assert data["success"] is False
+    assert "fallo eliminando" in data["error"]
+    eliminar_mock.assert_called_once_with(123, 7)
