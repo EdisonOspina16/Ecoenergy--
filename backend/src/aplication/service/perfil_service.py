@@ -57,7 +57,7 @@ def crear_perfil_hogar(data: Dict[str, Any], id_usuario: int, repo: PerfilReposi
     )
 
 
-def actualizar_perfil_hogar(data: Dict[str, Any], id_usuario: int, repo: PerfilRepository, hogar_previo: Any):
+def actualizar_perfil_hogar(data: Dict[str, Any], id_usuario: int, repo: PerfilRepository):
     error, payload = validate_profile_payload(data)
     if error:
         return error_response(error, 400)
@@ -77,10 +77,9 @@ def actualizar_perfil_hogar(data: Dict[str, Any], id_usuario: int, repo: PerfilR
         200,
     )
 
-
 def seleccionar_accion_perfil(data: Dict[str, Any], id_usuario: int, repo: PerfilRepository):
     """Decide si crear o actualizar según existencia previa."""
     hogar_previo = repo.get_hogar(id_usuario)
     if hogar_previo:
-        return actualizar_perfil_hogar(data, id_usuario, repo, hogar_previo)
+        return actualizar_perfil_hogar(data, id_usuario, repo)
     return crear_perfil_hogar(data, id_usuario, repo)
