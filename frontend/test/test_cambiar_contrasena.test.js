@@ -41,12 +41,12 @@ describe("cambiarContrasena", () => {
     test("C1 - Flujo exitoso: response.ok=true, redirige a /login", async () => {
         const fetchFn = async () => ({
             ok: true,
-            json: async () => ({ message: "Contraseña actualizada" })
+            json: async () => ({ message: "contrasena actualizada" })
         });
 
         const resultado = await cambiarContrasena("user@test.com", "Segura123!", fetchFn);
 
-        expect(resultado.success).toBe("Contraseña actualizada");
+        expect(resultado.success).toBe("contrasena actualizada");
         expect(resultado.redirect).toBe("/login");
         expect(resultado.error).toBeNull();
     });
