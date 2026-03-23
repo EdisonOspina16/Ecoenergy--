@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import Login from "../app/login/page";
+import Login from "../src/app/login/page";
 
 const pushMock = (globalThis as any).__routerPush as ReturnType<typeof vi.fn>;
 
@@ -24,7 +24,7 @@ describe("Login | casos de formulario", () => {
     vi.restoreAllMocks();
   });
 
-  it("Email existente y contraseña correcta", async () => {
+  it("Email existente y contrasena correcta", async () => {
     mockFetch(200, {
       success: true,
       redirect: "/home",
@@ -37,7 +37,7 @@ describe("Login | casos de formulario", () => {
       screen.getByPlaceholderText("Tu correo electrónico"),
       "admin@gmail.com",
     );
-    await userEvent.type(screen.getByPlaceholderText("Tu contraseña"), "admin");
+    await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/home"));
@@ -54,7 +54,7 @@ describe("Login | casos de formulario", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("Email correcto y sin contraseña", async () => {
+  it("Email correcto y sin contrasena", async () => {
     const fetchSpy = vi.spyOn(global, "fetch");
 
     render(<Login />);
@@ -68,18 +68,18 @@ describe("Login | casos de formulario", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("Email vacío y contraseña válida", async () => {
+  it("Email vacío y contrasena válida", async () => {
     const fetchSpy = vi.spyOn(global, "fetch");
 
     render(<Login />);
 
-    await userEvent.type(screen.getByPlaceholderText("Tu contraseña"), "admin");
+    await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("Email correcto y contraseña incorrecta", async () => {
+  it("Email correcto y contrasena incorrecta", async () => {
     mockFetch(401, { error: "Credenciales inválidas" });
 
     render(<Login />);
@@ -89,7 +89,7 @@ describe("Login | casos de formulario", () => {
       "admin@gmail.com",
     );
     await userEvent.type(
-      screen.getByPlaceholderText("Tu contraseña"),
+      screen.getByPlaceholderText("Tu contrasena"),
       "ayayai",
     );
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
@@ -106,7 +106,7 @@ describe("Login | casos de formulario", () => {
       screen.getByPlaceholderText("Tu correo electrónico"),
       "admin@",
     );
-    await userEvent.type(screen.getByPlaceholderText("Tu contraseña"), "admin");
+    await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -121,13 +121,13 @@ describe("Login | casos de formulario", () => {
       screen.getByPlaceholderText("Tu correo electrónico"),
       "admin",
     );
-    await userEvent.type(screen.getByPlaceholderText("Tu contraseña"), "admin");
+    await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("Email válido pero sin cuenta y contraseña válida", async () => {
+  it("Email válido pero sin cuenta y contrasena válida", async () => {
     mockFetch(401, { error: "Credenciales inválidas" });
 
     render(<Login />);
@@ -136,7 +136,7 @@ describe("Login | casos de formulario", () => {
       screen.getByPlaceholderText("Tu correo electrónico"),
       "tomi123@gmail.com",
     );
-    await userEvent.type(screen.getByPlaceholderText("Tu contraseña"), "admin");
+    await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     await waitFor(() => screen.getByText("Credenciales inválidas"));

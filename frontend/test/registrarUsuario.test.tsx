@@ -7,7 +7,8 @@
 
 import React from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { registrarUsuario } from "../lib/registrarUsuario";
+import { registrarUsuario } from "../src/hooks/useRegistro";
+
 
 // Mock global de fetch
 const mockFetch = vi.fn();
