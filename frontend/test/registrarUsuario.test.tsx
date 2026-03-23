@@ -7,7 +7,8 @@
 
 import React from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { registrarUsuario } from "../lib/registrarUsuario";
+import { registrarUsuario } from "../src/hooks/useRegistro";
+
 
 // Mock global de fetch
 const mockFetch = vi.fn();
@@ -41,7 +42,7 @@ describe("registrarUsuario - caja blanca", () => {
     nombre: "Ana",
     apellidos: "López",
     correo: "ana@mail.com",
-    contraseña: "1234",
+    contrasena: "1234",
   };
 
   test("registrarUsuario - happy path: registro exitoso y redirección a /login", async () => {
@@ -50,7 +51,7 @@ describe("registrarUsuario - caja blanca", () => {
       json: () => Promise.resolve({ redirect: "/login" }),
     });
 
-    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contraseña, {
+    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contrasena, {
       setLoading,
       setError,
     });
@@ -65,7 +66,7 @@ describe("registrarUsuario - caja blanca", () => {
           nombre: params.nombre,
           apellidos: params.apellidos,
           correo: params.correo,
-          contraseña: params.contraseña,
+          contrasena: params.contrasena,
         }),
       })
     );
@@ -88,7 +89,7 @@ describe("registrarUsuario - caja blanca", () => {
       json: () => Promise.resolve({ error: "Correo ya registrado" }),
     });
 
-    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contraseña, {
+    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contrasena, {
       setLoading,
       setError,
     });
@@ -107,7 +108,7 @@ describe("registrarUsuario - caja blanca", () => {
     const error = new TypeError("Failed to fetch");
     mockFetch.mockRejectedValue(error);
 
-    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contraseña, {
+    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contrasena, {
       setLoading,
       setError,
     });
@@ -129,7 +130,7 @@ describe("registrarUsuario - caja blanca", () => {
     const error = new Error("Network timeout");
     mockFetch.mockRejectedValue(error);
 
-    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contraseña, {
+    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contrasena, {
       setLoading,
       setError,
     });
@@ -149,7 +150,7 @@ describe("registrarUsuario - caja blanca", () => {
   test("registrarUsuario - error lanzado como string", async () => {
     mockFetch.mockRejectedValue("error_cadena");
 
-    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contraseña, {
+    await registrarUsuario(params.nombre, params.apellidos, params.correo, params.contrasena, {
       setLoading,
       setError,
     });

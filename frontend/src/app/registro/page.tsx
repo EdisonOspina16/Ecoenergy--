@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
-import { registrarUsuario as registrarUsuarioFn } from "../../lib/registrarUsuario";
+import { registrarUsuario as registrarUsuarioFn } from "../../hooks/useRegistro";
 
 export default function Registro() {
   const [nombre, setNombre] = useState("");
