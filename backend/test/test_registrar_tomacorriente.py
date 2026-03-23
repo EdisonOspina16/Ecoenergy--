@@ -177,3 +177,29 @@ def test_cp_tom_008_apodo_caracteres_especiales(client):
     assert resp.status_code == 201
     assert data["success"] is True
     assert data["dispositivo"]["alias"] == "Cargador@Móvil#2024"
+
+
+def test_perfil_payload_redirige_a_seleccionar(monkeypatch, client):
+    _seed_session(client)
+    seleccionar_mock = Mock(return_value=({"success": True, "message": "perfil"}, 200))
+    monkeypatch.setattr(vp, "seleccionar_accion_perfil", seleccionar_mock)
+
+    resp = client.post(
+        "/perfil",
+        json={"address": "Calle 1", "nombre_hogar": "Casa"},
+    )
+
+    assert resp.status_code == 200
+    assert resp.get_json()["message"] == "perfil"
+    seleccionar_mock.assert_called_once()
+
+
+def test_payload_invalido_retorna_error(client):
+    _seed_session(client)
+
+    resp = client.post("/perfil", json={"foo": "bar"})
+
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["success"] is False
+    assert "no coincide" in data["error"].lower()
