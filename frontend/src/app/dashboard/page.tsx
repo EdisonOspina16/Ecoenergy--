@@ -88,7 +88,7 @@ export default function Dashboard() {
             fontWeight: "bold"
           }}>
             <i className="fas fa-sign-in-alt" style={{ marginRight: "8px" }}></i>
-            Iniciar Sesión
+            {" Iniciar Sesión"}
           </a>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function Dashboard() {
       </Head>
 
       <header className={styles.header}>
-        ECOENERGY DASHBOARD
+        {"ECOENERGY DASHBOARD"}
         <span style={{ color: "#FFD700", marginLeft: "10px" }}>
           <i className="fas fa-lightbulb"></i>
         </span>
@@ -124,7 +124,7 @@ export default function Dashboard() {
             }}
           >
             <i className="fas fa-sign-out-alt" style={{ marginRight: "5px" }}></i>
-            Cerrar Sesión
+            {" Cerrar Sesión"}
           </button>
         </div>
       </header>
@@ -167,7 +167,7 @@ export default function Dashboard() {
           <p>Aquí podrás gestionar tus dispositivos de energía, ver estadísticas de consumo y más.</p>
           <p style={{ color: "#666", fontSize: "14px" }}>
             <i className="fas fa-info-circle" style={{ marginRight: "5px" }}></i>
-            Las funcionalidades adicionales se implementarán próximamente.
+            {" Las funcionalidades adicionales se implementarán próximamente."}
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export default function Dashboard() {
             marginRight: "10px"
           }}>
             <i className="fas fa-home" style={{ marginRight: "8px" }}></i>
-            Volver al Inicio
+            {" Volver al Inicio"}
           </a>
         </div>
       </div>

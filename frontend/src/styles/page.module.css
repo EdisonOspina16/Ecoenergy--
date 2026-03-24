@@ -33,7 +33,7 @@
 }
 
 .logoIcon {
-  color: #13ec5b;
+  color: #0c8a3c;
   display: flex;
   align-items: center;
 }
@@ -71,7 +71,7 @@
 }
 
 .navLink:hover {
-  color: #13ec5b;
+  color: #0c8a3c;
 }
 
 .ctaButton {
@@ -155,7 +155,7 @@
   align-items: center;
   gap: 0.5rem;
   background-color: rgba(19, 236, 91, 0.1);
-  color: #13ec5b;
+  color: #0c8a3c;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -185,7 +185,7 @@
 }
 
 .highlight {
-  color: #13ec5b;
+  color: #0c8a3c;
 }
 
 .heroDescription {
@@ -274,7 +274,7 @@
   background-color: rgba(19, 236, 91, 0.2);
   padding: 0.75rem;
   border-radius: 9999px;
-  color: #13ec5b;
+  color: #0c8a3c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,7 +319,7 @@
 .sectionSubtitle {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #13ec5b;
+  color: #0c8a3c;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   margin-bottom: 1rem;
@@ -397,7 +397,7 @@
 }
 
 .cardLink {
-  color: #13ec5b;
+  color: #0c8a3c;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -481,7 +481,7 @@
 .statValue {
   font-size: 2.25rem;
   font-weight: 900;
-  color: #13ec5b;
+  color: #0c8a3c;
   display: block;
 }
 
@@ -508,7 +508,7 @@
 }
 
 .tipsTitle .material-symbols-outlined {
-  color: #13ec5b;
+  color: #0c8a3c;
 }
 
 .tipsList {
@@ -528,7 +528,7 @@
 }
 
 .tipItem .material-symbols-outlined {
-  color: #13ec5b;
+  color: #0c8a3c;
   font-size: 0.875rem;
 }
 
@@ -572,7 +572,7 @@
 }
 
 .efficiencyBadge {
-  color: #13ec5b;
+  color: #0c8a3c;
   font-weight: 700;
   font-size: 0.75rem;
   background-color: rgba(19, 236, 91, 0.1);
@@ -598,7 +598,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #9ca3af;
+  color: #6b7280;
 }
 
 .progressBarWrapper {
@@ -853,7 +853,7 @@
 }
 
 .footerLogo .material-symbols-outlined {
-  color: #13ec5b;
+  color: #0c8a3c;
   font-size: 1.5rem;
 }
 
@@ -877,7 +877,7 @@
 }
 
 .footerLink:hover {
-  color: #13ec5b;
+  color: #0c8a3c;
 }
 
 .footerSocial {
