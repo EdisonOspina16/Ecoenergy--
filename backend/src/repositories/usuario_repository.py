@@ -25,4 +25,26 @@ class UsuarioRepository:
 
             raise PersistenciaError(f"Error en base de datos: {e}")
         
+    def actualizar_contrasena(self, correo, nueva_hash) -> bool:
+            """
+            Actualiza la contraseña hasheada de un usuario identificado por correo.
+            Retorna True si se actualizó al menos una fila, False si el correo
+            no existe en la BD.
+            Lanza PersistenciaError ante cualquier error de base de datos.
+            """
+            try:
+                cur = self.conn.cursor()
+                cur.execute("""
+                    UPDATE usuarios
+                    SET contrasena = %s
+                    WHERE correo = %s
+                """, (nueva_hash, correo))
     
+                self.conn.commit()
+                filas = cur.rowcount
+                cur.close()
+                return filas > 0
+    
+            except DatabaseError as e:
+                self.conn.rollback()
+                raise PersistenciaError(f"Error en base de datos: {e}")

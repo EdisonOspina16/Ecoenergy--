@@ -86,6 +86,16 @@ def es_contrasena_valida(contrasena: str) -> bool:
 
     return tiene_mayus and tiene_minus and tiene_digito and tiene_especial
 
+#Evalua el usuario para poder listar dispositivos
+def es_id_usuario_valido(id_usuario) -> bool:
+    if id_usuario is None:
+        return False
+    if not isinstance(id_usuario, int):
+        return False
+    if id_usuario <= 0:
+        return False
+    return True
+
 
 def validar_usuario(nombre, apellidos, correo, contrasena):
     if not es_nombre_valido(nombre):
@@ -99,3 +109,19 @@ def validar_usuario(nombre, apellidos, correo, contrasena):
 
     if not es_contrasena_valida(contrasena):
         raise ValidacionError("Contraseña inválida")
+    
+def validar_cambio_contrasena(correo, nueva_contrasena) -> None:
+    """
+    Valida los datos necesarios para cambiar la contraseña:
+    - Correo con formato válido
+    - Nueva contraseña con formato seguro
+    Lanza ValidacionError si alguno falla.
+    """
+    if not es_correo_valido(correo):
+        raise ValidacionError("Correo inválido")
+ 
+    if not es_contrasena_valida(nueva_contrasena):
+        raise ValidacionError("Contraseña inválida")
+    
+
+ 
