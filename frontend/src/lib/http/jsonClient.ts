@@ -8,6 +8,8 @@ type JsonRequestOptions = Pick<RequestInit, "credentials" | "headers">;
 
 const defaultHeaders = { "Content-Type": "application/json" };
 
+type JsonFetchOptions = Pick<RequestInit, "credentials" | "headers">;
+
 export async function postJson<T>(
   url: string,
   body: unknown,
@@ -18,6 +20,34 @@ export async function postJson<T>(
     credentials: options.credentials ?? "include",
     headers: { ...defaultHeaders, ...(options.headers ?? {}) },
     body: JSON.stringify(body),
+  };
+
+  try {
+    const response = await fetch(url, request);
+    const payload = await readJson(response);
+
+    if (response.ok) {
+      return { ok: true, data: payload as T, status: response.status };
+    }
+
+    return {
+      ok: false,
+      status: response.status,
+      message: extractErrorMessage(response.status, payload),
+    };
+  } catch (error) {
+    return { ok: false, status: 0, message: mapNetworkError(error) };
+  }
+}
+
+export async function getJson<T>(
+  url: string,
+  options: JsonFetchOptions = {},
+): Promise<JsonResult<T>> {
+  const request: RequestInit = {
+    method: "GET",
+    credentials: options.credentials ?? "include",
+    headers: { ...(options.headers ?? {}) },
   };
 
   try {

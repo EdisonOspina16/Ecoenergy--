@@ -178,4 +178,59 @@ describe("Listado de tomacorrientes en perfil", () => {
 
     expect(screen.getByTitle("Eliminar dispositivo")).toBeInTheDocument();
   });
+
+  it("CP-LIST-010 redirige a login en 401", async () => {
+    const originalLocation = window.location;
+    delete (window as any).location;
+    window.location = { ...originalLocation, href: "" } as Location;
+
+    setupFetch(makeResponse({}, 401));
+
+    render(<Profile />);
+    await waitFor(() => expect(window.location.href).toBe("/login"));
+
+    window.location = originalLocation;
+  });
+
+  it("CP-LIST-011 muestra error y limpia dispositivos en fallo", async () => {
+    setupFetch(makeResponse({ error: "fallo" }, 500));
+
+    render(<Profile />);
+    await waitForListado();
+
+    await screen.findByText(/Error 500|fallo/i);
+    expect(
+      screen.getByText(/No tienes dispositivos registrados/i),
+    ).toBeInTheDocument();
+  });
+
+  it("CP-LIST-012 dispositivos undefined cae a lista vacía", async () => {
+    setupFetch(
+      makeResponse({ success: true, hogar: {}, dispositivos: undefined }),
+    );
+
+    render(<Profile />);
+    await waitForListado();
+
+    expect(
+      screen.getByText(/No tienes dispositivos registrados/i),
+    ).toBeInTheDocument();
+  });
+
+  it("CP-LIST-013 hogar nulo no rompe y lista dispositivos", async () => {
+    setupFetch(
+      makeResponse({
+        success: true,
+        hogar: null,
+        dispositivos: [
+          { id: 77, name: "Sensor", icon: "plug", connected: true },
+        ],
+      }),
+    );
+
+    render(<Profile />);
+    await waitForListado();
+
+    expect(screen.getByDisplayValue("Sensor")).toBeInTheDocument();
+  });
 });

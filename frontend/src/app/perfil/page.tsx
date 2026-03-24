@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useDeviceRegistration } from "../../hooks/useDeviceRegistration";
 import { DeviceData } from "../../lib/api/devices";
+import { fetchPerfil, PerfilResponse } from "../../lib/api/profile";
 import styles from "../../styles/perfil.module.css";
 
 interface Device {
@@ -47,38 +48,37 @@ export default function Profile() {
     };
   }, [showUserMenu]);
 
-  const cargarDatos = async () => {
-    try {
-      setLoading(true);
+  const cargarDatos = () => {
+    setLoading(true);
 
-      // Una sola llamada GET para obtener perfil y dispositivos
-      const response = await fetch("http://localhost:5000/perfil", {
-        credentials: "include",
-      });
-
-      if (response.status === 401) {
-        window.location.href = "/login";
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Cargar datos del hogar
-        if (data.hogar) {
-          setAddress(data.hogar.direccion || "");
-          setHomeName(data.hogar.nombre_hogar || "");
+    fetchPerfil()
+      .then((result) => {
+        if (result.status === 401) {
+          window.location.href = "/login";
+          return;
         }
 
-        // Cargar dispositivos
-        setDevices(data.dispositivos || []);
-      }
-    } catch (error) {
-      console.error("Error al cargar datos:", error);
-      mostrarMensaje("error", "Error al cargar los datos");
-    } finally {
-      setLoading(false);
-    }
+        if (!result.ok) {
+          mostrarMensaje("error", result.message);
+          setDevices([]);
+          return;
+        }
+
+        aplicarPerfil(result.data);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const aplicarPerfil = (data: PerfilResponse) => {
+    aplicarHogar(data);
+    setDevices(data.dispositivos ?? []);
+  };
+
+  const aplicarHogar = (data: PerfilResponse) => {
+    const hogar = data.hogar;
+    if (!hogar) return;
+    setAddress(hogar.direccion || "");
+    setHomeName(hogar.nombre_hogar || "");
   };
 
   const mostrarMensaje = (type: "success" | "error", text: string) => {
