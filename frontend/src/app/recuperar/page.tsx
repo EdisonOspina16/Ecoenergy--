@@ -59,7 +59,7 @@ export default function Recuperar() {
       </Head>
 
       <header className={styles.header}>
-        ECOENERGY
+        {"ECOENERGY"}
         <span style={{ color: "#FFD700", marginLeft: "10px" }}>
           <i className="fas fa-lightbulb"></i>
         </span>
@@ -146,7 +146,7 @@ export default function Recuperar() {
               className="fas fa-sign-in-alt"
               style={{ marginRight: "5px" }}
             ></i>
-            Volver al inicio de sesión
+            {" Volver al inicio de sesión"}
           </a>
         </div>
       </div>

@@ -49,7 +49,7 @@
 }
 
 .logoIcon {
-  color: #10B981;
+  color: #047857;
   width: 1.5rem;
   height: 1.5rem;
 }
@@ -86,11 +86,11 @@
 }
 
 .navLink:hover {
-  color: #10B981;
+  color: #047857;
 }
 
 .navLinkActive {
-  color: #10B981;
+  color: #047857;
   font-weight: 600;
   text-decoration: none;
 }
@@ -276,8 +276,7 @@
 .formSelect:focus {
   outline: none;
   border-color: #10B981;
-  ring: 2px;
-  ring-color: #10B981;
+  box-shadow: 0 0 0 2px #10B981;
 }
 
 .formInput::placeholder {
@@ -352,7 +351,7 @@
 
 .deviceIconConnected {
   background-color: rgba(16, 185, 129, 0.2);
-  color: #10B981;
+  color: #047857;
 }
 
 .deviceIconDisconnected {
@@ -376,7 +375,7 @@
 
 .deviceNameInput:focus {
   outline: none;
-  ring: 0;
+  box-shadow: none;
 }
 
 .deviceStatus {
@@ -387,7 +386,7 @@
 }
 
 .deviceStatusConnected {
-  color: #10B981;
+  color: #047857;
 }
 
 .deviceStatusDisconnected {

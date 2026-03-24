@@ -6,7 +6,7 @@
 
 import React from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cargarRecomendacion } from "../lib/cargarRecomendacion";
+import { cargarRecomendacion } from "../src/lib/cargarRecomendacion";
 
 const mockFetch = vi.fn();
 

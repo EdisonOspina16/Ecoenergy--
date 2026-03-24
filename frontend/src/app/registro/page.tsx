@@ -29,7 +29,7 @@ export default function Registro() {
       </Head>
 
       <header className={styles.header}>
-        ECOENERGY
+        {"ECOENERGY"}
         <span style={{ color: "#FFD700", marginLeft: "10px" }}>
           <i className="fas fa-lightbulb"></i>
         </span>
@@ -120,7 +120,7 @@ export default function Registro() {
         <div className={styles.linksContainer}>
           <a href="/login">
             <i className="fas fa-sign-in-alt" style={{ marginRight: "5px" }}></i>
-            ¿Ya tienes cuenta? Inicia sesión
+            {" ¿Ya tienes cuenta? Inicia sesión"}
           </a>
         </div>
       </div>

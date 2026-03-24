@@ -231,7 +231,11 @@ export default function Profile() {
 
       if (!data.success) {
         // Si falla, revertir el cambio
-        setDevices(devices);
+        setDevices((currentDevices) =>
+          currentDevices.map((d) =>
+            d.id === id ? { ...d, connected: !d.connected } : d,
+          ),
+        );
         mostrarMensaje(
           "error",
           data.error || "No se pudo actualizar el estado",

@@ -81,7 +81,7 @@ export default function Principal() {
             <div className={styles.heroContent}>
               <div className={styles.badge}>
                 <span className="material-symbols-outlined">bolt</span>
-                Revolución Energética
+                {" Revolución Energética"}
               </div>
               <h1 className={styles.heroTitle}>
                 Energía Inteligente para un <span className={styles.highlight}>Futuro Sostenible</span>
@@ -136,7 +136,7 @@ export default function Principal() {
               <p className={styles.cardDescription}>
                 Configuración sencilla en minutos. Nuestro hardware se conecta directamente a tu panel sin necesidad de técnicos especializados.
               </p>
-              <a className={styles.cardLink} href="#">
+              <a className={styles.cardLink} href="/">
                 Leer guía <span className="material-symbols-outlined">arrow_forward</span>
               </a>
             </div>
@@ -150,7 +150,7 @@ export default function Principal() {
               <p className={styles.cardDescription}>
                 Nuestra IA identifica patrones de consumo ocultos y sugiere optimizaciones personalizadas para cada electrodoméstico.
               </p>
-              <a className={styles.cardLink} href="#">
+              <a className={styles.cardLink} href="/">
                 Ver tecnología <span className="material-symbols-outlined">arrow_forward</span>
               </a>
             </div>
@@ -164,7 +164,7 @@ export default function Principal() {
               <p className={styles.cardDescription}>
                 Automatiza el apagado y encendido en horas valle para reducir el costo de la factura sin sacrificar tu comodidad diaria.
               </p>
-              <a className={styles.cardLink} href="#">
+              <a className={styles.cardLink} href="/">
                 Estudio de caso <span className="material-symbols-outlined">arrow_forward</span>
               </a>
             </div>
@@ -194,20 +194,20 @@ export default function Principal() {
               <div className={styles.tips}>
                 <p className={styles.tipsTitle}>
                   <span className="material-symbols-outlined">tips_and_updates</span>
-                  Consejos para reducir tu huella:
+                  {" Consejos para reducir tu huella:"}
                 </p>
                 <ul className={styles.tipsList}>
                   <li className={styles.tipItem}>
                     <span className="material-symbols-outlined">check_circle</span>
-                    Aprovecha la luz natural durante las horas pico de sol.
+                    {" Aprovecha la luz natural durante las horas pico de sol."}
                   </li>
                   <li className={styles.tipItem}>
                     <span className="material-symbols-outlined">check_circle</span>
-                    Configura tus equipos en modo Eco con nuestra app.
+                    {" Configura tus equipos en modo Eco con nuestra app."}
                   </li>
                   <li className={styles.tipItem}>
                     <span className="material-symbols-outlined">check_circle</span>
-                    Desconecta dispositivos "vampiro" durante la noche.
+                    {" Desconecta dispositivos \"vampiro\" durante la noche."}
                   </li>
                 </ul>
               </div>
@@ -319,15 +319,15 @@ export default function Principal() {
               <h2 className={styles.footerLogoText}>EcoEnergy</h2>
             </div>
             <div className={styles.footerLinks}>
-              <a className={styles.footerLink} href="#">Privacidad</a>
-              <a className={styles.footerLink} href="#">Términos</a>
-              <a className={styles.footerLink} href="#">Contacto</a>
+              <a className={styles.footerLink} href="/">Privacidad</a>
+              <a className={styles.footerLink} href="/">Términos</a>
+              <a className={styles.footerLink} href="/">Contacto</a>
             </div>
             <div className={styles.footerSocial}>
-              <a className={styles.socialButton} href="#">
+              <a className={styles.socialButton} href="/">
                 <span className="material-symbols-outlined">share</span>
               </a>
-              <a className={styles.socialButton} href="#">
+              <a className={styles.socialButton} href="/">
                 <span className="material-symbols-outlined">public</span>
               </a>
             </div>

@@ -83,7 +83,7 @@ export default function Login() {
       </Head>
 
       <header className={styles.header}>
-        ECOENERGY
+        {"ECOENERGY"}
         <span style={{ color: "#FFD700", marginLeft: "10px" }}>
           <i className="fas fa-lightbulb"></i>
         </span>
@@ -155,12 +155,12 @@ export default function Login() {
         <div className={styles.linksContainer}>
           <a href="/registro">
             <i className="fas fa-user-plus" style={{ marginRight: "5px" }}></i>
-            ¿No tienes cuenta? Regístrate
+            {" ¿No tienes cuenta? Regístrate"}
           </a>
 
           <a href="/recuperar">
             <i className="fas fa-key" style={{ marginRight: "5px" }}></i>
-            ¿Olvidaste tu contrasena?
+            {" ¿Olvidaste tu contrasena?"}
           </a>
         </div>
       </div>

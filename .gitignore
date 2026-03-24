@@ -6,7 +6,7 @@
 /backend/sonar-project.properties
 /frontend/sonar-project.properties
 
-
+/frontend/.coverage
 /backend/.coverage
 /backend/coverage.xml
 

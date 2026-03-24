@@ -308,30 +308,3 @@
     padding: 8px;
   }
 }
-
-  .container {
-    width: 95%;
-    margin: 15px auto;
-    padding: 25px 15px;
-  }
-  
-  .header {
-    font-size: 20px;
-    padding: 12px 15px;
-  }
-  
-  .icono {
-    width: 70px;
-    height: 70px;
-    margin-bottom: 20px;
-  }
-  
-  .container h1 {
-    font-size: 22px;
-    margin-bottom: 6px;
-  }
-  
-  .descripcion {
-    font-size: 12px !important;
-    max-width: 250px;
-  }

@@ -69,7 +69,7 @@ export default function Home() {
         });
 
         if (response.status === 401) {
-          window.location.href = '/login';
+          globalThis.location.href = '/login';
           return;
         }
 
@@ -165,7 +165,7 @@ export default function Home() {
           credentials: 'include',
         });
         if (response.status === 401) {
-          window.location.href = '/login';
+          globalThis.location.href = '/login';
           return;
         }
         const data = await response.json();
@@ -200,7 +200,7 @@ export default function Home() {
         credentials: 'include',
       });
       if (response.status === 401) {
-        window.location.href = '/login';
+        globalThis.location.href = '/login';
         return;
       }
       const data = await response.json();
@@ -278,7 +278,7 @@ export default function Home() {
       <div style={{ padding: '1rem', height: '300px' }}>
         <svg width="100%" height="100%" viewBox="0 0 800 250">
           {[0, 1, 2, 3, 4].map((i) => (
-            <g key={i}>
+            <g key={`grid-line-${i}`}>
               <line x1="50" y1={50 + i * 50} x2="750" y2={50 + i * 50} stroke="#E5E7EB" strokeWidth="1" />
               <text x="35" y={55 + i * 50} fill="#6B7280" fontSize="12" textAnchor="end">
                 {(maxConsumo - (i * range) / 4).toFixed(1)}
@@ -303,7 +303,7 @@ export default function Home() {
             const x = 50 + i * (700 / (chartData.length - 1 || 1));
             const y = 250 - ((Number(d.consumo) - minConsumo) / range) * 200;
             return (
-              <g key={i}>
+              <g key={d.periodo || `point-${i}`}>
                 <circle cx={x} cy={y} r="4" fill="#10B981" />
                 {(chartData.length <= 12 || i % Math.ceil(chartData.length / 12) === 0) && (
                   <text x={x} y="270" fill="#6B7280" fontSize="11" textAnchor="middle">
@@ -466,7 +466,7 @@ export default function Home() {
                   </div>
                   <div style={{ borderTop: '1px solid #E5E7EB', padding: '0.5rem 0' }}>
                     <button
-                      onClick={() => (window.location.href = '/login')}
+                      onClick={() => (globalThis.location.href = '/login')}
                       style={{
                         display: 'block',
                         width: '100%',
