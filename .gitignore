@@ -1,14 +1,18 @@
-# SonarQube
-/backend/.sonar
-/backend/.scannerwork
-/frontend/.scannerwork
-/frontend/.sonar
-/backend/sonar-project.properties
-/frontend/sonar-project.properties
+# Package lock files (Generan conflictos frecuentes, Problemáticos para el control de versiones)
+package-lock.json
+/frontend/package-lock.json
+/backend/package-lock.json
 
-/frontend/.coverage
+# SonarQube
 /backend/.coverage
 /backend/coverage.xml
+/frontend/.coverage
+/backend/sonar-project.properties
+/frontend/sonar-project.properties
+/frontend/.sonar
+/frontend/.scannerwork
+/backend/.sonar
+/backend/.scannerwork
 
 # Conexiones a DB, Emails, API Keys, IA
 /backend/src/SecretConfig.py
