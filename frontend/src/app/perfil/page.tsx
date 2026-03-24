@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useDeviceRegistration } from "../../hooks/useDeviceRegistration";
+import { DeviceData } from "../../lib/api/devices";
 import styles from "../../styles/perfil.module.css";
 
 interface Device {
@@ -13,11 +15,9 @@ interface Device {
 export default function Profile() {
   const [address, setAddress] = useState("");
   const [homeName, setHomeName] = useState("");
-  const [newDeviceId, setNewDeviceId] = useState("");
-  const [newDeviceNickname, setNewDeviceNickname] = useState("");
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -86,6 +86,12 @@ export default function Profile() {
     setTimeout(() => setMessage(null), 5000);
   };
 
+  const agregarDispositivo = (nuevo: DeviceData) => {
+    setDevices([...devices, nuevo]);
+  };
+
+  const registro = useDeviceRegistration(agregarDispositivo, mostrarMensaje);
+
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -98,7 +104,7 @@ export default function Profile() {
     }
 
     try {
-      setSaving(true);
+      setProfileSaving(true);
 
       const response = await fetch("http://localhost:5000/perfil", {
         method: "POST",
@@ -123,52 +129,13 @@ export default function Profile() {
       console.error("Error al guardar perfil:", error);
       mostrarMensaje("error", "Error al conectar con el servidor");
     } finally {
-      setSaving(false);
+      setProfileSaving(false);
     }
   };
 
-  const handleDeviceRegister = async (e: React.FormEvent) => {
+  const handleDeviceRegister = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!newDeviceId || !newDeviceNickname) {
-      mostrarMensaje("error", "Ingresa el ID y el apodo del dispositivo");
-      return;
-    }
-
-    try {
-      setSaving(true);
-
-      const response = await fetch("http://localhost:5000/perfil", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          deviceId: newDeviceId,
-          nickname: newDeviceNickname,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setDevices([...devices, data.dispositivo]);
-        setNewDeviceId("");
-        setNewDeviceNickname("");
-        mostrarMensaje("success", "Dispositivo registrado exitosamente");
-      } else {
-        mostrarMensaje(
-          "error",
-          data.error || "Error al registrar el dispositivo",
-        );
-      }
-    } catch (error) {
-      console.error("Error al registrar dispositivo:", error);
-      mostrarMensaje("error", "Error al conectar con el servidor");
-    } finally {
-      setSaving(false);
-    }
+    registro.submit();
   };
 
   const handleDeleteDevice = async (id: number) => {
@@ -559,9 +526,9 @@ export default function Profile() {
                       <button
                         type="submit"
                         className={styles.primaryButton}
-                        disabled={saving}
+                        disabled={profileSaving}
                       >
-                        {saving ? "Guardando..." : "Guardar Cambios"}
+                        {profileSaving ? "Guardando..." : "Guardar Cambios"}
                       </button>
                     </div>
                   </form>
@@ -684,8 +651,8 @@ export default function Profile() {
                         type="text"
                         className={styles.formInput}
                         placeholder="Ingresa el código del dispositivo"
-                        value={newDeviceId}
-                        onChange={(e) => setNewDeviceId(e.target.value)}
+                        value={registro.deviceId}
+                        onChange={(e) => registro.setDeviceId(e.target.value)}
                         required
                       />
                     </label>
@@ -695,17 +662,19 @@ export default function Profile() {
                         type="text"
                         className={styles.formInput}
                         placeholder="Ej: Cargador del móvil"
-                        value={newDeviceNickname}
-                        onChange={(e) => setNewDeviceNickname(e.target.value)}
+                        value={registro.nickname}
+                        onChange={(e) => registro.setNickname(e.target.value)}
                         required
                       />
                     </label>
                     <button
                       type="submit"
                       className={styles.primaryButton}
-                      disabled={saving}
+                      disabled={registro.submitting}
                     >
-                      {saving ? "Registrando..." : "Registrar Tomacorriente"}
+                      {registro.submitting
+                        ? "Registrando..."
+                        : "Registrar Tomacorriente"}
                     </button>
                   </form>
                 </div>
