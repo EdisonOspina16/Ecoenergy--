@@ -15,7 +15,10 @@ export default function Registro() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await registrarUsuarioFn(nombre, apellidos, correo, contrasena, { setLoading, setError });
+    await registrarUsuarioFn(nombre, apellidos, correo, contrasena, {
+      setLoading,
+      setError,
+    });
   };
 
   return (
@@ -50,14 +53,16 @@ export default function Registro() {
         <p>Completa tus datos básicos para crear tu cuenta</p>
 
         {error && (
-          <div style={{ 
-            color: "#ff4444", 
-            backgroundColor: "#ffe6e6", 
-            padding: "10px", 
-            borderRadius: "5px", 
-            marginBottom: "20px",
-            textAlign: "center"
-          }}>
+          <div
+            style={{
+              color: "#ff4444",
+              backgroundColor: "#ffe6e6",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
             {error}
           </div>
         )}
@@ -119,7 +124,10 @@ export default function Registro() {
 
         <div className={styles.linksContainer}>
           <a href="/login">
-            <i className="fas fa-sign-in-alt" style={{ marginRight: "5px" }}></i>
+            <i
+              className="fas fa-sign-in-alt"
+              style={{ marginRight: "5px" }}
+            ></i>
             {" ¿Ya tienes cuenta? Inicia sesión"}
           </a>
         </div>

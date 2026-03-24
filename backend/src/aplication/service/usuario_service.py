@@ -23,11 +23,6 @@ def registrar_usuario(nombre, apellidos, correo, contrasena):
         conn.close()
 
 #-------------------------------------
-# Gestor de autenticación
-#-------------------------------------
-# login_usuario()
-# cerrar_sesion()
-#-------------------------------------
 # Gestor de contraseñas
 #-------------------------------------
 # solicitar_recuperacion_contrasena()

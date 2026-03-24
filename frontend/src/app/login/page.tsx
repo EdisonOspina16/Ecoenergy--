@@ -1,75 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Head from "next/head";
-import { useRouter } from "next/navigation";
 import styles from "../../styles/login.module.css";
+import { useLogin } from "../../hooks/useLogin";
 
 export default function Login() {
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setcontrasena] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const {
+    correo,
+    contrasena,
+    error,
+    loading,
+    setCorreo,
+    setContrasena,
+    resetError,
+    submit,
+  } = useLogin();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    console.log("🔍 Intentando login con:", { correo, contrasena: "***" });
-
-    try {
-      const response = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // ✅ Permite enviar y recibir cookies
-        body: JSON.stringify({
-          correo: correo,
-          contrasena: contrasena,
-        }),
-      });
-
-      // 🔍 DEBUG: Ver si se recibió la cookie
-      console.log("🍪 Cookies después del login:", document.cookie);
-
-      console.log("📊 Response status:", response.status);
-
-      const data = await response.json();
-      console.log("📊 Response data:", data);
-
-      if (response.ok) {
-        console.log("✅ Login exitoso, redirigiendo a:", data.redirect);
-
-        const redirectPath = data.redirect || "/dashboard";
-        router.push(redirectPath);
-
-        if (data.usuario) {
-          console.log("👤 Usuario logueado:", data.usuario);
-        }
-      } else {
-        console.error("❌ Error en login:", data.error);
-        setError(data.error || "Error al iniciar sesión");
-      }
-    } catch (error) {
-      console.error("❌ Error en la petición:", error);
-
-      if (error instanceof Error) {
-        if (error.name === "TypeError" && error.message.includes("fetch")) {
-          setError(
-            "No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:5000",
-          );
-        } else {
-          setError("Error al conectar con el servidor: " + error.message);
-        }
-      } else {
-        setError("Error desconocido al conectar con el servidor");
-      }
-    } finally {
-      setLoading(false);
-    }
+    submit();
   };
 
   return (
@@ -127,7 +77,10 @@ export default function Login() {
               required
               className={styles.iconInput}
               value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
+              onChange={(e) => {
+                resetError();
+                setCorreo(e.target.value);
+              }}
             />
           </div>
 
@@ -139,7 +92,10 @@ export default function Login() {
               required
               className={styles.iconInput}
               value={contrasena}
-              onChange={(e) => setcontrasena(e.target.value)}
+              onChange={(e) => {
+                resetError();
+                setContrasena(e.target.value);
+              }}
             />
           </div>
 
