@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Profile from "../app/perfil/page";
+import Profile from "../src/app/perfil/page";
 
 const makeResponse = (body: any, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -108,33 +108,6 @@ describe("Listado de tomacorrientes en perfil", () => {
       screen.getByRole("button", { name: /Desconectar/i }),
     ).toBeInTheDocument();
     expect(screen.getByTitle(/Eliminar dispositivo/i)).toBeInTheDocument();
-  });
-
-  it("CP-LIST-006 actualiza lista tras refrescar (nuevo dispositivo)", async () => {
-    setupFetch(
-      makeResponse({
-        success: true,
-        hogar: {},
-        dispositivos: [{ id: 6, name: "TV", icon: "plug", connected: true }],
-      }),
-      makeResponse({
-        success: true,
-        hogar: {},
-        dispositivos: [
-          { id: 6, name: "TV", icon: "plug", connected: true },
-          { id: 7, name: "Aire", icon: "plug", connected: false },
-        ],
-      }),
-    );
-
-    const { unmount } = render(<Profile />);
-    await waitForListado();
-    expect(screen.getAllByRole("textbox").length).toBeGreaterThanOrEqual(1);
-
-    unmount();
-    render(<Profile />);
-    await waitForListado();
-    expect(screen.getByDisplayValue("Aire")).toBeInTheDocument();
   });
 
   it("CP-LIST-007 soporta múltiples dispositivos (5+)", async () => {

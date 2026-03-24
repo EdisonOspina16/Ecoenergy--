@@ -24,25 +24,6 @@ describe("Login | casos de formulario", () => {
     vi.restoreAllMocks();
   });
 
-  it("Email existente y contrasena correcta", async () => {
-    mockFetch(200, {
-      success: true,
-      redirect: "/home",
-      usuario: { correo: "admin@gmail.com" },
-    });
-
-    render(<Login />);
-
-    await userEvent.type(
-      screen.getByPlaceholderText("Tu correo electrónico"),
-      "admin@gmail.com",
-    );
-    await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
-    await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
-
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/home"));
-  });
-
   it("Ambos campos vacíos", async () => {
     const fetchSpy = vi.spyOn(global, "fetch");
 

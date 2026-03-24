@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import Dashboard from "../app/dashboard/page";
+import Dashboard from "../src/app/dashboard/page";
 
 // Aquí configuramos window.location.href
 const hrefSpy = vi.fn();

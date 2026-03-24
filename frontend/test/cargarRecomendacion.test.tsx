@@ -6,7 +6,7 @@
 
 import React from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cargarRecomendacion } from "../lib/cargarRecomendacion";
+import { cargarRecomendacion } from "../src/lib/cargarRecomendacion";
 
 const mockFetch = vi.fn();
 
@@ -40,7 +40,10 @@ describe("cargarRecomendacion - caja blanca", () => {
 
     // C1: setRecommendations llamado con los resultados agregados
     expect(setRecommendations).toHaveBeenCalledTimes(1);
-    expect(setRecommendations).toHaveBeenCalledWith([datosDevice1, datosDevice2]);
+    expect(setRecommendations).toHaveBeenCalledWith([
+      datosDevice1,
+      datosDevice2,
+    ]);
   });
 
   test("cargarRecomendacion - res.ok = false: agrega { error: 'no response' }", async () => {
