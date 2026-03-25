@@ -16,19 +16,19 @@ from prometheus_flask_exporter import PrometheusMetrics
 
 
 # CSRF no aplicado porque es API REST con autenticación controlada
-app = Flask(__name__)
+app = Flask(__name__) # NOSONAR
 app.secret_key = 'clave_secreta_super_segura_iper_iper_segura_ecoenergy_123' # NOSONAR - Solo para desarrollo, no usar en producción
 metrics = PrometheusMetrics(app)
 
 # ============================================
-# 🌐 CORS - Permitir peticiones desde Next.js
+# CORS - Permitir peticiones desde Next.js
 # ============================================
 CORS(app, 
      resources={r"/*": {"origins": "http://localhost:3000"}},
      supports_credentials=True)
 
 # ============================================
-# 🍪 CONFIGURACIÓN DE SESIONES
+# CONFIGURACIÓN DE SESIONES
 # ============================================
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'   # CORRECTO para localhost
 app.config['SESSION_COOKIE_SECURE'] = False     # False porque estamos en HTTP
@@ -38,7 +38,7 @@ app.config['SESSION_COOKIE_PATH'] = '/'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)  # 1 hora
 
 # ============================================
-# 📋 REGISTRAR BLUEPRINTS
+# REGISTRAR BLUEPRINTS
 # ============================================
 app.register_blueprint(blueprint_Usuarios)
 app.register_blueprint(blueprint_perfil)
@@ -47,16 +47,10 @@ app.register_blueprint(email_bp)
 app.register_blueprint(blueprint_dispositivos)
 
 # ============================================
-# 🚀 INICIAR APLICACIÓN
+# INICIAR APLICACIÓN
 # ============================================
 if __name__ == '__main__':
-    print("="*60)
     print("🌱 EcoEnergy Backend - INICIANDO")
-    print("="*60)
-    print("📍 URL: http://localhost:5000")
-    print("🍪 Sesiones: Configuradas (Duración: 1 hora)")
-    print("🌐 CORS: Habilitado para http://localhost:3000")
-    print("🔓 Credenciales: Permitidas")
     print("="*60)
     iniciar_simulacion()
     

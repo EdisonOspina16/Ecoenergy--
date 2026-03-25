@@ -17,7 +17,7 @@ class hogar_fake:
         return {"id_hogar": self.id_hogar}
 
 
-class Dispositivo_fake:
+class DispositivoFake:
     def __init__(self, id_hogar: int, alias: str, device_id: str) -> None:
         self.id_dispositivos = 123
         self.id_hogar = id_hogar
@@ -67,7 +67,7 @@ def stub_dispositivos(monkeypatch):
 
     def fake_crear_dispositivo(id_hogar: int, alias: str, id_dispositivo_iot: str):
         registrados.add(id_dispositivo_iot)
-        return Dispositivo_fake(id_hogar, alias, id_dispositivo_iot)
+        return DispositivoFake(id_hogar, alias, id_dispositivo_iot)
 
     monkeypatch.setattr(vp, "verificar_dispositivo_existe", fake_verificar)
     monkeypatch.setattr(vp, "obtener_hogar_por_usuario", fake_hogar)
@@ -142,7 +142,7 @@ def test_cp_tom_004_apodo_muy_largo(client, monkeypatch):
     def crear_condicional(id_hogar: int, alias: str, id_dispositivo_iot: str):
         if len(alias) > 50:
             return None
-        return Dispositivo_fake(id_hogar, alias, id_dispositivo_iot)
+        return DispositivoFake(id_hogar, alias, id_dispositivo_iot)
 
     monkeypatch.setattr(vp, "crear_dispositivo", crear_condicional)
 
