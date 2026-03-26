@@ -1,49 +1,20 @@
 'use client';
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/page.module.css";
+import { useSubscribe } from "../hooks/useSubscribe";
 
 
 export default function Principal() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-
-  const handleSubscribe = async () => {
-    if (!email) {
-      setMessage("Por favor ingresa un correo válido");
-      return;
-    }
-
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const response = await fetch("http://localhost:5000/subscribe",{
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(data.error || "Error al registrar el correo");
-      } else {
-        setMessage("¡Gracias por unirte a la comunidad! 🌱");
-        setEmail("");
-      }
-    } catch (error) {
-      setMessage("No se pudo conectar con el servidor");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    loading,
+    message,
+    handleSubscribe
+  } = useSubscribe();
  
   return (
     <>      {/* TopNavBar */}

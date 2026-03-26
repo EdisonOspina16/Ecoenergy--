@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useDeviceRegistration } from "../../hooks/useDeviceRegistration";
+import { useProfileSubmit } from "../../hooks/useProfileSubmit";
 import { DeviceData } from "../../lib/api/devices";
 import { fetchPerfil, PerfilResponse } from "../../lib/api/profile";
 import styles from "../../styles/perfil.module.css";
@@ -18,7 +19,6 @@ export default function Profile() {
   const [homeName, setHomeName] = useState("");
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
-  const [profileSaving, setProfileSaving] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -92,45 +92,11 @@ export default function Profile() {
 
   const registro = useDeviceRegistration(agregarDispositivo, mostrarMensaje);
 
+  const { profileSaving, submitProfile } = useProfileSubmit(mostrarMensaje);
+
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!address || !homeName) {
-      mostrarMensaje(
-        "error",
-        "La dirección y el nombre del hogar son requeridos",
-      );
-      return;
-    }
-
-    try {
-      setProfileSaving(true);
-
-      const response = await fetch("http://localhost:5000/perfil", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          address,
-          nombre_hogar: homeName,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        mostrarMensaje("success", data.message);
-      } else {
-        mostrarMensaje("error", data.error || "Error al guardar el perfil");
-      }
-    } catch (error) {
-      console.error("Error al guardar perfil:", error);
-      mostrarMensaje("error", "Error al conectar con el servidor");
-    } finally {
-      setProfileSaving(false);
-    }
+    await submitProfile({ address, nombre_hogar: homeName });
   };
 
   const handleDeviceRegister = (e: React.FormEvent) => {
