@@ -153,4 +153,29 @@ describe("Login | casos de formulario", () => {
       contrasena: "admin",
     });
   });
+
+  it("Debería iniciar sesión y redirigir con éxito (Camino Normal)", async () => {
+    // === Arrange ===
+    vi.mocked(loginRequest).mockResolvedValue({
+      ok: true,
+      redirect: "/home",
+    });
+
+    render(<Login />);
+
+    await userEvent.type(
+      screen.getByPlaceholderText("Tu correo electrónico"),
+      "admin@gmail.com",
+    );
+    await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
+
+    // === Act ===
+    await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
+
+    // === Assert ===
+    await waitFor(() => {
+	    // @ts-expect-error router push is mocked in setupTests
+      expect(globalThis.__routerPush).toHaveBeenCalledWith("/home");
+    });
+  });
 });

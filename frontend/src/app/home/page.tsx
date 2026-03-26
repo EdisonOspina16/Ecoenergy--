@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { cargarDispositivos } from '../../hooks/useDispositivos';
 
 type Device = {
   nombre: string;
@@ -221,34 +222,7 @@ export default function Home() {
 
   // Cargar dispositivos desde backend
   useEffect(() => {
-    const cargarDispositivos = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/dispositivos', {
-          credentials: 'include',
-        });
-        if (!response.ok) throw new Error('Error al obtener dispositivos');
-        const data = await response.json();
-
-        if (data?.success && Array.isArray(data.dispositivos)) {
-          const dispositivosMapeados: Device[] = data.dispositivos.map((d: any) => ({
-            nombre: d.nombre,
-            consumo: Number(d.consumo) || 0,
-            estado: d.estado || 'Desconocido',
-          }));
-
-          setDevices(dispositivosMapeados);
-        } else {
-          setDevices([]);
-        }
-      } catch (error) {
-        console.error('Error al cargar dispositivos:', error);
-        setDevices([]);
-      } finally {
-        setLoadingDevices(false);
-      }
-    };
-
-    cargarDispositivos();
+    cargarDispositivos({ setDevices, setLoadingDevices });
   }, []);
 
   // Render del gráfico SVG
