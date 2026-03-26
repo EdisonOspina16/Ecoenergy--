@@ -91,7 +91,29 @@ describe("Eliminación de tomacorrientes en perfil", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("CP-DEL-004 maneja error de red al eliminar y notifica con fallback", async () => {
+  it("CP-DEL-004 usa el mensaje por defecto cuando el backend no envía 'error'", async () => {
+    const fetchMock = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValueOnce(makeResponse(profilePayload))
+      .mockResolvedValueOnce(makeResponse({ success: false }));
+
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    renderProfile();
+    await waitForListado();
+
+    await userEvent.click(screen.getByTitle(/eliminar dispositivo/i));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Error al eliminar el dispositivo/i),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.getByDisplayValue("Tomacorriente Sala")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("CP-DEL-005 maneja error de red al eliminar y notifica con fallback", async () => {
     const fetchMock = vi
       .spyOn(global, "fetch")
       .mockResolvedValueOnce(makeResponse(profilePayload))
