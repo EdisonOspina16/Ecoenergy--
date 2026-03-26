@@ -4,6 +4,7 @@ sys.path.append("src")
 from psycopg2.extras import RealDictCursor
 from model.hogar import Hogar
 from src.database import obtener_conexion
+from src.aplication.service.hogar_service import crear_hogar
 
 
 def obtener_hogar_por_usuario(id_usuario):
@@ -39,42 +40,6 @@ def obtener_hogar_por_usuario(id_usuario):
     except Exception as e:
         print(f"Error al obtener hogar: {e}")
         return None
-
-
-def crear_hogar(id_usuario, direccion, nombre_hogar):
-    """
-    Crea un nuevo hogar para un usuario.
-    """
-    try:
-        conn = obtener_conexion()
-        if not conn:
-            return None
-            
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        cur.execute("""
-            INSERT INTO hogares (id_usuario, direccion, nombre_hogar)
-            VALUES (%s, %s, %s)
-            RETURNING id_hogar, id_usuario, direccion, nombre_hogar
-        """, (id_usuario, direccion, nombre_hogar))
-        
-        fila = cur.fetchone()
-        conn.commit()
-        cur.close()
-        conn.close()
-        
-        if fila:
-            return Hogar(
-                id_hogar=fila['id_hogar'],
-                id_usuario=fila['id_usuario'],
-                direccion=fila['direccion'],
-                nombre_hogar=fila['nombre_hogar']
-            )
-        return None
-    except Exception as e:
-        print(f"Error al crear hogar: {e}")
-        return None
-
 
 def actualizar_hogar(id_usuario, direccion, nombre_hogar):
     """

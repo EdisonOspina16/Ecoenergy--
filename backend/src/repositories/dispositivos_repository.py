@@ -8,6 +8,7 @@ class DispositivoRepository:
     def __init__(self, conexion):
         self.conn = conexion
 
+#listar dispositivo
     def obtener_por_usuario(self, id_usuario: int) -> list:
         """
         Retorna las filas crudas de dispositivos asociados al hogar de un usuario.
@@ -31,7 +32,9 @@ class DispositivoRepository:
 
         except DatabaseError as e:
             raise PersistenciaError(f"Error en base de datos: {e}")
-    
+        
+#mostrar estado dispositivo
+
     def obtener_dispositivos_con_consumo(self) -> list:
         """
         Retorna las filas crudas de todos los dispositivos con su último
@@ -59,4 +62,3 @@ class DispositivoRepository:
  
         except DatabaseError as e:
             raise PersistenciaError(f"Error en base de datos: {e}")
- 

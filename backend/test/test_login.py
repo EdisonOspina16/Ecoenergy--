@@ -32,7 +32,7 @@ def client():
             yield client
 
 
-def test_login_sin_contraseña(client):
+def test_login_sin_contrasena(client):
     resp = client.post("/login", json={"correo": "solo@mail.com"})
     assert resp.status_code == 400
     data = resp.get_json()
@@ -88,7 +88,7 @@ def test_login_sin_body(client):
     assert resp.status_code == 415
 
 
-def test_login_contraseña_vacia(client):
+def test_login_contrasena_vacia(client):
     resp = client.post(
         "/login",
         json={"correo": "usuario@ejemplo.com", "contraseña": ""},
@@ -118,10 +118,10 @@ def test_login_valida_sesion_permanente(monkeypatch, client):
 def test_login_dos_usuarios_contra_mismas_credenciales(monkeypatch, client):
     """Simula dos correos posibles y solo acepta el correcto."""
 
-    def verificar_fake(correo, contraseña):
-        if correo == "valido@ejemplo.com" and contraseña == "ClaveValida1!":
+    def verificar_fake(correo, contrasena):
+        if correo == "valido@ejemplo.com" and contrasena == "ClaveValida1!":
             return UsuarioPrueba(correo)
-        if correo == "otro@ejemplo.com" and contraseña == "ClaveValida1!":
+        if correo == "otro@ejemplo.com" and contrasena == "ClaveValida1!":
             # un usuario diferente, misma contraseña, se rechaza
             return None
         return None

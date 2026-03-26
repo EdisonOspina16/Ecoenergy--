@@ -4,6 +4,7 @@ from src.database import obtener_conexion
 from src.controller.controladorSimulacion import generar_recomendacion, generar_ahorro_estimado
 from src.controller.controladorHogar import obtener_hogar_por_usuario
 from src.controller.controladorDispositivos import obtener_dispositivos_por_usuario
+from src.aplication.service.dispositivos_service import listar_dispositivos
 from domain.errors import ConexionError
 
 vista_consumo = Blueprint('vista_consumo', __name__)
@@ -125,51 +126,25 @@ def consumo_historico():
         return jsonify({"error": str(e)}), 500
 
 
-    
+# vista_consumo.py — refactorizada listar dispositivo 
+# vista_consumo.py — refactorizada listar dispositivo 
 @vista_consumo.route('/dispositivos', methods=['GET'])
-def obtener_dispositivos():
-    """
-    Devuelve la lista de dispositivos con su consumo individual
-    """
+@login_requerido  
+def listar_dispositivos_view():
     try:
-        conn = obtener_conexion()
-        cursor = conn.cursor()
+        usuario = session.get('usuario')
+        id_usuario = usuario['id'] 
 
-        # Dispositivos con su último registro
-        cursor.execute("""
-            SELECT DISTINCT ON (d.id_dispositivos)
-                d.alias,
-                r.watts,
-                d.estado_activo,
-                d.tipo_dispositivo_ia
-            FROM dispositivos AS d
-            LEFT JOIN registros_consumo AS r 
-                ON r.id_dispositivo = d.id_dispositivos
-            ORDER BY d.id_dispositivos, r.fecha_hora DESC
-        """)
+        dispositivos = listar_dispositivos(id_usuario)  
+        dispositivos_dict = [disp.to_dict() for disp in dispositivos]  
 
-        rows = cursor.fetchall()
-        dispositivos = [
-            {
-                "nombre": row[0] or row[3] or "Dispositivo Sin Nombre",
-                "consumo": float(row[1]) / 1000 if row[1] else 0.0,
-                "estado": "Encendido" if row[2] else "Apagado",
-                "watts": float(row[1]) if row[1] else 0.0
-            }
-            for row in rows
-        ]
+        return jsonify({"success": True, "dispositivos": dispositivos_dict}), 200
 
-        cursor.close()
-        conn.close()
-
-        return jsonify({
-            "success": True, 
-            "dispositivos": dispositivos
-        })
+    except ConexionError as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-
 
 @vista_consumo.route('/ahorro-estimado', methods=['GET'])
 def ahorro_estimado():

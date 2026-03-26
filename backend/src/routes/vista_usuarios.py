@@ -5,7 +5,8 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, session
 from flask_cors import cross_origin
 from controller.controladorUsuarios import verificar_credenciales, actualizar_contrasena, obtener_usuario_por_id
-from aplication.service.usuario_service import registrar_usuario
+from aplication.service.usuario_service import registrar_usuario, cambiar_contrasena
+from src.domain.errors import ConexionError, ValidacionError
 
 
 blueprint_Usuarios = Blueprint('vista_usuarios', __name__)
@@ -104,18 +105,25 @@ def logout():
 @cross_origin(supports_credentials=True)
 def recuperar():
     data = request.get_json()
-    
+
     if not data or not all(key in data for key in ['correo', 'nueva_contrasena']):
         return jsonify(ERROR_CAMPOS_REQUERIDOS), 400
-    
+
     correo = data['correo']
     nueva_contrasena = data['nueva_contrasena']
 
-    exito = actualizar_contrasena(correo, nueva_contrasena)
-    if exito:
-        return jsonify({
-            "message": "contrasena actualizada correctamente", 
-            "redirect": "/login"
-        })
-    else:
-        return jsonify({"error": "No se encontró el correo"}), 404
+    try:
+        exito = cambiar_contrasena(correo, nueva_contrasena)  
+        if exito:
+            return jsonify({
+                "message": "contrasena actualizada correctamente",
+                "redirect": "/login"
+            }), 200
+        else:
+            return jsonify({"error": "No se encontró el correo"}), 404
+
+    except ValidacionError as e:
+        return jsonify({"error": str(e)}), 400
+
+    except ConexionError as e:
+        return jsonify({"error": str(e)}), 500

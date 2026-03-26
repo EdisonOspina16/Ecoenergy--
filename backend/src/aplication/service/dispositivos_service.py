@@ -4,7 +4,7 @@ from model.dispositivo import Dispositivo
 from repositories.dispositivos_repository import DispositivoRepository
 from aplication.validators.dispositivos_validator import validar_listar_dispositivos
 
-
+# Listar dispositivo
 def listar_dispositivos(id_usuario: int) -> list:
     """
     Lista todos los dispositivos asociados al hogar de un usuario:
@@ -39,6 +39,7 @@ def listar_dispositivos(id_usuario: int) -> list:
     finally:
         conn.close()
 
+#mostrar estado dispositivo
 def obtener_dispositivos() -> list:
     """
     Obtiene todos los dispositivos con su estado y último consumo registrado:
