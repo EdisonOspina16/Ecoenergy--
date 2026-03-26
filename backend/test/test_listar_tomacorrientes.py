@@ -171,6 +171,7 @@ def test_cp_list_008_refresh_persistente(client, monkeypatch):
 
     first = client.get("/perfil").get_json()["dispositivos"]
     second = client.get("/perfil").get_json()["dispositivos"]
+<<<<<<< HEAD
     assert first == second
 
 
@@ -193,3 +194,6 @@ def test_cp_list_error_servidor_devuelve_500(monkeypatch, client):
         client.get("/perfil")
 
     helper_spy.assert_called_once()
+=======
+    assert first == second
+>>>>>>> refactorizacion_sofi

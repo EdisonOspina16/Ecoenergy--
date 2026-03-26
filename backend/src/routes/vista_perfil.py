@@ -1,4 +1,5 @@
 import sys
+import psycopg2
 sys.path.append("src")
 
 from flask import Blueprint, request, jsonify, session
@@ -72,32 +73,89 @@ def obtener_perfil_completo_y_listar_tomacorrientes():
         print(f"Error en obtener perfil completo: {e}")
         retornar_jsonify_fallido(e)
 
+def _es_registro_dispositivo(data):
+    """Verifica si los datos corresponden a un registro de dispositivo"""
+    return 'deviceId' in data and 'nickname' in data
+
+
+def _manejar_registro_dispositivo(data, id_usuario):
+    """Maneja el registro de un nuevo dispositivo"""
+    id_dispositivo_iot = data.get('deviceId')
+    alias = data.get('nickname')
+
+    if not all([id_dispositivo_iot, alias]):
+        return jsonify({'success': False, 'error': 'ID del dispositivo y alias son requeridos'}), 400
+
+    if verificar_dispositivo_existe(id_dispositivo_iot):
+        return jsonify({'success': False, 'error': 'Este dispositivo ya está registrado'}), 400
+
+    hogar = obtener_hogar_por_usuario(id_usuario)
+    if not hogar:
+        return jsonify({'success': False, 'error': 'Debes crear un perfil de hogar primero'}), 400
+
+    dispositivo = crear_dispositivo(
+        id_hogar=hogar.id_hogar,
+        alias=alias,
+        id_dispositivo_iot=id_dispositivo_iot
+    )
+
+    if dispositivo:
+        return jsonify({'success': True, 'message': 'Dispositivo registrado exitosamente', 'dispositivo': dispositivo.to_dict()}), 201
+
+    return jsonify({'success': False, 'error': 'Error al registrar el dispositivo'}), 500
+
+
+def _manejar_perfil_hogar(data, id_usuario):
+    """Maneja la creación o actualización del perfil de hogar"""
+    direccion = data.get('address')
+    nombre_hogar = data.get('nombre_hogar')
+
+    if not direccion or not nombre_hogar:
+        return jsonify({'success': False, 'error': 'La dirección y el nombre del hogar son requeridos'}), 400
+
+    hogar_previo = obtener_hogar_por_usuario(id_usuario)
+    hogar = crear_o_actualizar_hogar(id_usuario=id_usuario, direccion=direccion, nombre_hogar=nombre_hogar)
+
+    if not hogar:
+        return jsonify({'success': False, 'error': 'Error al guardar el perfil del hogar'}), 500
+
+    mensaje = 'Perfil actualizado exitosamente' if hogar_previo else 'Perfil creado exitosamente'
+    return jsonify({'success': True, 'message': mensaje, 'hogar': hogar.to_dict()}), 200
+
+
 @blueprint_perfil.route('/perfil', methods=['POST'])
 @cross_origin(supports_credentials=True)
 @login_requerido_perfil
 def registrar_tomacorriente_o_guardar_perfil_de_hogar():
-    """Registra un nuevo tomacorriente/dispositivo O crea/actualiza el perfil del hogar según los datos recibidos"""
-    usuario = session.get('usuario')
-    id_usuario = usuario['id']
+    """Registra un nuevo tomacorriente/dispositivo o crea/actualiza el perfil del hogar"""
+    try:
+        usuario = session.get('usuario')
+        id_usuario = usuario['id']
 
-    data = request.get_json() or {}
-    repo = PerfilRepository(
-        obtener_hogar=obtener_hogar_por_usuario,
-        crear_o_actualizar_hogar=crear_o_actualizar_hogar,
-        verificar_dispositivo_existe=verificar_dispositivo_existe,
-        crear_dispositivo=crear_dispositivo,
-    )
+        data = request.get_json() or {}
 
-    if is_device_payload(data):
-        return registrar_tomacorriente(data, id_usuario, repo)
+        repo = PerfilRepository(
+            obtener_hogar=obtener_hogar_por_usuario,
+            crear_o_actualizar_hogar=crear_o_actualizar_hogar,
+            verificar_dispositivo_existe=verificar_dispositivo_existe,
+            crear_dispositivo=crear_dispositivo,
+        )
 
-    if is_profile_payload(data):
-        return seleccionar_accion_perfil(data, id_usuario, repo)
+        if is_device_payload(data):
+            return registrar_tomacorriente(data, id_usuario, repo)
 
-    return error_response(
-        "La solicitud no coincide con un registro de dispositivo ni perfil",
-        400,
-    )
+        if is_profile_payload(data):
+            return seleccionar_accion_perfil(data, id_usuario, repo)
+
+        return error_response(
+            "La solicitud no coincide con un registro de dispositivo ni perfil",
+            400,
+        )
+
+    except Exception as e:
+        print(f"Error en registrar_tomacorriente_o_guardar_perfil_de_hogar: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @blueprint_perfil.route('/perfil/dispositivo/<int:id_dispositivo>', methods=['PUT'])
 @cross_origin(supports_credentials=True)
@@ -192,6 +250,7 @@ def cambiar_estado_dispositivo(id_dispositivo):
                 'error': 'Dispositivo no encontrado o no autorizado'
             }), 404
 
-    except Exception as e:
+    except Exception  as e:
         print(f"Error en cambiar_estado_dispositivo: {e}")
         retornar_jsonify_fallido(e)
+
