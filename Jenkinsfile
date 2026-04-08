@@ -1,93 +1,187 @@
 pipeline {
     agent any
-    
+
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        DOCKERHUB_USERNAME = 'sofi057'
-        BACKEND_IMAGE = 'sofi057/backend'
-        FRONTEND_IMAGE = 'sofi057/frontend'
-        VERSION = "${env.BUILD_ID}"
+        // ── SonarQube ──────────────────────────────────────────────
+        SONAR_HOST_URL          = 'http://localhost:9000'
+        SONAR_BACKEND_PROJECT   = 'EcoEnergy-Backend'
+        SONAR_FRONTEND_PROJECT  = 'EcoEnergy-Frontend'
+        // Tokens are stored as Jenkins credentials (Secret text)
+        SONAR_BACKEND_TOKEN     = credentials('sonar-backend-token')
+        SONAR_FRONTEND_TOKEN    = credentials('sonar-frontend-token')
+
+        // ── Docker Hub (kept for future CD stages) ─────────────────
+        DOCKERHUB_CREDENTIALS   = credentials('dockerhub-credentials')
+        DOCKERHUB_USERNAME      = 'sofi057'
+        BACKEND_IMAGE           = 'sofi057/backend'
+        FRONTEND_IMAGE          = 'sofi057/frontend'
+        VERSION                 = "${env.BUILD_ID}"
     }
-    
+
     stages {
+
+        // ════════════════════════════════════════════════════════════
+        // 1. CHECKOUT
+        // ════════════════════════════════════════════════════════════
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
-        stage('Build Backend') {
-            steps {
-                dir('backend') {
-                    echo "Compilando Backend (Flask)"
-                    sh 'python3 -m py_compile app.py || echo "No app.py found"'
+
+        // ════════════════════════════════════════════════════════════
+        // 2. INSTALL DEPENDENCIES  (backend & frontend in parallel)
+        // ════════════════════════════════════════════════════════════
+        stage('Install Dependencies') {
+            parallel {
+                stage('Backend Dependencies') {
+                    steps {
+                        dir('backend') {
+                            sh '''
+                                echo "══ Creating Python virtual environment ══"
+                                python3 -m venv venv
+                                . venv/bin/activate
+                                pip install --upgrade pip
+                                pip install -r requirements.txt
+                            '''
+                        }
+                    }
+                }
+                stage('Frontend Dependencies') {
+                    steps {
+                        dir('frontend') {
+                            sh '''
+                                echo "══ Installing Node.js dependencies ══"
+                                npm ci || npm install
+                            '''
+                        }
+                    }
                 }
             }
         }
-        
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    echo "Compilando Frontend (Next.js)"
-                    sh 'npm install || echo "npm install failed"'
-                    sh 'npm run build || echo "Build command not available"'
-                }
-            }
-        }
-        
-        stage('Unit Tests') {
+
+        // ════════════════════════════════════════════════════════════
+        // 3. RUN TESTS  (backend & frontend in parallel)
+        // ════════════════════════════════════════════════════════════
+        stage('Run Tests') {
             parallel {
                 stage('Backend Tests') {
                     steps {
                         dir('backend') {
-                            echo "Ejecutando pruebas Backend reales"
-                            sh 'python3 test_basic.py'
+                            sh '''
+                                echo "══ Running pytest with coverage ══"
+                                . venv/bin/activate
+                                python -m pytest \
+                                    --junitxml=test-results.xml \
+                                    --cov=src \
+                                    --cov-report=xml:coverage.xml \
+                                    --cov-report=term-missing \
+                                    -v
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            junit 'backend/test-results.xml'
                         }
                     }
                 }
                 stage('Frontend Tests') {
                     steps {
                         dir('frontend') {
-                            echo "Ejecutando pruebas Frontend reales"
-                            sh 'npm run test:ci'
+                            sh '''
+                                echo "══ Running vitest with coverage ══"
+                                npx vitest run \
+                                    --reporter=junit \
+                                    --outputFile=test-results.xml \
+                                    --coverage
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            junit 'frontend/test-results.xml'
                         }
                     }
                 }
             }
         }
-        
-        stage('Build Docker Images') {
-            steps {
-                script {
-                    echo "Generando imagenes Docker"
-                    sh "docker build -t ${env.BACKEND_IMAGE}:${env.VERSION} ./backend"
-                    sh "docker build -t ${env.FRONTEND_IMAGE}:${env.VERSION} ./frontend"
+
+        // ════════════════════════════════════════════════════════════
+        // 4. SONARQUBE ANALYSIS  (backend & frontend in parallel)
+        // ════════════════════════════════════════════════════════════
+        stage('SonarQube Analysis') {
+            parallel {
+                stage('SonarQube – Backend') {
+                    steps {
+                        dir('backend') {
+                            withSonarQubeEnv('SonarQube') {
+                                sh """
+                                    sonar-scanner \
+                                        -Dsonar.projectKey=${SONAR_BACKEND_PROJECT} \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.token=${SONAR_BACKEND_TOKEN} \
+                                        -Dsonar.sources=src \
+                                        -Dsonar.tests=test \
+                                        -Dsonar.python.version=3.12 \
+                                        -Dsonar.python.coverage.reportPaths=coverage.xml \
+                                        -Dsonar.exclusions=venv/**,__pycache__/**,.pytest_cache/** \
+                                        -Dsonar.sourceEncoding=UTF-8
+                                """
+                            }
+                        }
+                    }
+                }
+                stage('SonarQube – Frontend') {
+                    steps {
+                        dir('frontend') {
+                            withSonarQubeEnv('SonarQube') {
+                                sh """
+                                    sonar-scanner \
+                                        -Dsonar.projectKey=${SONAR_FRONTEND_PROJECT} \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.token=${SONAR_FRONTEND_TOKEN} \
+                                        -Dsonar.sources=src \
+                                        -Dsonar.tests=test \
+                                        -Dsonar.test.inclusions=**/*.test.js,**/*.test.ts,**/*.test.tsx \
+                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                        -Dsonar.exclusions=node_modules/**,.next/**,dist/**,build/** \
+                                        -Dsonar.sourceEncoding=UTF-8
+                                """
+                            }
+                        }
+                    }
                 }
             }
         }
-        
-        stage('Push to DockerHub') {
+
+        // ════════════════════════════════════════════════════════════
+        // 5. QUALITY GATE
+        // ════════════════════════════════════════════════════════════
+        stage('Quality Gate') {
             steps {
-                script {
-                    echo "Publicando imagenes en DockerHub"
-                    sh """
-                        echo '${env.DOCKERHUB_CREDENTIALS_PSW}' | docker login -u '${env.DOCKERHUB_CREDENTIALS_USR}' --password-stdin
-                        docker push ${env.BACKEND_IMAGE}:${env.VERSION}
-                        docker push ${env.FRONTEND_IMAGE}:${env.VERSION}
-                    """
+                echo '══ Waiting for SonarQube Quality Gate ══'
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
     }
-    
+
+    // ════════════════════════════════════════════════════════════════
+    // POST-BUILD ACTIONS
+    // ════════════════════════════════════════════════════════════════
     post {
+        success {
+            echo '✅ Pipeline completed successfully — all tests passed and Quality Gate met.'
+        }
+        failure {
+            echo '❌ Pipeline FAILED — check test results or SonarQube Quality Gate.'
+        }
         always {
-            echo "Resumen del Pipeline"
-            echo "Checkout completado"
-            echo "Build/Compilacion completado" 
-            echo "Pruebas unitarias ejecutadas"
-            echo "Imagenes Docker generadas"
-            echo "Publicacion en DockerHub completada"
+            echo '📋 Archiving test and coverage reports…'
+            archiveArtifacts artifacts: 'backend/coverage.xml, backend/test-results.xml, frontend/test-results.xml, frontend/coverage/**', allowEmptyArchive: true
+            cleanWs()
         }
     }
 }
