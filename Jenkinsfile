@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarRunner 'SonarScanner'
-    }
-
     environment {
         // ── SonarQube ──────────────────────────────────────────────
         // Cambiado de localhost a sonarqube para compatibilidad con Docker
