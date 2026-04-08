@@ -1,9 +1,14 @@
 pipeline {
     agent any
 
+    tools {
+        sonarQubeScanner 'SonarScanner'
+    }
+
     environment {
         // ── SonarQube ──────────────────────────────────────────────
-        SONAR_HOST_URL          = 'http://localhost:9000'
+        // Cambiado de localhost a sonarqube para compatibilidad con Docker
+        SONAR_HOST_URL          = 'http://sonarqube:9000'
         SONAR_BACKEND_PROJECT   = 'EcoEnergy-Backend'
         SONAR_FRONTEND_PROJECT  = 'EcoEnergy-Frontend'
     }
@@ -107,18 +112,21 @@ pipeline {
                         dir('backend') {
                             withCredentials([string(credentialsId: 'sonar-backend-token', variable: 'SONAR_BACKEND_TOKEN')]) {
                                 withSonarQubeEnv('SonarQube') {
-                                    sh '''
-                                        sonar-scanner \
-                                            -Dsonar.projectKey=$SONAR_BACKEND_PROJECT \
-                                            -Dsonar.host.url=$SONAR_HOST_URL \
-                                            -Dsonar.token=$SONAR_BACKEND_TOKEN \
-                                            -Dsonar.sources=src \
-                                            -Dsonar.tests=test \
-                                            -Dsonar.python.version=3.12 \
-                                            -Dsonar.python.coverage.reportPaths=coverage.xml \
-                                            -Dsonar.exclusions=venv/**,__pycache__/**,.pytest_cache/** \
-                                            -Dsonar.sourceEncoding=UTF-8
-                                    '''
+                                    script {
+                                        def scannerHome = tool 'SonarScanner'
+                                        sh """
+                                            ${scannerHome}/bin/sonar-scanner \
+                                                -Dsonar.projectKey=${SONAR_BACKEND_PROJECT} \
+                                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                                -Dsonar.token=\$SONAR_BACKEND_TOKEN \
+                                                -Dsonar.sources=src \
+                                                -Dsonar.tests=test \
+                                                -Dsonar.python.version=3.12 \
+                                                -Dsonar.python.coverage.reportPaths=coverage.xml \
+                                                -Dsonar.exclusions=venv/**,__pycache__/**,.pytest_cache/** \
+                                                -Dsonar.sourceEncoding=UTF-8
+                                        """
+                                    }
                                 }
                             }
                         }
@@ -129,18 +137,21 @@ pipeline {
                         dir('frontend') {
                             withCredentials([string(credentialsId: 'sonar-frontend-token', variable: 'SONAR_FRONTEND_TOKEN')]) {
                                 withSonarQubeEnv('SonarQube') {
-                                    sh '''
-                                        sonar-scanner \
-                                            -Dsonar.projectKey=$SONAR_FRONTEND_PROJECT \
-                                            -Dsonar.host.url=$SONAR_HOST_URL \
-                                            -Dsonar.token=$SONAR_FRONTEND_TOKEN \
-                                            -Dsonar.sources=src \
-                                            -Dsonar.tests=test \
-                                            -Dsonar.test.inclusions=**/*.test.js,**/*.test.ts,**/*.test.tsx \
-                                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                            -Dsonar.exclusions=node_modules/**,.next/**,dist/**,build/** \
-                                            -Dsonar.sourceEncoding=UTF-8
-                                    '''
+                                    script {
+                                        def scannerHome = tool 'SonarScanner'
+                                        sh """
+                                            ${scannerHome}/bin/sonar-scanner \
+                                                -Dsonar.projectKey=${SONAR_FRONTEND_PROJECT} \
+                                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                                -Dsonar.token=\$SONAR_FRONTEND_TOKEN \
+                                                -Dsonar.sources=src \
+                                                -Dsonar.tests=test \
+                                                -Dsonar.test.inclusions=**/*.test.js,**/*.test.ts,**/*.test.tsx \
+                                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                                -Dsonar.exclusions=node_modules/**,.next/**,dist/**,build/** \
+                                                -Dsonar.sourceEncoding=UTF-8
+                                        """
+                                    }
                                 }
                             }
                         }
