@@ -6,16 +6,6 @@ pipeline {
         SONAR_HOST_URL          = 'http://localhost:9000'
         SONAR_BACKEND_PROJECT   = 'EcoEnergy-Backend'
         SONAR_FRONTEND_PROJECT  = 'EcoEnergy-Frontend'
-        // Tokens are stored as Jenkins credentials (Secret text)
-        SONAR_BACKEND_TOKEN     = credentials('sonar-backend-token')
-        SONAR_FRONTEND_TOKEN    = credentials('sonar-frontend-token')
-
-        // ── Docker Hub (kept for future CD stages) ─────────────────
-        DOCKERHUB_CREDENTIALS   = credentials('dockerhub-credentials')
-        DOCKERHUB_USERNAME      = 'sofi057'
-        BACKEND_IMAGE           = 'sofi057/backend'
-        FRONTEND_IMAGE          = 'sofi057/frontend'
-        VERSION                 = "${env.BUILD_ID}"
     }
 
     stages {
@@ -112,10 +102,10 @@ pipeline {
         // ════════════════════════════════════════════════════════════
         stage('SonarQube Analysis') {
             parallel {
-                stage('SonarQube – Backend') {
+                stage('SonarQube - Backend') {
                     steps {
                         dir('backend') {
-                            withSonarQubeEnv('SonarQube') {
+                            withCredentials([string(credentialsId: 'sonar-backend-token', variable: 'SONAR_BACKEND_TOKEN')]) {
                                 sh """
                                     sonar-scanner \
                                         -Dsonar.projectKey=${SONAR_BACKEND_PROJECT} \
@@ -132,10 +122,10 @@ pipeline {
                         }
                     }
                 }
-                stage('SonarQube – Frontend') {
+                stage('SonarQube - Frontend') {
                     steps {
                         dir('frontend') {
-                            withSonarQubeEnv('SonarQube') {
+                            withCredentials([string(credentialsId: 'sonar-frontend-token', variable: 'SONAR_FRONTEND_TOKEN')]) {
                                 sh """
                                     sonar-scanner \
                                         -Dsonar.projectKey=${SONAR_FRONTEND_PROJECT} \
@@ -180,8 +170,10 @@ pipeline {
         }
         always {
             echo '📋 Archiving test and coverage reports…'
-            archiveArtifacts artifacts: 'backend/coverage.xml, backend/test-results.xml, frontend/test-results.xml, frontend/coverage/**', allowEmptyArchive: true
-            cleanWs()
+            node('') {
+                archiveArtifacts artifacts: 'backend/coverage.xml, backend/test-results.xml, frontend/test-results.xml, frontend/coverage/**', allowEmptyArchive: true
+                cleanWs()
+            }
         }
     }
 }
