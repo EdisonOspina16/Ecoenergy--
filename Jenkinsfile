@@ -42,7 +42,7 @@ pipeline {
                         dir('frontend') {
                             sh '''
                                 echo "══ Installing Node.js dependencies ══"
-                                npm ci || npm install
+                                npm install
                             '''
                         }
                     }
