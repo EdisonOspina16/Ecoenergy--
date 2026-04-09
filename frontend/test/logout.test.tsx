@@ -151,4 +151,41 @@ describe("Dashboard | logout", () => {
     await waitFor(() => screen.getByText(/Debes iniciar sesión/i));
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
+
+  it("CP-LOG-006 Registra error en consola si el logout falla", async () => {
+    const fetchMock = vi
+      .spyOn(global, "fetch")
+      // Perfil OK para mostrar el botón
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            usuario: { nombre: "Admin", correo: "admin@gmail.com" },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ) as any,
+      )
+      // Logout falla por error de red
+      .mockRejectedValueOnce(new Error("Network down"));
+
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    render(<Dashboard />);
+    await waitFor(() => screen.getByText(/hola, admin/i));
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /cerrar sesión/i }),
+    );
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error al cerrar sesión:",
+        expect.any(Error),
+      );
+    });
+
+    expect(hrefSpy).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });
