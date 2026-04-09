@@ -107,9 +107,9 @@ pipeline {
                     steps {
                         dir('backend') {
                             withCredentials([string(credentialsId: 'sonar-backend-token', variable: 'SONAR_BACKEND_TOKEN')]) {
-                                withSonarQubeEnv('SonarQube') {
+                                withSonarQubeEnv('Sonarqube') {
                                     script {
-                                        def scannerHome = tool 'SonarScanner'
+                                        def scannerHome = tool 'SonarQube'
                                         sh """
                                             ${scannerHome}/bin/sonar-scanner \
                                                 -Dsonar.projectKey=${SONAR_BACKEND_PROJECT} \
@@ -132,9 +132,9 @@ pipeline {
                     steps {
                         dir('frontend') {
                             withCredentials([string(credentialsId: 'sonar-frontend-token', variable: 'SONAR_FRONTEND_TOKEN')]) {
-                                withSonarQubeEnv('SonarQube') {
+                                withSonarQubeEnv('Sonarqube') {
                                     script {
-                                        def scannerHome = tool 'SonarScanner'
+                                        def scannerHome = tool 'SonarQube'
                                         sh """
                                             ${scannerHome}/bin/sonar-scanner \
                                                 -Dsonar.projectKey=${SONAR_FRONTEND_PROJECT} \

@@ -1,23 +1,27 @@
-# docker-compose.jenkins.yml - Infraestructura CI/CD (Jenkins + SonarQube)
-version: '3.8'
-
+# Infraestructura CI/CD (Jenkins + SonarQube)
 services:
   sonarqube:
-    image: sonarqube:lts
+    image: sonarqube:latest
     container_name: sonarqube-server
+    hostname: sonarqube
     restart: unless-stopped
     ports:
       - "9000:9000"
     networks:
       - ci-net
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
-    # Nota: SonarQube requiere vm.max_map_count=262144 en el host para ElasticSearch
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     container_name: jenkins-ci
     privileged: true
     user: root
@@ -38,6 +42,7 @@ services:
 
 networks:
   ci-net:
+    name: ci-net
     driver: bridge
 
 volumes:
