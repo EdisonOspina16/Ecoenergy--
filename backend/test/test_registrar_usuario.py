@@ -4,7 +4,7 @@ import psycopg2
 import pytest
 from typing import Any
 from src.aplication.service import usuario_service as us
-from src.domain.errors import PersistenciaError, CorreoDuplicadoError, ValidacionError
+from src.domain.errors import PersistenciaError, CorreoDuplicadoError, ValidacionError, ConexionError
 from psycopg2 import Error as DatabaseError
 
 # ==============================================================
@@ -769,3 +769,27 @@ def test_contrasena_con_emoji() -> None:
 
     # Assert
     assert "contraseña inválida" in str(exc_info.value).lower()
+
+# ==============================================================
+# PRUEBA DE SIN CONEXIÓN A BASE DE DATOS
+# ==============================================================
+
+def test_sin_conexion_bd(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stub: cuando obtener_conexion() retorna None debe lanzar ConexionError."""
+    # Arrange
+    monkeypatch.setattr(us, "obtener_conexion", lambda: None)
+    nombre = "Carlos"
+    apellidos = "Gómez"
+    correo = "usuario@gmail.com"
+    contrasena = "Abc123!@"
+
+    # Act & Assert
+    with pytest.raises(ConexionError) as exc_info:
+        us.registrar_usuario(
+            nombre=nombre,
+            apellidos=apellidos,
+            correo=correo,
+            contrasena=contrasena,
+        )
+
+    assert "no se pudo conectar" in str(exc_info.value).lower()

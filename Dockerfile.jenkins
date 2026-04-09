@@ -1,0 +1,25 @@
+FROM jenkins/jenkins:latest
+
+USER root
+
+# Evitar prompts y errores de repositorios antiguos
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Reparar y actualizar repositorios
+# --allow-releaseinfo-change permite que apt acepte cambios de versión de Debian (por ejemplo, si bullseye pasó a oldstable)
+RUN apt-get update --allow-releaseinfo-change && \
+    apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    curl \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Asegurar que el usuario root pueda ejecutar docker (como en tu configuración previa)
+USER root

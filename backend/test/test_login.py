@@ -32,7 +32,7 @@ def client():
             yield client
 
 
-def test_login_sin_contraseña(client):
+def test_login_sin_contrasena(client):
     resp = client.post("/login", json={"correo": "solo@mail.com"})
 
     assert resp.status_code == 400
@@ -116,7 +116,7 @@ def test_login_sin_body(client):
     assert resp.status_code == 415
 
 
-def test_login_contraseña_vacia(client):
+def test_login_contrasena_vacia(client):
     resp = client.post(
         "/login",
         json={"correo": "usuario@ejemplo.com", "contrasena": ""},

@@ -3,50 +3,19 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import styles from "../../styles/login.module.css";
+import { useRecuperar } from "../../hooks/useRecuperar";
 
 export default function Recuperar() {
-  const [correo, setCorreo] = useState("");
-  const [nuevacontrasena, setNuevacontrasena] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
-
-    try {
-      const response = await fetch("http://localhost:5000/recuperar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          credentials: "include",
-        },
-        body: JSON.stringify({
-          correo: correo,
-          nueva_contrasena: nuevacontrasena,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess(data.message);
-        setTimeout(() => {
-          window.location.href = data.redirect;
-        }, 2000);
-      } else {
-        setError(data.error || "Error al recuperar contrasena");
-      }
-    } catch (error) {
-      console.error("Error en la petición:", error);
-      setError("Error al conectar con el servidor");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    correo,
+    setCorreo,
+    nuevacontrasena,
+    setNuevacontrasena,
+    error,
+    success,
+    loading,
+    handleSubmit
+  } = useRecuperar();
 
   return (
     <>

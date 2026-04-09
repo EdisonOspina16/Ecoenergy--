@@ -55,3 +55,24 @@ class UsuarioRepository:
 
         except DatabaseError as e:
             raise PersistenciaError(f"Error al obtener hogar: {e}")
+        
+
+    def actualizar_contrasena(self, correo, nueva_hash) -> bool:
+        try:
+            cur = self.conn.cursor()
+
+            cur.execute("""
+                UPDATE usuarios
+                SET contrasena = %s
+                WHERE correo = %s
+            """, (nueva_hash, correo))
+
+            self.conn.commit()
+            filas = cur.rowcount
+            cur.close()
+
+            return filas > 0
+
+        except DatabaseError as e:
+            self.conn.rollback()
+            raise PersistenciaError(f"Error en base de datos: {e}")

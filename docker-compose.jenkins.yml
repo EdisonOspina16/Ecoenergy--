@@ -1,14 +1,38 @@
-# docker-compose.jenkins.yml - JENKINS CI/CD
-version: '3.8'
+# Infraestructura CI/CD (Jenkins + SonarQube)
 services:
+  sonarqube:
+    image: sonarqube:latest
+    container_name: sonarqube-server
+    hostname: sonarqube
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    networks:
+      - ci-net
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     container_name: jenkins-ci
     privileged: true
     user: root
+    restart: unless-stopped
+    depends_on:
+      - sonarqube
     ports:
       - "8080:8080"
       - "50000:50000"
+    networks:
+      - ci-net
     volumes:
       - jenkins_data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
@@ -16,5 +40,13 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
 
+networks:
+  ci-net:
+    name: ci-net
+    driver: bridge
+
 volumes:
   jenkins_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
