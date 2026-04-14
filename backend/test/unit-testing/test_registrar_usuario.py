@@ -305,7 +305,7 @@ def test_correo_valido_estandar() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-011: Correo válido estándar debería retornar True"
+    assert resultado is True
 
 
 def test_correo_sin_arroba() -> None:
