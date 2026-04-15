@@ -1,6 +1,7 @@
 import pytest
 from flask import Flask
 from unittest.mock import patch
+from hamcrest import assert_that, is_, equal_to
 
 # Importamos el blueprint y constantes necesarios
 from src.routes.vista_usuarios import blueprint_Usuarios, ERROR_CAMPOS_REQUERIDOS
@@ -40,11 +41,11 @@ def test_registro_exitoso(mock_registrar_usuario, client):
     response = client.post('/registro', json=dummy_data)
 
     # [Assert] - Afirmar
-    assert response.status_code == 200
-    assert response.get_json() == {
+    assert_that(response.status_code, is_(200))
+    assert_that(response.get_json(), equal_to({
         "message": "Usuario registrado con éxito",
         "redirect": "/login"
-    }
+    }))
     
     # Mock (Verificación de interacciones): Afirmamos que el servicio subyacente 
     # se llamó exactamente 1 vez y recibió los datos correctos del Dummy.
@@ -73,8 +74,8 @@ def test_registro_error_faltan_campos(client):
     response = client.post('/registro', json=incompleta_data)
 
     # [Assert]
-    assert response.status_code == 400
-    assert response.get_json() == ERROR_CAMPOS_REQUERIDOS
+    assert_that(response.status_code, is_(400))
+    assert_that(response.get_json(), equal_to(ERROR_CAMPOS_REQUERIDOS))
 
 # --- CASO 3: Caso Borde (Body/payload completamente vacío) ---
 def test_registro_error_payload_vacio(client):
@@ -88,8 +89,8 @@ def test_registro_error_payload_vacio(client):
     response = client.post('/registro', json={})
 
     # [Assert]
-    assert response.status_code == 400
-    assert response.get_json() == ERROR_CAMPOS_REQUERIDOS
+    assert_that(response.status_code, is_(400))
+    assert_that(response.get_json(), equal_to(ERROR_CAMPOS_REQUERIDOS))
 
 # --- CASO 4: Caso Error (Falla el registro en Base de Datos) ---
 @patch('src.routes.vista_usuarios.registrar_usuario')
@@ -113,8 +114,8 @@ def test_registro_error_guardar_bd(mock_registrar_usuario, client):
     response = client.post('/registro', json=dummy_data)
 
     # [Assert]
-    assert response.status_code == 500
-    assert response.get_json() == {"error": "Error al registrar usuario"}
+    assert_that(response.status_code, is_(500))
+    assert_that(response.get_json(), equal_to({"error": "Error al registrar usuario"}))
     
     # Mock: Se debe seguir llamando a la BD aunque falló
     mock_registrar_usuario.assert_called_once_with(**dummy_data)
