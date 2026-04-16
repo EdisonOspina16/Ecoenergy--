@@ -111,7 +111,7 @@ pipeline {
                 sh '''
                     docker compose stop backend || true
                     docker compose rm -f backend || true
-                    docker compose up -d --build backend
+                    docker compose up -d --build backend --no-deps
                     echo "✅ Backend running on http://localhost:5000"
                 '''
             }

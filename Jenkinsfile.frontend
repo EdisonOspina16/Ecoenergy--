@@ -105,7 +105,7 @@ pipeline {
                 sh '''
                     docker compose stop frontend || true
                     docker compose rm -f frontend || true
-                    docker compose up -d --build frontend
+                    docker compose up -d --build frontend --no-deps
                     echo "✅ Frontend running on http://localhost:3001"
                 '''
             }
