@@ -103,9 +103,9 @@ pipeline {
             steps {
                 echo '🚀 Deploying Frontend (Next.js) on localhost:3001...'
                 sh '''
-                    docker compose stop frontend || true
-                    docker compose rm -f frontend || true
-                    docker compose up -d --build frontend
+                    docker compose -p ecoenergy stop frontend || true
+                    docker compose -p ecoenergy rm -f frontend || true
+                    docker compose -p ecoenergy up -d --build frontend
                     echo "✅ Frontend running on http://localhost:3001"
                 '''
             }
