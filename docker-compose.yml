@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:latest
-    container_name: db_postgres
+    # container_name: db_postgres
     environment:
       POSTGRES_DB: ecoenergydb
       POSTGRES_USER: ecoenergy
@@ -17,7 +17,7 @@ services:
   
   mosquitto:
     image: eclipse-mosquitto:latest
-    container_name: mosquitto-broker
+    # container_name: mosquitto-broker
     restart: unless-stopped
     ports:
       - "1883:1883"    
@@ -30,7 +30,7 @@ services:
       - ecoenergy-net
 
   backend:
-    container_name: backend_app
+    #container_name: backend_app
     depends_on:
       - db
       - mosquitto
@@ -46,7 +46,7 @@ services:
       - ecoenergy-net
 
   frontend:
-    container_name: frontend_app
+    # container_name: frontend_app
     build: ./frontend
     ports:
       - "3001:3000"   
