@@ -109,9 +109,9 @@ pipeline {
             steps {
                 echo '🚀 Deploying Backend on localhost:5000...'
                 sh '''
-                    docker compose stop backend_app || true
-                    docker compose rm -f backend_app || true
-                    docker compose up -d --build backend_app
+                    docker compose stop backend || true
+                    docker compose rm -f backend || true
+                    docker compose up -d --build backend
                     echo "✅ Backend running on http://localhost:5000"
                 '''
             }
