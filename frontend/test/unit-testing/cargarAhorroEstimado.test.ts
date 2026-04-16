@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { cargarAhorroEstimado, CargarAhorroSetters } from '../src/lib/cargarAhorroEstimado';
+import { cargarAhorroEstimado, CargarAhorroSetters } from '@/lib/cargarAhorroEstimado';
 
 describe('cargarAhorroEstimado', () => {
   // Spies: Interceptar funciones de state sin implementar la lógica de UI
@@ -87,3 +87,4 @@ describe('cargarAhorroEstimado', () => {
     });
   });
 });
+

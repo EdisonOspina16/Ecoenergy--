@@ -6,7 +6,7 @@
 
 import React from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cargarAhorroEstimado } from "../src/lib/cargarAhorroEstimado";
+import { cargarAhorroEstimado } from "@/lib/cargarAhorroEstimado";
 
 const mockFetch = vi.fn();
 const vacio = {
@@ -109,3 +109,4 @@ describe("cargarAhorroEstimado - caja blanca", () => {
     expect(setSavingData).toHaveBeenCalledWith(vacio);
   });
 });
+

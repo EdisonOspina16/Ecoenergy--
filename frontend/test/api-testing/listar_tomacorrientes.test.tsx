@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Profile from "../src/app/perfil/page";
+import Profile from "@/app/perfil/page";
 
 const makeResponse = (body: any, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -234,3 +234,4 @@ describe("Listado de tomacorrientes en perfil", () => {
     expect(screen.getByDisplayValue("Sensor")).toBeInTheDocument();
   });
 });
+

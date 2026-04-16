@@ -2,10 +2,10 @@ import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import Login from "../src/app/login/page";
-import { loginRequest } from "../src/lib/api/auth";
+import Login from "@/app/login/page";
+import { loginRequest } from "@/lib/api/auth";
 
-vi.mock("../src/lib/api/auth", () => ({
+vi.mock("@/lib/api/auth", () => ({
   loginRequest: vi.fn(),
 }));
 

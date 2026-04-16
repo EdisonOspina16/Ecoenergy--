@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { cargarRecomendacion, DeviceForRecomendacion } from '../src/lib/cargarRecomendacion';
+import { cargarRecomendacion, DeviceForRecomendacion } from '@/lib/cargarRecomendacion';
 
 describe('cargarRecomendacion', () => {
   let setRecommendationsSpy: ReturnType<typeof vi.fn>;
@@ -80,3 +80,4 @@ describe('cargarRecomendacion', () => {
     expect(setRecommendationsSpy).toHaveBeenCalledWith([]);
   });
 });
+

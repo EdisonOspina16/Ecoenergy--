@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Recuperar from '../../src/app/recuperar/page';
-import * as useRecuperarHook from '../../src/hooks/useRecuperar';
+import Recuperar from '@/app/recuperar/page';
+import * as useRecuperarHook from '@/hooks/useRecuperar';
 
 // Mockeamos head para evitar errores de next/head
 vi.mock('next/head', () => ({
@@ -116,3 +116,4 @@ describe('Página: Recuperar Contraseña', () => {
     expect(screen.getByText(/ACTUALIZANDO/i)).toBeInTheDocument();
   });
 });
+

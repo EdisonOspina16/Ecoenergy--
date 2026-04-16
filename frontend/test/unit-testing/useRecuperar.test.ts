@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useRecuperar } from '../src/hooks/useRecuperar';
-import { postRecuperar } from '../src/lib/api/recuperar';
+import { useRecuperar } from '@/hooks/useRecuperar';
+import { postRecuperar } from '@/lib/api/recuperar';
 
 // Mock: Simulamos postRecuperar aislando esta prueba del ecosistema de fetch/backend.
-vi.mock('../src/lib/api/recuperar', () => ({
+vi.mock('@/lib/api/recuperar', () => ({
   postRecuperar: vi.fn(),
 }));
 
@@ -181,3 +181,4 @@ describe('Hook: useRecuperar', () => {
     expect(result.current.loading).toBe(false);
   });
 });
+

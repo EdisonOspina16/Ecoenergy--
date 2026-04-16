@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchPerfil, postProfile } from '../src/lib/api/profile';
-import { postRecuperar } from '../src/lib/api/recuperar';
-import { postSubscribe } from '../src/lib/api/subscribe';
+import { fetchPerfil, postProfile } from '@/lib/api/profile';
+import { postRecuperar } from '@/lib/api/recuperar';
+import { postSubscribe } from '@/lib/api/subscribe';
 
 // Usaremos un Stub global sobre fetch para simular el comportamiento de jsonClient que consume estas APIs
 describe('Capas API REST (lib/api/*)', () => {
@@ -113,3 +113,4 @@ describe('Capas API REST (lib/api/*)', () => {
     });
   });
 });
+

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchDispositivos } from '../src/lib/api/dispositivos';
-import { cargarDispositivos } from '../src/hooks/useDispositivos';
+import { fetchDispositivos } from '@/lib/api/dispositivos';
+import { cargarDispositivos } from '@/hooks/useDispositivos';
 
 describe('Dispositivos API (fetchDispositivos)', () => {
   beforeEach(() => {
@@ -86,3 +86,4 @@ describe('Hook: cargarDispositivos', () => {
     expect(consoleSpy).toHaveBeenCalled();
   });
 });
+

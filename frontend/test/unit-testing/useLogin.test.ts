@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useLogin } from '../src/hooks/useLogin';
-import { loginRequest } from '../src/lib/api/auth';
+import { useLogin } from '@/hooks/useLogin';
+import { loginRequest } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 
 // Mock dependencias externas
-vi.mock('../src/lib/api/auth', () => ({
+vi.mock('@/lib/api/auth', () => ({
   loginRequest: vi.fn(),
 }));
 
@@ -46,3 +46,4 @@ describe('Hook: useLogin', () => {
     expect(result.current.loading).toBe(false);
   });
 });
+

@@ -1,14 +1,14 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Registro from '../../src/app/registro/page';
-import * as useRegistroHook from '../../src/hooks/useRegistro';
+import Registro from '@/app/registro/page';
+import * as useRegistroHook from '@/hooks/useRegistro';
 
 vi.mock('next/head', () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock('../../src/hooks/useRegistro', () => ({
+vi.mock('@/hooks/useRegistro', () => ({
   registrarUsuario: vi.fn(),
 }));
 
@@ -61,3 +61,4 @@ describe('Página: Registro de Usuario', () => {
     });
   });
 });
+

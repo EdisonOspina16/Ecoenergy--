@@ -1,12 +1,12 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import ProfilePage from '../../src/app/perfil/page';
+import ProfilePage from '@/app/perfil/page';
 
 // Mocks
-import * as useProfileHooks from '../../src/hooks/useProfileSubmit';
-import * as useDeviceRegHooks from '../../src/hooks/useDeviceRegistration';
-import * as profileApi from '../../src/lib/api/profile';
+import * as useProfileHooks from '@/hooks/useProfileSubmit';
+import * as useDeviceRegHooks from '@/hooks/useDeviceRegistration';
+import * as profileApi from '@/lib/api/profile';
 
 describe('Página: Profile / Perfil', () => {
 
@@ -92,3 +92,4 @@ describe('Página: Profile / Perfil', () => {
     expect(mockDeviceRegistroSubmit).toHaveBeenCalled();
   });
 });
+

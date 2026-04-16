@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useSubscribe } from '../src/hooks/useSubscribe';
-import { postSubscribe } from '../src/lib/api/subscribe';
+import { useSubscribe } from '@/hooks/useSubscribe';
+import { postSubscribe } from '@/lib/api/subscribe';
 
 // Mock: Simulando request de Subscribe API
-vi.mock('../src/lib/api/subscribe', () => ({
+vi.mock('@/lib/api/subscribe', () => ({
   postSubscribe: vi.fn(),
 }));
 
@@ -79,3 +79,4 @@ describe('Hook: useSubscribe', () => {
     expect(result.current.email).toBe('existe@ecoenergy.com'); 
   });
 });
+

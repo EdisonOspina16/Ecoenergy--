@@ -1,10 +1,10 @@
 import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Profile from "../src/app/perfil/page";
-import { registerDevice } from "../src/lib/api/devices";
+import Profile from "@/app/perfil/page";
+import { registerDevice } from "@/lib/api/devices";
 
-vi.mock("../src/lib/api/devices", () => ({ registerDevice: vi.fn() }));
+vi.mock("@/lib/api/devices", () => ({ registerDevice: vi.fn() }));
 
 const makeResponse = (body: any, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -106,3 +106,4 @@ describe("Registrar tomacorriente - handleDeviceRegister", () => {
     await screen.findByText(/Error al registrar el dispositivo/i);
   }, 8000);
 });
+

@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import HomePage from '../../src/app/home/page';
-import * as useDispositivosHooks from '../../src/hooks/useDispositivos';
+import HomePage from '@/app/home/page';
+import * as useDispositivosHooks from '@/hooks/useDispositivos';
 
 // Mockeamos la location global ya que hay un globalThis.location para la validacion oauth en la UI
 beforeEach(() => {
@@ -99,3 +99,4 @@ describe('Página: Dashboard Hogar', () => {
     });
   });
 });
+

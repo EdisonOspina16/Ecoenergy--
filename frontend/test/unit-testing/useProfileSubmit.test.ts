@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useProfileSubmit } from '../src/hooks/useProfileSubmit';
-import { postProfile } from '../src/lib/api/profile';
+import { useProfileSubmit } from '@/hooks/useProfileSubmit';
+import { postProfile } from '@/lib/api/profile';
 
 // Mock: Simulamos la respuesta de postProfile porque ya se asume testeada aparte (o en el mismo suite).
 // Usamos mock en lugar de spy/stub simple para interceptar importaciones directamente.
-vi.mock('../src/lib/api/profile', () => ({
+vi.mock('@/lib/api/profile', () => ({
   postProfile: vi.fn(),
   fetchPerfil: vi.fn(),
 }));
@@ -128,3 +128,4 @@ describe('Hook: useProfileSubmit', () => {
     expect(result.current.profileSaving).toBe(false);
   });
 });
+

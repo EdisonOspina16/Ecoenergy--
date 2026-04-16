@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import PrincipalPage from '../../src/app/page';
+import PrincipalPage from '@/app/page';
 
 // Mock de next/navigation (Router)
 vi.mock('next/navigation', () => ({
@@ -9,7 +9,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Spy sobre nuestro custom hook useSubscribe
-import * as useSubscribeHooks from '../../src/hooks/useSubscribe';
+import * as useSubscribeHooks from '@/hooks/useSubscribe';
 
 describe('Página: Landing Principal (Subscribe)', () => {
   const mockHandleSubscribe = vi.fn();
@@ -72,3 +72,4 @@ describe('Página: Landing Principal (Subscribe)', () => {
     expect(screen.getByText('¡Gracias por unirte a la comunidad! 🌱')).toBeInTheDocument();
   });
 });
+

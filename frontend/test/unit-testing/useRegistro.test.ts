@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { registrarUsuario, RegistrarUsuarioSetters } from '../src/hooks/useRegistro';
-import * as apiRegistro from '../src/lib/api/registro';
+import { registrarUsuario, RegistrarUsuarioSetters } from '@/hooks/useRegistro';
+import * as apiRegistro from '@/lib/api/registro';
 
 // Mock del módulo entero: Aisla completamente la lógica de validación de los Custom Hooks
 // garantizando que no dispare lógica de fetch accidentalmente. Emplea Stubs globales.
-vi.mock('../src/lib/api/registro', () => ({
+vi.mock('@/lib/api/registro', () => ({
   postRegistro: vi.fn(),
   resolveError: vi.fn((err: any) => err?.message || 'Error resuelto')
 }));
@@ -84,3 +84,4 @@ describe('useRegistro - registrarUsuario', () => {
     expect(setLoadingSpy).toHaveBeenLastCalledWith(false);
   });
 });
+

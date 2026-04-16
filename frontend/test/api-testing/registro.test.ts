@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { postRegistro, resolveError } from '../src/lib/api/registro';
+import { postRegistro, resolveError } from '@/lib/api/registro';
 
 describe('API Registro (postRegistro / resolveError)', () => {
   beforeEach(() => {
@@ -107,3 +107,4 @@ describe('resolveError', () => {
     expect(resultado).toBe('Error desconocido al conectar con el servidor');
   });
 });
+

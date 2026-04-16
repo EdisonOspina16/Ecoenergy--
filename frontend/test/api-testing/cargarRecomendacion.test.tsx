@@ -6,7 +6,7 @@
 
 import React from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cargarRecomendacion } from "../src/lib/cargarRecomendacion";
+import { cargarRecomendacion } from "@/lib/cargarRecomendacion";
 
 const mockFetch = vi.fn();
 
@@ -79,3 +79,4 @@ describe("cargarRecomendacion - caja blanca", () => {
     expect(setRecommendations).toHaveBeenCalledWith([]);
   });
 });
+
