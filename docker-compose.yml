@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:latest
+    build: ./init-db
     # container_name: db_postgres
     environment:
       POSTGRES_DB: ecoenergydb
@@ -9,21 +9,19 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./init-db:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql
     restart: always
     networks:
       - ecoenergy-net
   
   mosquitto:
-    image: eclipse-mosquitto:latest
+    build: ./mosquitto
     # container_name: mosquitto-broker
     restart: unless-stopped
     ports:
       - "1883:1883"    
       - "9001:9001"   
     volumes:
-      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
     networks:
@@ -58,12 +56,10 @@ services:
       - ecoenergy-net
 
   prometheus:
-    image: prom/prometheus:latest
+    build: ./prometheus
     container_name: prometheus
     ports:
       - "9090:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - ecoenergy-net
   grafana:
