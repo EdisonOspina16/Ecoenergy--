@@ -1,147 +1,24 @@
 pipeline {
     agent any
 
-    environment {
-        SONAR_HOST_URL          = 'http://sonarqube:9000'
-        SONAR_BACKEND_PROJECT   = 'EcoEnergy-Backend'
-        SONAR_FRONTEND_PROJECT  = 'EcoEnergy-Frontend'
-    }
-
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Install Dependencies') {
+        // ════════════════════════════════════════════════════════════
+        // Dispara Backend y Frontend al mismo tiempo
+        // Cada uno corre su propio pipeline completo:
+        //   Checkout → Install → Tests → SonarQube → Quality Gate → Deploy
+        // ════════════════════════════════════════════════════════════
+        stage('EcoEnergy - Full Deploy') {
             parallel {
-                stage('Backend Dependencies') {
+                stage('Backend Pipeline') {
                     steps {
-                        dir('backend') {
-                            sh '''
-                                python3 -m venv venv
-                                . venv/bin/activate
-                                pip install --upgrade pip
-                                pip install -r requirements.txt
-                            '''
-                        }
+                        build job: 'Pipeline-Backend', wait: true, propagate: true
                     }
                 }
-                stage('Frontend Dependencies') {
+                stage('Frontend Pipeline') {
                     steps {
-                        dir('frontend') {
-                            sh 'npm install'
-                        }
+                        build job: 'Pipeline-Frontend', wait: true, propagate: true
                     }
-                }
-            }
-        }
-
-        stage('Run Tests') {
-            parallel {
-                stage('Backend Tests') {
-                    steps {
-                        dir('backend') {
-                            sh '''
-                                . venv/bin/activate
-                                python -m pytest \
-                                    --junitxml=test-results.xml \
-                                    --cov=src \
-                                    --cov-report=xml:coverage.xml \
-                                    --cov-report=term-missing \
-                                    -v
-                            '''
-                        }
-                    }
-                    post {
-                        always { junit 'backend/test-results.xml' }
-                    }
-                }
-                stage('Frontend Tests') {
-                    steps {
-                        dir('frontend') {
-                            sh '''
-                                npx vitest run \
-                                    --reporter=junit \
-                                    --outputFile=test-results.xml \
-                                    --coverage
-                            '''
-                        }
-                    }
-                    post {
-                        always { junit 'frontend/test-results.xml' }
-                    }
-                }
-            }
-        }
-
-        // ── Análisis separados, NO en paralelo ──────────────────────
-        stage('SonarQube Analysis - Backend') {
-            steps {
-                dir('backend') {
-                    withCredentials([string(credentialsId: 'sonar-backend-token', variable: 'SONAR_BACKEND_TOKEN')]) {
-                        withSonarQubeEnv('Sonarqube') {
-                            script {
-                                def scannerHome = tool 'SonarQube'
-                                sh """
-                                    ${scannerHome}/bin/sonar-scanner \
-                                        -Dsonar.projectKey=${SONAR_BACKEND_PROJECT} \
-                                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                                        -Dsonar.token=\$SONAR_BACKEND_TOKEN \
-                                        -Dsonar.sources=src \
-                                        -Dsonar.tests=test \
-                                        -Dsonar.python.version=3.12 \
-                                        -Dsonar.python.coverage.reportPaths=coverage.xml \
-                                        -Dsonar.exclusions=venv/**,__pycache__/**,.pytest_cache/** \
-                                        -Dsonar.sourceEncoding=UTF-8
-                                """
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Quality Gate - Backend') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        stage('SonarQube Analysis - Frontend') {
-            steps {
-                dir('frontend') {
-                    withCredentials([string(credentialsId: 'sonar-frontend-token', variable: 'SONAR_FRONTEND_TOKEN')]) {
-                        withSonarQubeEnv('Sonarqube') {
-                            script {
-                                def scannerHome = tool 'SonarQube'
-                                sh """
-                                    ${scannerHome}/bin/sonar-scanner \
-                                        -Dsonar.projectKey=${SONAR_FRONTEND_PROJECT} \
-                                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                                        -Dsonar.token=\$SONAR_FRONTEND_TOKEN \
-                                        -Dsonar.sources=src \
-                                        -Dsonar.tests=test \
-                                        -Dsonar.test.inclusions=**/*.test.js,**/*.test.ts,**/*.test.tsx \
-                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                        -Dsonar.exclusions=node_modules/**,.next/**,dist/**,build/** \
-                                        -Dsonar.sourceEncoding=UTF-8
-                                """
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Quality Gate - Frontend') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
                 }
             }
         }
@@ -149,17 +26,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline completed successfully.'
+            echo '✅ Ambos pipelines completados — Backend en localhost:5000 | Frontend en localhost:3001'
         }
         failure {
-            echo '❌ Pipeline FAILED — check test results or SonarQube Quality Gate.'
-        }
-        always {
-            echo '📋 Archiving test and coverage reports…'
-            node('') {
-                archiveArtifacts artifacts: 'backend/coverage.xml, backend/test-results.xml, frontend/test-results.xml, frontend/coverage/**', allowEmptyArchive: true
-                cleanWs()
-            }
+            echo '❌ Uno o ambos pipelines fallaron — revisa los resultados individuales.'
         }
     }
 }

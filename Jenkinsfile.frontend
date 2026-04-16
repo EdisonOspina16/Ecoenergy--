@@ -1,0 +1,131 @@
+pipeline {
+    agent any
+
+    environment {
+        SONAR_HOST_URL         = 'http://sonarqube:9000'
+        SONAR_FRONTEND_PROJECT = 'EcoEnergy-Frontend'
+    }
+
+    stages {
+
+        // ════════════════════════════════════════════════════════════
+        // 1. CHECKOUT
+        // ════════════════════════════════════════════════════════════
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 2. INSTALL DEPENDENCIES
+        // ════════════════════════════════════════════════════════════
+        stage('Install Dependencies') {
+            steps {
+                dir('frontend') {
+                    sh '''
+                        echo "══ Installing Node.js dependencies ══"
+                        npm install
+                    '''
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 3. RUN TESTS
+        // ════════════════════════════════════════════════════════════
+        stage('Run Tests') {
+            steps {
+                dir('frontend') {
+                    sh '''
+                        echo "══ Running vitest with coverage ══"
+                        npx vitest run \
+                            --reporter=junit \
+                            --outputFile=test-results.xml \
+                            --coverage
+                    '''
+                }
+            }
+            post {
+                always {
+                    junit 'frontend/test-results.xml'
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 4. SONARQUBE ANALYSIS
+        // ════════════════════════════════════════════════════════════
+        stage('SonarQube Analysis') {
+            steps {
+                dir('frontend') {
+                    withCredentials([string(credentialsId: 'sonar-frontend-token', variable: 'SONAR_TOKEN')]) {
+                        withSonarQubeEnv('Sonarqube') {
+                            script {
+                                def scannerHome = tool 'SonarQube'
+                                sh """
+                                    ${scannerHome}/bin/sonar-scanner \
+                                        -Dsonar.projectKey=${SONAR_FRONTEND_PROJECT} \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.token=\$SONAR_TOKEN \
+                                        -Dsonar.sources=src \
+                                        -Dsonar.tests=test \
+                                        -Dsonar.test.inclusions=**/*.test.js,**/*.test.ts,**/*.test.tsx \
+                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                        -Dsonar.exclusions=node_modules/**,.next/**,dist/**,build/**,coverage/** \
+                                        -Dsonar.sourceEncoding=UTF-8
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 5. QUALITY GATE
+        // ════════════════════════════════════════════════════════════
+        stage('Quality Gate') {
+            steps {
+                echo '══ Waiting for SonarQube Quality Gate ══'
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 6. DEPLOY FRONTEND (Next.js)
+        // Solo se ejecuta si tests y Quality Gate pasaron
+        // Frontend disponible en http://localhost:3001
+        // ════════════════════════════════════════════════════════════
+        stage('Deploy Frontend') {
+            steps {
+                echo '🚀 Deploying Frontend (Next.js) on localhost:3001...'
+                sh '''
+                    docker compose stop frontend_app || true
+                    docker compose rm -f frontend_app || true
+                    docker compose up -d --build frontend_app
+                    echo "✅ Frontend running on http://localhost:3001"
+                '''
+            }
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // POST-BUILD ACTIONS
+    // ════════════════════════════════════════════════════════════════
+    post {
+        success {
+            echo '✅ Frontend pipeline completed — tests passed, Quality Gate met, deployed successfully.'
+        }
+        failure {
+            echo '❌ Frontend pipeline FAILED — check test results or SonarQube Quality Gate.'
+        }
+        always {
+            echo '📋 Archiving frontend reports…'
+            archiveArtifacts artifacts: 'frontend/test-results.xml, frontend/coverage/**', allowEmptyArchive: true
+            cleanWs()
+        }
+    }
+}
