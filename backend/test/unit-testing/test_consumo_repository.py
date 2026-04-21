@@ -1,6 +1,7 @@
 import pytest
 import json
 from unittest.mock import patch, MagicMock
+from hamcrest import assert_that, is_, equal_to, has_length, close_to, none, not_none
 
 from src.repositories.consumo_repository import (
     obtener_dispositivos_con_ultimo_consumo,
@@ -29,13 +30,15 @@ class TestConsumoRepository:
             (None, None, True, "Aire")
         ]
         
+        # Act
         resultado = obtener_dispositivos_con_ultimo_consumo()
         
-        assert len(resultado) == 2
-        assert resultado[0]["nombre"] == "Nevera"
-        assert resultado[0]["consumo_watts"] == pytest.approx(150.5)
-        assert resultado[1]["nombre"] == "Aire"
-        assert resultado[1]["consumo_watts"] == pytest.approx(0.0)
+        # Assert
+        assert_that(resultado, has_length(2))
+        assert_that(resultado[0]["nombre"], is_(equal_to("Nevera")))
+        assert_that(resultado[0]["consumo_watts"], is_(close_to(150.5, 0.001)))
+        assert_that(resultado[1]["nombre"], is_(equal_to("Aire")))
+        assert_that(resultado[1]["consumo_watts"], is_(close_to(0.0, 0.001)))
 
     # ---------------------------------------------------------
     # Test: obtener_dispositivos_por_usuario
@@ -57,10 +60,13 @@ class TestConsumoRepository:
             ("TV", 100.0)
         ]
         
+        # Act
         resultado = obtener_dispositivos_por_usuario(1)
-        assert len(resultado) == 1
-        assert resultado[0]["nombre"] == "TV"
-        assert resultado[0]["consumo_watts"] == pytest.approx(100.0)
+
+        # Assert
+        assert_that(resultado, has_length(1))
+        assert_that(resultado[0]["nombre"], is_(equal_to("TV")))
+        assert_that(resultado[0]["consumo_watts"], is_(close_to(100.0, 0.001)))
 
     # ---------------------------------------------------------
     # Test: obtener_recomendacion_diaria
@@ -80,7 +86,11 @@ class TestConsumoRepository:
         
         mock_cursor.fetchone.return_value = None
         
-        assert obtener_recomendacion_diaria(10) is None
+        # Act
+        resultado = obtener_recomendacion_diaria(10)
+
+        # Assert
+        assert_that(resultado, is_(none()))
 
     @patch('src.repositories.consumo_repository.obtener_conexion')
     def test_obtener_recomendacion_diaria_con_registro_json_str(self, mock_obtener_conexion):
@@ -93,10 +103,12 @@ class TestConsumoRepository:
         json_str = json.dumps([{"rec": "Haz algo"}])
         mock_cursor.fetchone.return_value = (json_str, "5000", "2kg", "1 auto")
         
+        # Act
         resultado = obtener_recomendacion_diaria(10)
         
-        assert resultado["recomendaciones"][0]["rec"] == "Haz algo"
-        assert resultado["ahorro_financiero"] == "5000"
+        # Assert
+        assert_that(resultado["recomendaciones"][0]["rec"], is_(equal_to("Haz algo")))
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("5000")))
 
     # ---------------------------------------------------------
     # Test: guardar_recomendacion_diaria
@@ -114,7 +126,9 @@ class TestConsumoRepository:
         mock_obtener_conexion.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
         
+        # Act
         guardar_recomendacion_diaria(10, [{"rec": "Test"}], {"ahorro_financiero": "500 COP"})
         
+        # Assert
         mock_cursor.execute.assert_called_once()
         mock_conn.commit.assert_called_once()

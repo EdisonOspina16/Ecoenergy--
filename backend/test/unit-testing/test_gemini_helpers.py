@@ -1,6 +1,7 @@
 import pytest
 import json
 from google.genai.errors import ClientError
+from hamcrest import assert_that, is_, contains_string, equal_to
 
 from src.infrastructure.ia.gemini_helpers import (
     construir_prompt_recomendacion,
@@ -22,9 +23,9 @@ class TestGeminiHelpers:
         resultado = construir_prompt_recomendacion(consumo, dispositivo)
 
         # Assert
-        assert "Lavadora" in resultado
-        assert "150.0 W" in resultado
-        assert "Reglas:" in resultado
+        assert_that(resultado, contains_string("Lavadora"))
+        assert_that(resultado, contains_string("150.0 W"))
+        assert_that(resultado, contains_string("Reglas:"))
 
     def test_construir_prompt_ahorro_estimado_incluye_datos(self):
         # Arrange
@@ -34,9 +35,9 @@ class TestGeminiHelpers:
         resultado = construir_prompt_ahorro_estimado(dispositivos)
 
         # Assert
-        assert "Nevera: 400 W" in resultado
-        assert "Consumo total estimado: 400 W" in resultado
-        assert "ahorro_financiero" in resultado
+        assert_that(resultado, contains_string("Nevera: 400 W"))
+        assert_that(resultado, contains_string("Consumo total estimado: 400 W"))
+        assert_that(resultado, contains_string("ahorro_financiero"))
 
     def test_limpiar_markdown_sin_etiquetas_retorna_igual(self):
         # Arrange
@@ -46,7 +47,7 @@ class TestGeminiHelpers:
         resultado = _limpiar_markdown(texto_crudo)
 
         # Assert
-        assert resultado == '{"clave": "valor"}'
+        assert_that(resultado, is_(equal_to('{"clave": "valor"}')))
 
     def test_limpiar_markdown_con_etiqueta_json_retorna_limpio(self):
         # Arrange
@@ -56,7 +57,7 @@ class TestGeminiHelpers:
         resultado = _limpiar_markdown(texto_crudo)
 
         # Assert
-        assert resultado == '{"clave": "valor"}'
+        assert_that(resultado, is_(equal_to('{"clave": "valor"}')))
 
     def test_limpiar_markdown_con_etiqueta_simple_retorna_limpio(self):
         # Arrange
@@ -66,7 +67,7 @@ class TestGeminiHelpers:
         resultado = _limpiar_markdown(texto_crudo)
 
         # Assert
-        assert resultado == '{"clave": "valor"}'
+        assert_that(resultado, is_(equal_to('{"clave": "valor"}')))
 
     def test_extraer_recomendaciones_completas_retorna_todas(self):
         # Arrange
@@ -81,11 +82,11 @@ class TestGeminiHelpers:
         resultado = _extraer_recomendaciones(datos)
 
         # Assert
-        assert resultado == {
+        assert_that(resultado, is_(equal_to({
             "ahorro_financiero": "1000",
             "impacto_ambiental": "2kg",
             "indicador_didactico": "1 hora",
-        }
+        })))
 
     def test_extraer_recomendaciones_incompletas_aplica_na(self):
         # Arrange
@@ -95,11 +96,11 @@ class TestGeminiHelpers:
         resultado = _extraer_recomendaciones(datos)
 
         # Assert
-        assert resultado == {
+        assert_that(resultado, is_(equal_to({
             "ahorro_financiero": "1000",
             "impacto_ambiental": "N/A",
             "indicador_didactico": "N/A",
-        }
+        })))
 
     def test_parsear_respuesta_gemini_valida_retorna_dict(self):
         # Arrange
@@ -109,8 +110,8 @@ class TestGeminiHelpers:
         resultado = parsear_respuesta_gemini(texto)
 
         # Assert
-        assert resultado["ahorro_financiero"] == "100"
-        assert resultado["impacto_ambiental"] == "1"
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("100")))
+        assert_that(resultado["impacto_ambiental"], is_(equal_to("1")))
 
     def test_fallback_por_excepcion_json_decode_error(self):
         # Arrange
@@ -120,8 +121,8 @@ class TestGeminiHelpers:
         resultado = fallback_por_excepcion(error)
 
         # Assert
-        assert resultado["ahorro_financiero"] == "No disponible"
-        assert "No fue posible generar" in resultado["indicador_didactico"]
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("No disponible")))
+        assert_that(resultado["indicador_didactico"], contains_string("No fue posible generar"))
 
     def test_fallback_por_excepcion_client_error(self):
         # Arrange
@@ -131,8 +132,8 @@ class TestGeminiHelpers:
         resultado = fallback_por_excepcion(error)
 
         # Assert
-        assert resultado["ahorro_financiero"] == "Error de conexión"
-        assert "servicio de IA" in resultado["indicador_didactico"]
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("Error de conexión")))
+        assert_that(resultado["indicador_didactico"], contains_string("servicio de IA"))
 
     def test_fallback_por_excepcion_generica(self):
         # Arrange
@@ -142,5 +143,5 @@ class TestGeminiHelpers:
         resultado = fallback_por_excepcion(error)
 
         # Assert
-        assert resultado["ahorro_financiero"] == "Error interno"
-        assert "error interno" in resultado["indicador_didactico"]
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("Error interno")))
+        assert_that(resultado["indicador_didactico"], contains_string("error interno"))

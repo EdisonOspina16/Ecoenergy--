@@ -2,6 +2,7 @@ import pytest
 import json
 from unittest.mock import patch, MagicMock
 from google.genai.errors import ClientError
+from hamcrest import assert_that, is_, contains_string, equal_to
 
 from src.infrastructure.ia.gemini_service import llamar_recomendacion, llamar_ahorro_estimado
 
@@ -22,7 +23,7 @@ class TestLlamarRecomendacion:
         
         # Assert
         mock_generate_content.assert_called_once()
-        assert "niveles normales" in resultado
+        assert_that(resultado, contains_string("niveles normales"))
 
     @patch('src.infrastructure.ia.gemini_service.client.models.generate_content')
     def test_llamar_recomendacion_error_api(self, mock_generate_content):
@@ -34,7 +35,7 @@ class TestLlamarRecomendacion:
         
         # Assert
         mock_generate_content.assert_called_once()
-        assert "No fue posible generar la recomendación" in resultado
+        assert_that(resultado, contains_string("No fue posible generar la recomendación"))
 
     @patch('src.infrastructure.ia.gemini_service.client.models.generate_content')
     def test_llamar_recomendacion_error_inesperado(self, mock_generate_content):
@@ -46,7 +47,7 @@ class TestLlamarRecomendacion:
         
         # Assert
         mock_generate_content.assert_called_once()
-        assert "Ocurrió un error interno al generar la recomendación" in resultado
+        assert_that(resultado, contains_string("Ocurrió un error interno al generar la recomendación"))
 
 class TestLlamarAhorroEstimado:
     
@@ -64,9 +65,9 @@ class TestLlamarAhorroEstimado:
         
         # Assert
         mock_generate_content.assert_called_once()
-        assert resultado["impacto_ambiental"] == "20 kg"
-        assert resultado["ahorro_financiero"] == "5.000 COP"
-        assert resultado["indicador_didactico"] == "1 árbol"
+        assert_that(resultado["impacto_ambiental"], is_(equal_to("20 kg")))
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("5.000 COP")))
+        assert_that(resultado["indicador_didactico"], is_(equal_to("1 árbol")))
 
     @patch('src.infrastructure.ia.gemini_service.client.models.generate_content')
     def test_llamar_ahorro_estimado_formato_incorrecto(self, mock_generate_content):
@@ -82,8 +83,8 @@ class TestLlamarAhorroEstimado:
         
         # Assert
         mock_generate_content.assert_called_once()
-        assert resultado["ahorro_financiero"] == "No disponible"
-        assert resultado["impacto_ambiental"] == "No disponible"
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("No disponible")))
+        assert_that(resultado["impacto_ambiental"], is_(equal_to("No disponible")))
 
     @patch('src.infrastructure.ia.gemini_service.client.models.generate_content')
     def test_llamar_ahorro_estimado_client_error(self, mock_generate_content):
@@ -96,7 +97,7 @@ class TestLlamarAhorroEstimado:
         
         # Assert
         mock_generate_content.assert_called_once()
-        assert resultado["ahorro_financiero"] == "Error de conexión"
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("Error de conexión")))
 
     @patch('src.infrastructure.ia.gemini_service.client.models.generate_content')
     def test_llamar_ahorro_estimado_exception(self, mock_generate_content):
@@ -109,4 +110,4 @@ class TestLlamarAhorroEstimado:
         
         # Assert
         mock_generate_content.assert_called_once()
-        assert resultado["ahorro_financiero"] == "Error interno"
+        assert_that(resultado["ahorro_financiero"], is_(equal_to("Error interno")))
