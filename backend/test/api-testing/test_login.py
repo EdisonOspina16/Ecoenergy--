@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
+from hamcrest import assert_that, is_, equal_to, has_length, close_to, none, not_none
 
 with patch("google.genai.Client") as FakeClient:
     fake_models = Mock()
@@ -35,9 +36,9 @@ def client():
 def test_login_sin_contrasena(client):
     resp = client.post("/login", json={"correo": "solo@mail.com"})
 
-    assert resp.status_code == 400
+    assert_that(resp.status_code, is_(equal_to(400)))
     data = resp.get_json()
-    assert data["error"] == "Faltan campos requeridos"
+    assert_that(data["error"], is_(equal_to("Faltan campos requeridos")))
 
 
 def test_login_sin_contrasena_no_llama_verificar(monkeypatch, client):
@@ -49,15 +50,15 @@ def test_login_sin_contrasena_no_llama_verificar(monkeypatch, client):
 
     resp = client.post("/login", json={"correo": "solo@mail.com"})
 
-    assert resp.status_code == 400
+    assert_that(resp.status_code, is_(equal_to(400)))
     verificar_mock.assert_not_called()
 
 def test_login_correo_vacio(client):
     resp = client.post("/login", json={"correo": ""})
 
-    assert resp.status_code == 400
+    assert_that(resp.status_code, is_(equal_to(400)))
     data = resp.get_json()
-    assert data["error"] == "Faltan campos requeridos"
+    assert_that(data["error"], is_(equal_to("Faltan campos requeridos")))
 
 
 def test_login_credenciales_invalidas(monkeypatch, client):
@@ -75,9 +76,9 @@ def test_login_credenciales_invalidas(monkeypatch, client):
     )
 
     # Assert
-    assert resp.status_code == 401
+    assert_that(resp.status_code, is_(equal_to(401)))
     data = resp.get_json()
-    assert data["error"] == "Credenciales inválidas"
+    assert_that(data["error"], is_(equal_to("Credenciales inválidas")))
     verificar_mock.assert_called_once_with("usuario@ejemplo.com", "WrongPass1!")
     with client.session_transaction() as sess:
         assert "usuario" not in sess
@@ -99,21 +100,21 @@ def test_login_valido(monkeypatch, client):
     )
 
     # Assert
-    assert resp.status_code == 200
+    assert_that(resp.status_code, is_(equal_to(200)))
     data = resp.get_json()
-    assert data["success"] is True
-    assert data["redirect"] == "/home"
-    assert data["usuario"]["correo"] == "usuario@ejemplo.com"
+    assert_that(data["success"], is_(equal_to(True)))
+    assert_that(data["redirect"], is_(equal_to("/home")))
+    assert_that(data["usuario"]["correo"], is_(equal_to("usuario@ejemplo.com")))
     verificar_mock.assert_called_once_with("usuario@ejemplo.com", "ValidPass1!")
     with client.session_transaction() as sess:
-        assert sess["usuario"]["correo"] == "usuario@ejemplo.com"
+        assert_that(sess["usuario"]["correo"], is_(equal_to("usuario@ejemplo.com")))
 
 
 def test_login_sin_body(client):
     resp = client.post("/login")
 
     # request.get_json() devuelve None -> 415 campos requeridos
-    assert resp.status_code == 415
+    assert_that(resp.status_code, is_(equal_to(415)))
 
 
 def test_login_contrasena_vacia(client):
@@ -123,9 +124,9 @@ def test_login_contrasena_vacia(client):
     )
 
     # Campo presente pero vacío -> llega al controlador y responde 401
-    assert resp.status_code == 401
+    assert_that(resp.status_code, is_(equal_to(401)))
     data = resp.get_json()
-    assert data["error"] == "Credenciales inválidas"
+    assert_that(data["error"], is_(equal_to("Credenciales inválidas")))
 
 
 def test_login_valida_sesion_permanente(monkeypatch, client):
@@ -140,9 +141,9 @@ def test_login_valida_sesion_permanente(monkeypatch, client):
         json={"correo": "usuario@ejemplo.com", "contrasena": "ValidPass1!"},
     )
 
-    assert resp.status_code == 200
+    assert_that(resp.status_code, is_(equal_to(200)))
     with client.session_transaction() as sess:
-        assert sess.permanent is True
+        assert_that(sess.permanent, is_(equal_to(True)))
 
 
 def test_login_dos_usuarios_contra_mismas_credenciales(monkeypatch, client):
@@ -166,13 +167,13 @@ def test_login_dos_usuarios_contra_mismas_credenciales(monkeypatch, client):
         "/login",
         json={"correo": "otro@ejemplo.com", "contrasena": "ClaveValida1!"},
     )
-    assert respuesta_mala.status_code == 401
+    assert_that(respuesta_mala.status_code, is_(equal_to(401)))
 
     # Segundo intento: correo correcto
     respuesta_buena = client.post(
         "/login",
         json={"correo": "valido@ejemplo.com", "contrasena": "ClaveValida1!"},
     )
-    assert respuesta_buena.status_code == 200
+    assert_that(respuesta_buena.status_code, is_(equal_to(200)))
     with client.session_transaction() as sess:
-        assert sess["usuario"]["correo"] == "valido@ejemplo.com"
+        assert_that(sess["usuario"]["correo"], is_(equal_to("valido@ejemplo.com")))
