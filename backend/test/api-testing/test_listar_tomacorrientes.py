@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
+from hamcrest import assert_that, is_, equal_to, has_length, close_to, none, not_none
 
 with patch("google.genai.Client") as FakeClient:
     fake_models = Mock()
@@ -84,10 +85,10 @@ def test_cp_list_001_lista_con_dispositivos(client, monkeypatch):
     resp = client.get("/perfil")
     data = resp.get_json()
 
-    assert resp.status_code == 200
-    assert data["success"] is True
+    assert_that(resp.status_code, is_(equal_to(200)))
+    assert_that(resp.get_json()["success"], is_(equal_to(True)))
     nombres_dispositivos_en_data = [d["alias"] for d in data["dispositivos"]]
-    assert nombres_dispositivos_en_data == ["Cargador", "Lavadora"]
+    assert_that(nombres_dispositivos_en_data, is_(equal_to(["Cargador", "Lavadora"])))
 
 
 def test_cp_list_002_lista_vacia(client, monkeypatch):
@@ -98,9 +99,9 @@ def test_cp_list_002_lista_vacia(client, monkeypatch):
     resp = client.get("/perfil")
     data = resp.get_json()
 
-    assert resp.status_code == 200
-    assert data["success"] is True
-    assert data["dispositivos"] == []
+    assert_that(resp.status_code, is_(equal_to(200)))
+    assert_that(resp.get_json()["success"], is_(equal_to(True)))
+    assert_that(data["dispositivos"], is_(equal_to([])))
 
 
 def test_cp_list_003_estado_desconectado(client, monkeypatch):
@@ -110,7 +111,7 @@ def test_cp_list_003_estado_desconectado(client, monkeypatch):
 
     resp = client.get("/perfil")
     data = resp.get_json()
-    assert data["dispositivos"][0]["estado_activo"] is False
+    assert_that(data["dispositivos"][0]["estado_activo"], is_(equal_to(False)))
 
 
 def test_cp_list_004_estado_conectado(client, monkeypatch):
@@ -120,7 +121,7 @@ def test_cp_list_004_estado_conectado(client, monkeypatch):
 
     resp = client.get("/perfil")
     data = resp.get_json()
-    assert data["dispositivos"][0]["estado_activo"] is True
+    assert_that(data["dispositivos"][0]["estado_activo"], is_(equal_to(True)))
 
 
 def test_cp_list_005_verificar_campos_correctos(client, monkeypatch):
@@ -133,8 +134,8 @@ def test_cp_list_005_verificar_campos_correctos(client, monkeypatch):
     data = resp.get_json()
     device_json = data["dispositivos"][0]
 
-    assert device_json["id_dispositivos"] == 3
-    assert device_json["alias"] == "Microondas"
+    assert_that(device_json["id_dispositivos"], is_(equal_to(3)))
+    assert_that(device_json["alias"], is_(equal_to("Microondas")))
 
 
 def test_cp_list_006_actualiza_lista_despues_de_registro(client, monkeypatch):
@@ -145,12 +146,12 @@ def test_cp_list_006_actualiza_lista_despues_de_registro(client, monkeypatch):
     _set_devices(monkeypatch, devices)
 
     first = client.get("/perfil").get_json()
-    assert len(first["dispositivos"]) == 1
+    assert_that(first["dispositivos"], has_length(1))
 
     # Agregamos otro dispositivo
     devices.append(DispositivoFake(5, "Aire", False))
     second = client.get("/perfil").get_json()
-    assert len(second["dispositivos"]) == 2
+    assert_that(second["dispositivos"], has_length(2))
 
 
 def test_cp_list_007_lista_multiple(client, monkeypatch):
@@ -171,7 +172,7 @@ def test_cp_list_008_refresh_persistente(client, monkeypatch):
 
     first = client.get("/perfil").get_json()["dispositivos"]
     second = client.get("/perfil").get_json()["dispositivos"]
-    assert first == second
+    assert_that(first, is_(equal_to(second)))
 
 
 def test_cp_list_error_servidor_devuelve_500(monkeypatch, client):
