@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from hamcrest import assert_that, is_, equal_to, has_length, close_to, none, not_none
+from hamcrest import assert_that, is_, equal_to
 
 with patch("google.genai.Client") as FakeClient:
     fake_models = Mock()
