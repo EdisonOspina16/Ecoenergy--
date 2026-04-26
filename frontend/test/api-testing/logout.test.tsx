@@ -1,8 +1,9 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, it, vi } from "vitest";
 import Dashboard from "@/app/dashboard/page";
+import { expect } from "chai";
 
 // Aquí configuramos window.location.href
 const hrefSpy = vi.fn();
@@ -43,13 +44,13 @@ describe("Dashboard | logout", () => {
             usuario: { nombre: "Admin", correo: "admin@gmail.com" },
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
-        ) as any,
+        ),
       )
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        }) as any,
+        }),
       );
 
     render(<Dashboard />);
@@ -59,20 +60,26 @@ describe("Dashboard | logout", () => {
       screen.getByRole("button", { name: /cerrar sesión/i }),
     );
 
-    await waitFor(() => expect(hrefSpy).toHaveBeenCalledWith("/login"));
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      const hrefCalls = hrefSpy.mock.calls;
+      expect(hrefCalls.length).to.equal(1);
+      expect(hrefCalls[0][0]).to.equal("/login");
+    });
+    expect(fetchMock.mock.calls.length).to.equal(2);
   });
 
   it("CP-LOG-002 Intentar acceder al Dashboard sin sesión (debería pedir login)", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(new Response("", { status: 401 })) as any;
+      .mockResolvedValueOnce(new Response("", { status: 401 }));
 
     render(<Dashboard />);
 
     await waitFor(() => screen.getByText(/Debes iniciar sesión/i));
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole("button", { name: /cerrar sesión/i })).toBeNull();
+    expect(fetchMock.mock.calls.length).to.equal(1);
+    expect(screen.queryByRole("button", { name: /cerrar sesión/i })).to.equal(
+      null,
+    );
   });
 
   it("CP-LOG-003 Logout idempotente (múltiples clics seguidos)", async () => {
@@ -84,13 +91,13 @@ describe("Dashboard | logout", () => {
             usuario: { nombre: "Admin", correo: "admin@gmail.com" },
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
-        ) as any,
+        ),
       )
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ success: true }), { status: 200 }) as any,
+        new Response(JSON.stringify({ success: true }), { status: 200 }),
       )
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ success: true }), { status: 200 }) as any,
+        new Response(JSON.stringify({ success: true }), { status: 200 }),
       );
 
     render(<Dashboard />);
@@ -102,20 +109,24 @@ describe("Dashboard | logout", () => {
     await userEvent.click(btn);
 
     // Debe haber llamado a 1 GET y a 2 POST
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-    await waitFor(() => expect(hrefSpy).toHaveBeenCalled());
+    expect(fetchMock.mock.calls.length).to.equal(3);
+    await waitFor(() => {
+      expect(hrefSpy.mock.calls.length).to.be.greaterThan(0);
+    });
   });
 
   it("CP-LOG-004 Botón logout sin sesión activa (no debería mostrarse)", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(new Response("", { status: 401 }) as any);
+      .mockResolvedValueOnce(new Response("", { status: 401 }));
 
     render(<Dashboard />);
 
     await waitFor(() => screen.getByText(/Debes iniciar sesión/i));
-    expect(screen.queryByRole("button", { name: /cerrar sesión/i })).toBeNull();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: /cerrar sesión/i })).to.equal(
+      null,
+    );
+    expect(fetchMock.mock.calls.length).to.equal(1);
   });
 
   it("CP-LOG-005 No debe mostrarse dashboard tras cerrar y 'cerrar navegador' (nuevo render limpio)", async () => {
@@ -128,14 +139,14 @@ describe("Dashboard | logout", () => {
             usuario: { nombre: "Admin", correo: "admin@gmail.com" },
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
-        ) as any,
+        ),
       )
       // Logout
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ success: true }), { status: 200 }) as any,
+        new Response(JSON.stringify({ success: true }), { status: 200 }),
       )
       // "Nuevo navegador"/nueva sesión => 401 directo
-      .mockResolvedValueOnce(new Response("", { status: 401 }) as any);
+      .mockResolvedValueOnce(new Response("", { status: 401 }));
 
     const { unmount } = render(<Dashboard />);
     await waitFor(() => screen.getByText(/hola, admin/i));
@@ -143,13 +154,15 @@ describe("Dashboard | logout", () => {
     await userEvent.click(
       screen.getByRole("button", { name: /cerrar sesión/i }),
     );
-    await waitFor(() => expect(hrefSpy).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(hrefSpy.mock.calls.length).to.be.greaterThan(0);
+    });
 
     // Simula abrir nueva pestaña/navegador: unmount + render fresco
     unmount();
     render(<Dashboard />);
     await waitFor(() => screen.getByText(/Debes iniciar sesión/i));
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls.length).to.equal(3);
   });
 
   it("CP-LOG-006 Registra error en consola si el logout falla", async () => {
@@ -162,7 +175,7 @@ describe("Dashboard | logout", () => {
             usuario: { nombre: "Admin", correo: "admin@gmail.com" },
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
-        ) as any,
+        ),
       )
       // Logout falla por error de red
       .mockRejectedValueOnce(new Error("Network down"));
@@ -179,13 +192,13 @@ describe("Dashboard | logout", () => {
     );
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error al cerrar sesión:",
-        expect.any(Error),
-      );
+      const errorCalls = consoleErrorSpy.mock.calls;
+      expect(errorCalls.length).to.equal(1);
+      expect(errorCalls[0][0]).to.equal("Error al cerrar sesión:");
+      expect(errorCalls[0][1]).to.be.instanceOf(Error);
     });
 
-    expect(hrefSpy).not.toHaveBeenCalled();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(hrefSpy.mock.calls.length).to.equal(0);
+    expect(fetchMock.mock.calls.length).to.equal(2);
   });
 });
