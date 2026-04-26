@@ -32,8 +32,8 @@ describe("Login | casos de formulario", () => {
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     // Validación evita submit: no se debe llamar a fetch ni loginRequest
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(loginRequest).not.toHaveBeenCalled();
+    expect(fetchSpy.mock.calls.length).to.equal(0);
+    expect(vi.mocked(loginRequest).mock.calls.length).to.equal(0);
   });
 
   it("Email correcto y sin contrasena", async () => {
@@ -53,8 +53,8 @@ describe("Login | casos de formulario", () => {
     fireEvent.submit(form);
 
     await screen.findByText(/Ingresa correo y contraseña/i);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(loginRequest).not.toHaveBeenCalled();
+    expect(fetchSpy.mock.calls.length).to.equal(0);
+    expect(vi.mocked(loginRequest).mock.calls.length).to.equal(0);
   });
 
   it("Email vacío y contrasena válida", async () => {
@@ -69,8 +69,8 @@ describe("Login | casos de formulario", () => {
     await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(loginRequest).not.toHaveBeenCalled();
+    expect(fetchSpy.mock.calls.length).to.equal(0);
+    expect(vi.mocked(loginRequest).mock.calls.length).to.equal(0);
   });
 
   it("Email correcto y contrasena incorrecta", async () => {
@@ -92,7 +92,9 @@ describe("Login | casos de formulario", () => {
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     await waitFor(() => screen.getByText("Credenciales inválidas"));
-    expect(loginRequest).toHaveBeenCalledWith({
+    const loginCalls = vi.mocked(loginRequest).mock.calls;
+    expect(loginCalls.length).to.equal(1);
+    expect(loginCalls[0][0]).to.deep.equal({
       correo: "admin@gmail.com",
       contrasena: "ayayai",
     });
@@ -111,8 +113,8 @@ describe("Login | casos de formulario", () => {
     await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(loginRequest).not.toHaveBeenCalled();
+    expect(fetchSpy.mock.calls.length).to.equal(0);
+    expect(vi.mocked(loginRequest).mock.calls.length).to.equal(0);
   });
 
   it("Email sin @", async () => {
@@ -128,8 +130,8 @@ describe("Login | casos de formulario", () => {
     await userEvent.type(screen.getByPlaceholderText("Tu contrasena"), "admin");
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(loginRequest).not.toHaveBeenCalled();
+    expect(fetchSpy.mock.calls.length).to.equal(0);
+    expect(vi.mocked(loginRequest).mock.calls.length).to.equal(0);
   });
 
   it("Email válido pero sin cuenta y contrasena válida", async () => {
@@ -148,7 +150,9 @@ describe("Login | casos de formulario", () => {
     await userEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
     await waitFor(() => screen.getByText("Credenciales inválidas"));
-    expect(loginRequest).toHaveBeenCalledWith({
+    const loginCalls = vi.mocked(loginRequest).mock.calls;
+    expect(loginCalls.length).to.equal(1);
+    expect(loginCalls[0][0]).to.deep.equal({
       correo: "tomi123@gmail.com",
       contrasena: "admin",
     });
@@ -175,7 +179,9 @@ describe("Login | casos de formulario", () => {
     // === Assert ===
     await waitFor(() => {
       // @ts-expect-error router push is mocked in setupTests
-      expect(globalThis.__routerPush).toHaveBeenCalledWith("/home");
+      const routerPushCalls = globalThis.__routerPush.mock.calls;
+      expect(routerPushCalls.length).to.equal(1);
+      expect(routerPushCalls[0][0]).to.equal("/home");
     });
   });
 });
