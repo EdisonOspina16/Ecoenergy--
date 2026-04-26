@@ -31,10 +31,10 @@ afterEach(() => {
 describe("Eliminación de tomacorrientes en perfil", () => {
   it("CP-DEL-001 no elimina si el usuario cancela la confirmación", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(makeResponse(profilePayload));
 
-    vi.spyOn(window, "confirm").mockReturnValue(false);
+    vi.spyOn(globalThis, "confirm").mockReturnValue(false);
 
     renderProfile();
     await waitForListado();
@@ -47,11 +47,11 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
   it("CP-DEL-002 elimina el dispositivo y muestra mensaje de éxito", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(makeResponse(profilePayload))
       .mockResolvedValueOnce(makeResponse({ success: true }));
 
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.spyOn(globalThis, "confirm").mockReturnValue(true);
 
     renderProfile();
     await waitForListado();
@@ -71,13 +71,13 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
   it("CP-DEL-003 muestra error del backend y conserva el dispositivo", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(makeResponse(profilePayload))
       .mockResolvedValueOnce(
         makeResponse({ success: false, error: "No se pudo" }, 400),
       );
 
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.spyOn(globalThis, "confirm").mockReturnValue(true);
 
     renderProfile();
     await waitForListado();
@@ -93,11 +93,11 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
   it("CP-DEL-004 usa el mensaje por defecto cuando el backend no envía 'error'", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(makeResponse(profilePayload))
       .mockResolvedValueOnce(makeResponse({ success: false }));
 
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.spyOn(globalThis, "confirm").mockReturnValue(true);
 
     renderProfile();
     await waitForListado();
@@ -115,11 +115,11 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
   it("CP-DEL-005 maneja error de red al eliminar y notifica con fallback", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(makeResponse(profilePayload))
       .mockRejectedValueOnce(new Error("Network down"));
 
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.spyOn(globalThis, "confirm").mockReturnValue(true);
     const consoleErrorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});

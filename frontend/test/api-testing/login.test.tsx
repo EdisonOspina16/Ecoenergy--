@@ -21,7 +21,7 @@ describe("Login | casos de formulario", () => {
   });
 
   it("Ambos campos vacíos", async () => {
-    const fetchSpy = vi.spyOn(global, "fetch");
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
     vi.mocked(loginRequest).mockResolvedValue({
       ok: false,
       message: "",
@@ -37,7 +37,7 @@ describe("Login | casos de formulario", () => {
   });
 
   it("Email correcto y sin contrasena", async () => {
-    const fetchSpy = vi.spyOn(global, "fetch");
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
     vi.mocked(loginRequest).mockResolvedValue({
       ok: false,
       message: "",
@@ -58,7 +58,7 @@ describe("Login | casos de formulario", () => {
   });
 
   it("Email vacío y contrasena válida", async () => {
-    const fetchSpy = vi.spyOn(global, "fetch");
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
     vi.mocked(loginRequest).mockResolvedValue({
       ok: false,
       message: "",
@@ -99,7 +99,7 @@ describe("Login | casos de formulario", () => {
   });
 
   it("Email sin texto después del arroba", async () => {
-    const fetchSpy = vi.spyOn(global, "fetch");
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
     vi.mocked(loginRequest).mockResolvedValue({ ok: false, message: "" });
 
     render(<Login />);
@@ -116,7 +116,7 @@ describe("Login | casos de formulario", () => {
   });
 
   it("Email sin @", async () => {
-    const fetchSpy = vi.spyOn(global, "fetch");
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
     vi.mocked(loginRequest).mockResolvedValue({ ok: false, message: "" });
 
     render(<Login />);
@@ -174,7 +174,7 @@ describe("Login | casos de formulario", () => {
 
     // === Assert ===
     await waitFor(() => {
-	    // @ts-expect-error router push is mocked in setupTests
+      // @ts-expect-error router push is mocked in setupTests
       expect(globalThis.__routerPush).toHaveBeenCalledWith("/home");
     });
   });

@@ -8,7 +8,7 @@ import Dashboard from "@/app/dashboard/page";
 const hrefSpy = vi.fn();
 const installLocationMock = () => {
   const loc: any = {
-    ...window.location,
+    ...globalThis.location,
     assign: hrefSpy,
     reload: vi.fn(),
     get href() {
@@ -18,7 +18,7 @@ const installLocationMock = () => {
       hrefSpy(val);
     },
   };
-  Object.defineProperty(window, "location", {
+  Object.defineProperty(globalThis, "location", {
     value: loc,
     writable: true,
   });
@@ -36,7 +36,7 @@ describe("Dashboard | logout", () => {
 
   it("CP-LOG-001 Cerrar sesión correctamente desde el botón", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -65,7 +65,7 @@ describe("Dashboard | logout", () => {
 
   it("CP-LOG-002 Intentar acceder al Dashboard sin sesión (debería pedir login)", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(new Response("", { status: 401 })) as any;
 
     render(<Dashboard />);
@@ -77,7 +77,7 @@ describe("Dashboard | logout", () => {
 
   it("CP-LOG-003 Logout idempotente (múltiples clics seguidos)", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -108,7 +108,7 @@ describe("Dashboard | logout", () => {
 
   it("CP-LOG-004 Botón logout sin sesión activa (no debería mostrarse)", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(new Response("", { status: 401 }) as any);
 
     render(<Dashboard />);
@@ -120,7 +120,7 @@ describe("Dashboard | logout", () => {
 
   it("CP-LOG-005 No debe mostrarse dashboard tras cerrar y 'cerrar navegador' (nuevo render limpio)", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       // Render inicial OK
       .mockResolvedValueOnce(
         new Response(
@@ -154,7 +154,7 @@ describe("Dashboard | logout", () => {
 
   it("CP-LOG-006 Registra error en consola si el logout falla", async () => {
     const fetchMock = vi
-      .spyOn(global, "fetch")
+      .spyOn(globalThis, "fetch")
       // Perfil OK para mostrar el botón
       .mockResolvedValueOnce(
         new Response(
@@ -189,4 +189,3 @@ describe("Dashboard | logout", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
-

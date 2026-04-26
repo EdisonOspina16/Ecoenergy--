@@ -13,8 +13,8 @@ const makeResponse = (body: any, status = 200) =>
   }) as any;
 
 const renderPerfil = () => {
-  vi.spyOn(global, "fetch").mockResolvedValue(
-    makeResponse({ success: true, hogar: {}, dispositivos: [] }) as any,
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    makeResponse({ success: true, hogar: {}, dispositivos: [] }),
   );
   return render(<Profile />);
 };
@@ -106,4 +106,3 @@ describe("Registrar tomacorriente - handleDeviceRegister", () => {
     await screen.findByText(/Error al registrar el dispositivo/i);
   }, 8000);
 });
-
