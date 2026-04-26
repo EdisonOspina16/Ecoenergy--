@@ -23,8 +23,8 @@ metrics = PrometheusMetrics(app)
 # ============================================
 # CORS - Permitir peticiones desde Next.js
 # ============================================
-CORS(app, 
-     resources={r"/*": {"origins": "http://localhost:3000"}},
+CORS(app,
+     resources={r"/*": {"origins": ["http://localhost:3001", "http://localhost:3000"]}},
      supports_credentials=True)
 
 # ============================================
@@ -53,6 +53,6 @@ if __name__ == '__main__':
     print("🌱 EcoEnergy Backend - INICIANDO")
     print("="*60)
     iniciar_simulacion()
-    
+
     # Se usa 0.0.0.0 para permitir acceso desde red local (desarrollo)
     app.run(host="0.0.0.0", debug=False, port=5000) # NOSONAR
