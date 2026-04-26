@@ -79,4 +79,3 @@ describe("cargarRecomendacion - caja blanca", () => {
     expect(setRecommendations).toHaveBeenCalledWith([]);
   });
 });
-

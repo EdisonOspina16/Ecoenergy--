@@ -109,4 +109,3 @@ describe("cargarAhorroEstimado - caja blanca", () => {
     expect(setSavingData).toHaveBeenCalledWith(vacio);
   });
 });
-

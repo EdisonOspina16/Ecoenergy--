@@ -1,19 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useLogin } from '@/hooks/useLogin';
-import { loginRequest } from '@/lib/api/auth';
-import { useRouter } from 'next/navigation';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import { useLogin } from "@/hooks/useLogin";
+import { loginRequest } from "@/lib/api/auth";
+import { useRouter } from "next/navigation";
 
 // Mock dependencias externas
-vi.mock('@/lib/api/auth', () => ({
+vi.mock("@/lib/api/auth", () => ({
   loginRequest: vi.fn(),
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
 }));
 
-describe('Hook: useLogin', () => {
+describe("Hook: useLogin", () => {
   const mockPush = vi.fn();
 
   beforeEach(() => {
@@ -21,18 +21,18 @@ describe('Hook: useLogin', () => {
     (useRouter as any).mockReturnValue({ push: mockPush });
   });
 
-  it('debería rutear al redirect y frenar el loading si es ok (Camino Normal)', async () => {
+  it("debería rutear al redirect y frenar el loading si es ok (Camino Normal)", async () => {
     // === Arrange ===
     (loginRequest as any).mockResolvedValue({
       ok: true,
-      redirect: '/dashboard'
+      redirect: "/dashboard",
     });
 
     const { result } = renderHook(() => useLogin());
 
     act(() => {
-      result.current.setCorreo('test@correo.com');
-      result.current.setContrasena('1234');
+      result.current.setCorreo("test@correo.com");
+      result.current.setContrasena("1234");
     });
 
     // === Act ===
@@ -41,9 +41,11 @@ describe('Hook: useLogin', () => {
     });
 
     // === Assert ===
-    expect(loginRequest).toHaveBeenCalledWith({ correo: 'test@correo.com', contrasena: '1234' });
-    expect(mockPush).toHaveBeenCalledWith('/dashboard');
+    expect(loginRequest).toHaveBeenCalledWith({
+      correo: "test@correo.com",
+      contrasena: "1234",
+    });
+    expect(mockPush).toHaveBeenCalledWith("/dashboard");
     expect(result.current.loading).toBe(false);
   });
 });
-
