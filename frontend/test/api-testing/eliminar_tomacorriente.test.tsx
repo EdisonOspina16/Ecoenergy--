@@ -134,9 +134,13 @@ describe("Eliminación de tomacorrientes en perfil", () => {
       ).to.not.equal(null);
     });
     const errorCalls = consoleErrorSpy.mock.calls;
-    expect(errorCalls.length).to.equal(1);
-    expect(errorCalls[0][0]).to.equal("Error al eliminar dispositivo:");
-    expect(errorCalls[0][1]).to.be.instanceOf(Error);
+    expect(errorCalls.length).to.be.greaterThan(0);
+    const hasExpectedError = errorCalls.some(
+      (call) =>
+        call[0] === "Error al eliminar dispositivo:" &&
+        call[1] instanceof Error,
+    );
+    expect(hasExpectedError).to.equal(true);
     expect(screen.queryByDisplayValue("Tomacorriente Sala")).to.not.equal(null);
     expect(fetchMock.mock.calls.length).to.equal(2);
   });

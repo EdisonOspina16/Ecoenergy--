@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useLogin } from "@/hooks/useLogin";
 import { loginRequest } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
+import { expect } from "chai";
 
 // Mock dependencias externas
 vi.mock("@/lib/api/auth", () => ({
@@ -41,11 +42,15 @@ describe("Hook: useLogin", () => {
     });
 
     // === Assert ===
-    expect(loginRequest).toHaveBeenCalledWith({
+    const loginCalls = vi.mocked(loginRequest).mock.calls;
+    expect(loginCalls.length).to.equal(1);
+    expect(loginCalls[0][0]).to.deep.equal({
       correo: "test@correo.com",
       contrasena: "1234",
     });
-    expect(mockPush).toHaveBeenCalledWith("/dashboard");
-    expect(result.current.loading).toBe(false);
+    const pushCalls = mockPush.mock.calls;
+    expect(pushCalls.length).to.equal(1);
+    expect(pushCalls[0][0]).to.equal("/dashboard");
+    expect(result.current.loading).to.equal(false);
   });
 });
