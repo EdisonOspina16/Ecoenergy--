@@ -1,6 +1,5 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Profile from "@/app/perfil/page";
 
@@ -11,7 +10,7 @@ const makeResponse = (body: any, status = 200) =>
   }) as any;
 
 const setupFetch = (...responses: Response[]) => {
-  const spy = vi.spyOn(global, "fetch");
+  const spy = vi.spyOn(globalThis, "fetch");
   responses.forEach((res) => spy.mockResolvedValueOnce(res as any));
   return spy;
 };
@@ -180,16 +179,16 @@ describe("Listado de tomacorrientes en perfil", () => {
   });
 
   it("CP-LIST-010 redirige a login en 401", async () => {
-    const originalLocation = window.location;
-    delete (window as any).location;
-    window.location = { ...originalLocation, href: "" } as Location;
+    const originalLocation = globalThis.location;
+    delete (globalThis as any).location;
+    globalThis.location = { ...originalLocation, href: "" } as Location;
 
     setupFetch(makeResponse({}, 401));
 
     render(<Profile />);
-    await waitFor(() => expect(window.location.href).toBe("/login"));
+    await waitFor(() => expect(globalThis.location.href).toBe("/login"));
 
-    window.location = originalLocation;
+    globalThis.location = originalLocation;
   });
 
   it("CP-LIST-011 muestra error y limpia dispositivos en fallo", async () => {
@@ -234,4 +233,3 @@ describe("Listado de tomacorrientes en perfil", () => {
     expect(screen.getByDisplayValue("Sensor")).toBeInTheDocument();
   });
 });
-

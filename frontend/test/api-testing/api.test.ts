@@ -1,42 +1,48 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchPerfil, postProfile } from '@/lib/api/profile';
-import { postRecuperar } from '@/lib/api/recuperar';
-import { postSubscribe } from '@/lib/api/subscribe';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { fetchPerfil, postProfile } from "@/lib/api/profile";
+import { postRecuperar } from "@/lib/api/recuperar";
+import { postSubscribe } from "@/lib/api/subscribe";
 
 // Usaremos un Stub global sobre fetch para simular el comportamiento de jsonClient que consume estas APIs
-describe('Capas API REST (lib/api/*)', () => {
+describe("Capas API REST (lib/api/*)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  describe('API: Perfil', () => {
-    it('fetchPerfil debería hacer una solicitud GET a /perfil', async () => {
+  describe("API: Perfil", () => {
+    it("fetchPerfil debería hacer una solicitud GET a /perfil", async () => {
       // === Arrange ===
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ success: true, hogar: { nombre_hogar: "Mi casa test" } })
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          success: true,
+          hogar: { nombre_hogar: "Mi casa test" },
+        }),
       });
 
       // === Act ===
       const result = await fetchPerfil();
 
       // === Assert ===
-      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/perfil'), expect.objectContaining({ method: 'GET' }));
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/perfil"),
+        expect.objectContaining({ method: "GET" }),
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data.hogar?.nombre_hogar).toBe("Mi casa test");
       }
     });
 
-    it('postProfile debería hacer una solicitud POST a /perfil con payload correcto', async () => {
+    it("postProfile debería hacer una solicitud POST a /perfil con payload correcto", async () => {
       // === Arrange ===
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ success: true, message: "OK" })
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({ success: true, message: "OK" }),
       });
 
       const payload = { address: "123", nombre_hogar: "Hogar" };
@@ -45,24 +51,24 @@ describe('Capas API REST (lib/api/*)', () => {
       await postProfile(payload);
 
       // === Assert ===
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/perfil'),
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/perfil"),
         expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(payload)
-        })
+          method: "POST",
+          body: JSON.stringify(payload),
+        }),
       );
     });
   });
 
-  describe('API: Recuperar', () => {
-    it('postRecuperar debería procesar POST correctamente', async () => {
+  describe("API: Recuperar", () => {
+    it("postRecuperar debería procesar POST correctamente", async () => {
       // === Arrange ===
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ error: "Token invalido" })
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({ error: "Token invalido" }),
       });
 
       const payload = { correo: "test@test.com", nueva_contrasena: "123" };
@@ -71,9 +77,9 @@ describe('Capas API REST (lib/api/*)', () => {
       const result = await postRecuperar(payload);
 
       // === Assert ===
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/recuperar'),
-        expect.objectContaining({ method: 'POST' })
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/recuperar"),
+        expect.objectContaining({ method: "POST" }),
       );
       expect(result.ok).toBe(false);
       // jsonClient extrae el error como result.message
@@ -83,10 +89,12 @@ describe('Capas API REST (lib/api/*)', () => {
     });
   });
 
-  describe('API: Subscribe', () => {
-    it('postSubscribe debería procesar error de red como fallo genérico (Network Error)', async () => {
+  describe("API: Subscribe", () => {
+    it("postSubscribe debería procesar error de red como fallo genérico (Network Error)", async () => {
       // === Arrange ===
-      global.fetch = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+      globalThis.fetch = vi
+        .fn()
+        .mockRejectedValue(new TypeError("Failed to fetch"));
 
       const payload = { email: "fail@ecoenergy.com" };
 
@@ -97,20 +105,19 @@ describe('Capas API REST (lib/api/*)', () => {
       // Esto valida la función del jsonClient cuando el fetch falla puramente
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.message).toContain("No se puede conectar"); // mapNetworkError fallback 
+        expect(result.message).toContain("No se puede conectar"); // mapNetworkError fallback
       }
     });
 
-    it('postSubscribe debería retornar payload de exito', async () => {
-       global.fetch = vi.fn().mockResolvedValue({
+    it("postSubscribe debería retornar payload de exito", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ success: true })
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({ success: true }),
       });
       const result = await postSubscribe({ email: "ok@eco.com" });
       expect(result.ok).toBe(true);
     });
   });
 });
-
