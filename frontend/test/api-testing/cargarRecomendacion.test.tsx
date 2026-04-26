@@ -5,8 +5,9 @@
  */
 
 import React from "react";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, test, vi } from "vitest";
 import { cargarRecomendacion } from "@/lib/cargarRecomendacion";
+import { expect } from "chai";
 
 const mockFetch = vi.fn();
 
@@ -39,11 +40,9 @@ describe("cargarRecomendacion - caja blanca", () => {
     await cargarRecomendacion([{ id: "1" }, { id: "2" }], setRecommendations);
 
     // C1: setRecommendations llamado con los resultados agregados
-    expect(setRecommendations).toHaveBeenCalledTimes(1);
-    expect(setRecommendations).toHaveBeenCalledWith([
-      datosDevice1,
-      datosDevice2,
-    ]);
+    const calls = setRecommendations.mock.calls;
+    expect(calls.length).to.equal(1);
+    expect(calls[0][0]).to.deep.equal([datosDevice1, datosDevice2]);
   });
 
   test("cargarRecomendacion - res.ok = false: agrega { error: 'no response' }", async () => {
@@ -55,7 +54,10 @@ describe("cargarRecomendacion - caja blanca", () => {
     await cargarRecomendacion([{ id: "1" }], setRecommendations);
 
     // C2: cuando !res.ok se agrega { error: "no response" } al resultado
-    expect(setRecommendations).toHaveBeenCalledWith([{ error: "no response" }]);
+    expect(setRecommendations.mock.calls.length).to.equal(1);
+    expect(setRecommendations.mock.calls[0][0]).to.deep.equal([
+      { error: "no response" },
+    ]);
   });
 
   test("cargarRecomendacion - excepción de red: setRecommendations([])", async () => {
@@ -64,7 +66,8 @@ describe("cargarRecomendacion - caja blanca", () => {
     await cargarRecomendacion([{ id: "1" }], setRecommendations);
 
     // C3: ante excepción se llama setRecommendations con array vacío
-    expect(setRecommendations).toHaveBeenCalledWith([]);
+    expect(setRecommendations.mock.calls.length).to.equal(1);
+    expect(setRecommendations.mock.calls[0][0]).to.deep.equal([]);
   });
 
   test("cargarRecomendacion - JSON malformado: res.ok true pero res.json() lanza", async () => {
@@ -76,6 +79,7 @@ describe("cargarRecomendacion - caja blanca", () => {
     await cargarRecomendacion([{ id: "1" }], setRecommendations);
 
     // C4: si res.json() lanza, se actualiza setRecommendations([])
-    expect(setRecommendations).toHaveBeenCalledWith([]);
+    expect(setRecommendations.mock.calls.length).to.equal(1);
+    expect(setRecommendations.mock.calls[0][0]).to.deep.equal([]);
   });
 });

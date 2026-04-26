@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, vi, beforeEach } from "vitest";
 import { postRegistro, resolveError } from "@/lib/api/registro";
+import { expect } from "chai";
 
 describe("API Registro (postRegistro / resolveError)", () => {
   beforeEach(() => {
@@ -29,14 +30,13 @@ describe("API Registro (postRegistro / resolveError)", () => {
 
     // === Assert (Afirmar) ===
     // Spy implícito (vi.fn): Se utiliza para verificar con qué argumentos se llamó el 'fetch'.
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/registro"),
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify(dummyPayload),
-      }),
-    );
-    expect(resultado).toEqual({ ok: true, redirect: "/dashboard" });
+    const fetchCalls = vi.mocked(globalThis.fetch).mock.calls;
+    expect(fetchCalls.length).to.equal(1);
+    const [url, init] = fetchCalls[0] as [string, RequestInit];
+    expect(url).to.contain("/registro");
+    expect(init.method).to.equal("POST");
+    expect(init.body).to.equal(JSON.stringify(dummyPayload));
+    expect(resultado).to.deep.equal({ ok: true, redirect: "/dashboard" });
   });
 
   it("debería retornar error cuando la respuesta no es ok (Caso Error)", async () => {
@@ -53,7 +53,10 @@ describe("API Registro (postRegistro / resolveError)", () => {
     const resultado = await postRegistro(dummyPayload);
 
     // === Assert ===
-    expect(resultado).toEqual({ ok: false, error: "El correo ya existe" });
+    expect(resultado).to.deep.equal({
+      ok: false,
+      error: "El correo ya existe",
+    });
   });
 
   it("debería lanzar error si el formato no es JSON (Caso Borde)", async () => {
@@ -67,10 +70,15 @@ describe("API Registro (postRegistro / resolveError)", () => {
     });
 
     // === Act & Assert ===
-    // Con expects a rechazos asíncronos "rejects.toThrow", el Act y el Assert ocurren simultáneamente.
-    await expect(postRegistro(dummyPayload)).rejects.toThrow(
-      /Formato de respuesta incorrecto/,
-    );
+    try {
+      await postRegistro(dummyPayload);
+      throw new Error("Se esperaba excepción por formato inválido");
+    } catch (error) {
+      expect(error).to.be.instanceOf(Error);
+      expect((error as Error).message).to.contain(
+        "Formato de respuesta incorrecto",
+      );
+    }
   });
 });
 
@@ -84,7 +92,7 @@ describe("resolveError", () => {
     const resultado = resolveError(error);
 
     // === Assert ===
-    expect(resultado).toBe(
+    expect(resultado).to.equal(
       "Error al conectar con el servidor: Mensaje de prueba",
     );
   });
@@ -97,7 +105,7 @@ describe("resolveError", () => {
     const resultado = resolveError(error);
 
     // === Assert ===
-    expect(resultado).toContain("Verifica que el backend esté corriendo");
+    expect(resultado).to.contain("Verifica que el backend esté corriendo");
   });
 
   it("debería manejar errores de origen desconocido (Caso Borde)", () => {
@@ -108,6 +116,6 @@ describe("resolveError", () => {
     const resultado = resolveError(errorInvalido);
 
     // === Assert ===
-    expect(resultado).toBe("Error desconocido al conectar con el servidor");
+    expect(resultado).to.equal("Error desconocido al conectar con el servidor");
   });
 });

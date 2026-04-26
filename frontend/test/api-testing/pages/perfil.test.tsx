@@ -1,7 +1,8 @@
 import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ProfilePage from "@/app/perfil/page";
+import { expect } from "chai";
 
 // Mocks
 import * as useProfileHooks from "@/hooks/useProfileSubmit";
@@ -23,7 +24,7 @@ describe("Página: Profile / Perfil", () => {
         dispositivos: [],
       },
       status: 200,
-    } as any);
+    });
 
     vi.spyOn(useProfileHooks, "useProfileSubmit").mockReturnValue({
       profileSaving: false,
@@ -37,7 +38,7 @@ describe("Página: Profile / Perfil", () => {
       setNickname: vi.fn(),
       submitting: false,
       submit: mockDeviceRegistroSubmit,
-    } as any);
+    });
 
     Object.defineProperty(globalThis, "location", {
       value: { href: "" },
@@ -49,21 +50,21 @@ describe("Página: Profile / Perfil", () => {
     render(<ProfilePage />);
 
     // Verifica que el fetch API fue llamado al montar el componente
-    expect(profileApi.fetchPerfil).toHaveBeenCalled();
+    expect(vi.mocked(profileApi.fetchPerfil).mock.calls.length).to.equal(1);
 
     // El texto "Cargando..." aparece hasta que se resuelva la promesa
     await waitFor(() => {
-      expect(screen.queryByText("Cargando...")).not.toBeInTheDocument();
+      expect(screen.queryByText("Cargando...")).to.equal(null);
     });
 
     // Se asume que renderizó bien y los effectos actualizaron state:
-    expect(screen.getByText("Perfil del Hogar")).toBeInTheDocument();
+    expect(screen.queryByText("Perfil del Hogar")).to.not.equal(null);
   });
 
   it("debería ejecutar el envio del perfil en form handleSubmit (Interacción Eventos)", async () => {
     render(<ProfilePage />);
     await waitFor(() => {
-      expect(screen.queryByText("Cargando...")).not.toBeInTheDocument();
+      expect(screen.queryByText("Cargando...")).to.equal(null);
     });
 
     // Encontrar inputs
@@ -74,13 +75,13 @@ describe("Página: Profile / Perfil", () => {
     fireEvent.click(btnSubmit);
 
     // Debe llamar al hook con la nueva address
-    expect(mockSubmitProfile).toHaveBeenCalled();
+    expect(mockSubmitProfile.mock.calls.length).to.equal(1);
   });
 
   it("debería gestionar la UI de device registry llamando el hook asignado (Integración Sub-Forms)", async () => {
     render(<ProfilePage />);
     await waitFor(() => {
-      expect(screen.queryByText("Cargando...")).not.toBeInTheDocument();
+      expect(screen.queryByText("Cargando...")).to.equal(null);
     });
 
     const btnDevice = screen.getByRole("button", {
@@ -94,6 +95,6 @@ describe("Página: Profile / Perfil", () => {
       fireEvent.click(btnDevice);
     }
 
-    expect(mockDeviceRegistroSubmit).toHaveBeenCalled();
+    expect(mockDeviceRegistroSubmit.mock.calls.length).to.equal(1);
   });
 });

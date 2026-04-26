@@ -1,14 +1,15 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, it, vi } from "vitest";
 import Profile from "@/app/perfil/page";
+import { expect } from "chai";
 
 const makeResponse = (body: any, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
-  }) as any;
+  });
 
 const profilePayload = {
   success: true,
@@ -41,8 +42,8 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
     await userEvent.click(screen.getByTitle(/eliminar dispositivo/i));
 
-    expect(fetchMock).toHaveBeenCalledTimes(1); // Solo el GET inicial
-    expect(screen.getByDisplayValue("Tomacorriente Sala")).toBeInTheDocument();
+    expect(fetchMock.mock.calls.length).to.equal(1); // Solo el GET inicial
+    expect(screen.queryByDisplayValue("Tomacorriente Sala")).to.not.equal(null);
   });
 
   it("CP-DEL-002 elimina el dispositivo y muestra mensaje de éxito", async () => {
@@ -58,15 +59,13 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
     await userEvent.click(screen.getByTitle(/eliminar dispositivo/i));
 
-    await waitFor(() =>
-      expect(
-        screen.queryByDisplayValue("Tomacorriente Sala"),
-      ).not.toBeInTheDocument(),
-    );
+    await waitFor(() => {
+      expect(screen.queryByDisplayValue("Tomacorriente Sala")).to.equal(null);
+    });
     expect(
-      screen.getByText(/Dispositivo eliminado exitosamente/i),
-    ).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+      screen.queryByText(/Dispositivo eliminado exitosamente/i),
+    ).to.not.equal(null);
+    expect(fetchMock.mock.calls.length).to.equal(2);
   });
 
   it("CP-DEL-003 muestra error del backend y conserva el dispositivo", async () => {
@@ -84,11 +83,11 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
     await userEvent.click(screen.getByTitle(/eliminar dispositivo/i));
 
-    await waitFor(() =>
-      expect(screen.getByText(/No se pudo/i)).toBeInTheDocument(),
-    );
-    expect(screen.getByDisplayValue("Tomacorriente Sala")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(screen.queryByText(/No se pudo/i)).to.not.equal(null);
+    });
+    expect(screen.queryByDisplayValue("Tomacorriente Sala")).to.not.equal(null);
+    expect(fetchMock.mock.calls.length).to.equal(2);
   });
 
   it("CP-DEL-004 usa el mensaje por defecto cuando el backend no envía 'error'", async () => {
@@ -104,13 +103,13 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
     await userEvent.click(screen.getByTitle(/eliminar dispositivo/i));
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(
-        screen.getByText(/Error al eliminar el dispositivo/i),
-      ).toBeInTheDocument(),
-    );
-    expect(screen.getByDisplayValue("Tomacorriente Sala")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+        screen.queryByText(/Error al eliminar el dispositivo/i),
+      ).to.not.equal(null);
+    });
+    expect(screen.queryByDisplayValue("Tomacorriente Sala")).to.not.equal(null);
+    expect(fetchMock.mock.calls.length).to.equal(2);
   });
 
   it("CP-DEL-005 maneja error de red al eliminar y notifica con fallback", async () => {
@@ -129,16 +128,16 @@ describe("Eliminación de tomacorrientes en perfil", () => {
 
     await userEvent.click(screen.getByTitle(/eliminar dispositivo/i));
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(
-        screen.getByText(/Error al conectar con el servidor/i),
-      ).toBeInTheDocument(),
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Error al eliminar dispositivo:",
-      expect.any(Error),
-    );
-    expect(screen.getByDisplayValue("Tomacorriente Sala")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+        screen.queryByText(/Error al conectar con el servidor/i),
+      ).to.not.equal(null);
+    });
+    const errorCalls = consoleErrorSpy.mock.calls;
+    expect(errorCalls.length).to.equal(1);
+    expect(errorCalls[0][0]).to.equal("Error al eliminar dispositivo:");
+    expect(errorCalls[0][1]).to.be.instanceOf(Error);
+    expect(screen.queryByDisplayValue("Tomacorriente Sala")).to.not.equal(null);
+    expect(fetchMock.mock.calls.length).to.equal(2);
   });
 });

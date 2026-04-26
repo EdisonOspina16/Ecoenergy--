@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, vi, beforeEach } from "vitest";
 import { fetchPerfil, postProfile } from "@/lib/api/profile";
 import { postRecuperar } from "@/lib/api/recuperar";
 import { postSubscribe } from "@/lib/api/subscribe";
+import { expect } from "chai";
 
 // Usaremos un Stub global sobre fetch para simular el comportamiento de jsonClient que consume estas APIs
 describe("Capas API REST (lib/api/*)", () => {
@@ -26,13 +27,14 @@ describe("Capas API REST (lib/api/*)", () => {
       const result = await fetchPerfil();
 
       // === Assert ===
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/perfil"),
-        expect.objectContaining({ method: "GET" }),
-      );
-      expect(result.ok).toBe(true);
+      const fetchCalls = vi.mocked(globalThis.fetch).mock.calls;
+      expect(fetchCalls.length).to.equal(1);
+      const [url, init] = fetchCalls[0] as [string, RequestInit];
+      expect(url).to.contain("/perfil");
+      expect(init.method).to.equal("GET");
+      expect(result.ok).to.equal(true);
       if (result.ok) {
-        expect(result.data.hogar?.nombre_hogar).toBe("Mi casa test");
+        expect(result.data.hogar?.nombre_hogar).to.equal("Mi casa test");
       }
     });
 
@@ -51,13 +53,12 @@ describe("Capas API REST (lib/api/*)", () => {
       await postProfile(payload);
 
       // === Assert ===
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/perfil"),
-        expect.objectContaining({
-          method: "POST",
-          body: JSON.stringify(payload),
-        }),
-      );
+      const fetchCalls = vi.mocked(globalThis.fetch).mock.calls;
+      expect(fetchCalls.length).to.equal(1);
+      const [url, init] = fetchCalls[0] as [string, RequestInit];
+      expect(url).to.contain("/perfil");
+      expect(init.method).to.equal("POST");
+      expect(init.body).to.equal(JSON.stringify(payload));
     });
   });
 
@@ -77,14 +78,15 @@ describe("Capas API REST (lib/api/*)", () => {
       const result = await postRecuperar(payload);
 
       // === Assert ===
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/recuperar"),
-        expect.objectContaining({ method: "POST" }),
-      );
-      expect(result.ok).toBe(false);
+      const fetchCalls = vi.mocked(globalThis.fetch).mock.calls;
+      expect(fetchCalls.length).to.equal(1);
+      const [url, init] = fetchCalls[0] as [string, RequestInit];
+      expect(url).to.contain("/recuperar");
+      expect(init.method).to.equal("POST");
+      expect(result.ok).to.equal(false);
       // jsonClient extrae el error como result.message
       if (!result.ok) {
-        expect(result.message).toBe("Token invalido");
+        expect(result.message).to.equal("Token invalido");
       }
     });
   });
@@ -103,9 +105,9 @@ describe("Capas API REST (lib/api/*)", () => {
 
       // === Assert ===
       // Esto valida la función del jsonClient cuando el fetch falla puramente
-      expect(result.ok).toBe(false);
+      expect(result.ok).to.equal(false);
       if (!result.ok) {
-        expect(result.message).toContain("No se puede conectar"); // mapNetworkError fallback
+        expect(result.message).to.contain("No se puede conectar"); // mapNetworkError fallback
       }
     });
 
@@ -117,7 +119,7 @@ describe("Capas API REST (lib/api/*)", () => {
         json: async () => ({ success: true }),
       });
       const result = await postSubscribe({ email: "ok@eco.com" });
-      expect(result.ok).toBe(true);
+      expect(result.ok).to.equal(true);
     });
   });
 });

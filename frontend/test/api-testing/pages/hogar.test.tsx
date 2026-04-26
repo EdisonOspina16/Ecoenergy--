@@ -1,8 +1,9 @@
 import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import HomePage from "@/app/home/page";
 import * as useDispositivosHooks from "@/hooks/useDispositivos";
+import { expect } from "chai";
 
 // Mockeamos la location global ya que hay un globalThis.location para la validacion oauth en la UI
 beforeEach(() => {
@@ -74,15 +75,15 @@ describe("Página: Dashboard Hogar", () => {
     render(<HomePage />);
 
     // Componente principal de nombre
-    expect(screen.getByText("ECOENERGY")).toBeInTheDocument();
+    expect(screen.queryByText("ECOENERGY")).to.not.equal(null);
 
     // La carga de dispositivos inicial va con mock así que "Nevera" debería estar mapeada
     await waitFor(() => {
-      expect(screen.getByText("Nevera Inteligente")).toBeInTheDocument();
+      expect(screen.queryByText("Nevera Inteligente")).to.not.equal(null);
     });
 
     // Verifica la interpolación de state
-    expect(screen.getByText("30.00 kWh")).toBeInTheDocument();
+    expect(screen.queryByText("30.00 kWh")).to.not.equal(null);
   });
 
   it("debería llamar a los servicios correspondientes on mount (Verify Fetch Spies)", async () => {
@@ -90,14 +91,19 @@ describe("Página: Dashboard Hogar", () => {
 
     await waitFor(() => {
       // Debe haber consultado historial de consumo
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("consumo-historico"),
-        expect.any(Object),
+      const fetchCalls = vi.mocked(globalThis.fetch).mock.calls;
+      expect(fetchCalls.length).to.be.greaterThan(0);
+      const consumoHistoricoCall = fetchCalls.find((call) =>
+        String(call[0]).includes("consumo-historico"),
       );
+      expect(consumoHistoricoCall).to.not.equal(undefined);
+      expect(consumoHistoricoCall![1]).to.not.equal(undefined);
 
       // Debe haber mandado llamar cargarDispositivos al iniciar
-      expect(mockCargarDispositivos).not.toHaveBeenCalled(); // Wait, it triggers the spy implementation inline bypassing mock.
-      expect(useDispositivosHooks.cargarDispositivos).toHaveBeenCalled();
+      expect(mockCargarDispositivos.mock.calls.length).to.equal(0); // Wait, it triggers the spy implementation inline bypassing mock.
+      expect(
+        vi.mocked(useDispositivosHooks.cargarDispositivos).mock.calls.length,
+      ).to.be.greaterThan(0);
     });
   });
 
@@ -109,7 +115,7 @@ describe("Página: Dashboard Hogar", () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(globalThis.location.href).toBe("/login");
+      expect(globalThis.location.href).to.equal("/login");
     });
   });
 });
