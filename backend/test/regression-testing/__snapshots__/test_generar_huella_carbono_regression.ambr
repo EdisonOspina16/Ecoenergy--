@@ -1,0 +1,12 @@
+# serializer version: 1
+# name: test_regression_generar_huella_carbono
+  dict({
+    'data': dict({
+      'ahorro_financiero': '$50.00',
+      'huella_carbono': '20kg CO2',
+      'impacto_ambiental': 'Menos huella de carbono',
+      'indicador_didactico': '10 árboles salvados',
+    }),
+    'success': True,
+  })
+# ---

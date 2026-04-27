@@ -1,0 +1,8 @@
+# serializer version: 1
+# name: test_regression_generar_recomendaciones_ahorro
+  dict({
+    'dispositivo': 'Televisor',
+    'esAlerta': True,
+    'recomendacion': 'Deberías reducir el uso del televisor.',
+  })
+# ---

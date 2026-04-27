@@ -1,0 +1,12 @@
+# serializer version: 1
+# name: test_regression_gestion_hogar
+  dict({
+    'dispositivos': list([
+    ]),
+    'hogar': dict({
+      'id_hogar': 1,
+      'nombre_hogar': 'Mi Hogar',
+    }),
+    'success': True,
+  })
+# ---

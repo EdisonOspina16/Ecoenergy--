@@ -1,0 +1,7 @@
+# serializer version: 1
+# name: test_regression_registro_usuario
+  dict({
+    'message': 'Usuario registrado con éxito',
+    'redirect': '/login',
+  })
+# ---
