@@ -1,0 +1,14 @@
+Flask
+Flask-Cors
+google-genai
+prometheus-client
+prometheus-flask-exporter
+psycopg2-binary
+Werkzeug
+PyHamcrest
+locust
+pytest
+pytest-cov
+bandit
+pip-audit
+syrupy
