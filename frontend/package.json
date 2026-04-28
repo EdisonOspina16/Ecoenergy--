@@ -12,11 +12,12 @@
     "test:ci": "vitest run --reporter=dot"
   },
   "dependencies": {
-    "next": "13.5.6",
+    "next": "^16.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "6.4.2",
     "@testing-library/react": "14.2.1",
     "@testing-library/user-event": "14.6.1",
@@ -25,19 +26,27 @@
     "@types/node": "20.4.9",
     "@types/react": "18.2.28",
     "@types/react-dom": "18.2.13",
-    "@vitest/coverage-v8": "^1.6.1",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "chai": "^6.2.2",
     "eslint": "8.50.0",
     "eslint-config-next": "13.5.6",
     "jsdom": "23.2.0",
-    "mocha": "^11.7.5",
+    "mocha": "^11.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
-    "vitest": "^1.6.1",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5",
     "whatwg-fetch": "3.6.20"
   },
   "vitest": {
     "environment": "jsdom",
     "setupFiles": "./test/setupTests.ts"
+  },
+  "overrides": {
+    "postcss": ">=8.5.10",
+    "minimatch": ">=9.0.7",
+    "serialize-javascript": ">=7.0.5",
+    "diff": ">=9.0.0"
   }
 }

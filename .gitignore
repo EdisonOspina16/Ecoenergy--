@@ -1,7 +1,3 @@
-# Package lock files (Generan conflictos frecuentes, Problemáticos para el control de versiones)
-package-lock.json
-/frontend/package-lock.json
-/backend/package-lock.json
 
 # SonarQube
 /backend/.coverage
