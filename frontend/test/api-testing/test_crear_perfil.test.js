@@ -1,10 +1,11 @@
 /**
  * Pruebas Unitarias - Frontend
  * Función: crearPerfil
- * Framework: Vitest
+ * Framework: Vitest + Chai (fluent assertions)
  */
 
-import { describe, test, expect } from "vitest";
+import { describe, test } from "vitest";
+import { expect } from "chai";
 
 async function crearPerfil(address, homeName, fetchFn) {
     if (!address || !homeName) {
@@ -23,7 +24,7 @@ async function crearPerfil(address, homeName, fetchFn) {
         } else {
             return { mensaje: data.error, tipoMensaje: "error" };
         }
-    } catch (e) {
+    } catch (e) { //NOSONAR
         return { mensaje: "Error al conectar con el servidor", tipoMensaje: "error" };
     }
 }
@@ -38,8 +39,8 @@ describe("crearPerfil", () => {
 
         const resultado = await crearPerfil("Calle 123", "Mi Hogar", fetchFn);
 
-        expect(resultado.tipoMensaje).toBe("success");
-        expect(resultado.mensaje).toBe("Perfil creado correctamente");
+        expect(resultado.tipoMensaje).to.equal("success");
+        expect(resultado.mensaje).to.equal("Perfil creado correctamente");
     });
 
     test("C2 - Datos válidos, success=false: muestra mensaje de error", async () => {
@@ -50,8 +51,8 @@ describe("crearPerfil", () => {
 
         const resultado = await crearPerfil("Calle 123", "Mi Hogar", fetchFn);
 
-        expect(resultado.tipoMensaje).toBe("error");
-        expect(resultado.mensaje).toBe("Error al guardar perfil");
+        expect(resultado.tipoMensaje).to.equal("error");
+        expect(resultado.mensaje).to.equal("Error al guardar perfil");
     });
 
     test("C3 - Error de red: fetch lanza excepción", async () => {
@@ -59,8 +60,8 @@ describe("crearPerfil", () => {
 
         const resultado = await crearPerfil("Calle 123", "Mi Hogar", fetchFn);
 
-        expect(resultado.tipoMensaje).toBe("error");
-        expect(resultado.mensaje).toBe("Error al conectar con el servidor");
+        expect(resultado.tipoMensaje).to.equal("error");
+        expect(resultado.mensaje).to.equal("Error al conectar con el servidor");
     });
 
     test("C4 - Validación falla: campos vacíos", async () => {
@@ -68,8 +69,8 @@ describe("crearPerfil", () => {
 
         const resultado = await crearPerfil("", "", fetchFn);
 
-        expect(resultado.tipoMensaje).toBe("error");
-        expect(resultado.mensaje).toBe("La dirección y el nombre del hogar son requeridos");
+        expect(resultado.tipoMensaje).to.equal("error");
+        expect(resultado.mensaje).to.equal("La dirección y el nombre del hogar son requeridos");
     });
 
 });
