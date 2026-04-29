@@ -1,10 +1,11 @@
 /**
  * Pruebas Unitarias - Frontend
  * Función: registrarSuscripcion
- * Framework: Vitest
+ * Framework: Vitest + Chai (fluent assertions)
  */
 
-import { describe, test, expect } from "vitest";
+import { describe, test } from "vitest";
+import { expect } from "chai";
 
 async function registrarSuscripcion(email, fetchFn) {
     if (!email) {
@@ -23,7 +24,7 @@ async function registrarSuscripcion(email, fetchFn) {
             const data = await response.json();
             return { mensaje: data.error, exito: false };
         }
-    } catch (e) {
+    } catch (e) { //NOSONAR
         return { mensaje: "No se pudo conectar con el servidor", exito: false };
     }
 }
@@ -35,8 +36,8 @@ describe("registrarSuscripcion", () => {
 
         const resultado = await registrarSuscripcion("user@correo.com", fetchFn);
 
-        expect(resultado.exito).toBe(true);
-        expect(resultado.mensaje).toContain("Gracias");
+        expect(resultado.exito).to.equal(true);
+        expect(resultado.mensaje).to.include("Gracias");
     });
 
     test("C2 - Email vacío: no llama fetch, muestra validación", async () => {
@@ -45,9 +46,9 @@ describe("registrarSuscripcion", () => {
 
         const resultado = await registrarSuscripcion("", fetchFn);
 
-        expect(resultado.exito).toBe(false);
-        expect(resultado.mensaje).toBe("Por favor ingresa un correo válido");
-        expect(fetchLlamado).toBe(false);
+        expect(resultado.exito).to.equal(false);
+        expect(resultado.mensaje).to.equal("Por favor ingresa un correo válido");
+        expect(fetchLlamado).to.equal(false);
     });
 
     test("C3 - Correo ya registrado: response.ok=false, muestra error", async () => {
@@ -58,8 +59,8 @@ describe("registrarSuscripcion", () => {
 
         const resultado = await registrarSuscripcion("user@correo.com", fetchFn);
 
-        expect(resultado.exito).toBe(false);
-        expect(resultado.mensaje).toBe("Correo ya registrado");
+        expect(resultado.exito).to.equal(false);
+        expect(resultado.mensaje).to.equal("Correo ya registrado");
     });
 
     test("C4 - Error de red: fetch lanza excepción", async () => {
@@ -67,8 +68,8 @@ describe("registrarSuscripcion", () => {
 
         const resultado = await registrarSuscripcion("user@correo.com", fetchFn);
 
-        expect(resultado.exito).toBe(false);
-        expect(resultado.mensaje).toBe("No se pudo conectar con el servidor");
+        expect(resultado.exito).to.equal(false);
+        expect(resultado.mensaje).to.equal("No se pudo conectar con el servidor");
     });
 
 });
