@@ -1,10 +1,12 @@
+
 /**
  * Pruebas Unitarias - Frontend
  * Función: cambiarContrasena
- * Framework: Vitest
+ * Framework: Vitest + Chai (fluent assertions)
  */
 
-import { describe, test, expect } from "vitest";
+import { describe, test } from "vitest";
+import { expect } from "chai";
 
 // ── Función bajo prueba ──────────────────────────────────────────
 
@@ -27,7 +29,7 @@ async function cambiarContrasena(correo, nuevaContrasena, fetchFn) {
             const data = await response.json();
             error = data.error;
         }
-    } catch (e) {
+    } catch (e) { //NOSONAR
         error = "Error al conectar con el servidor";
     }
 
@@ -46,9 +48,9 @@ describe("cambiarContrasena", () => {
 
         const resultado = await cambiarContrasena("user@test.com", "Segura123!", fetchFn);
 
-        expect(resultado.success).toBe("contrasena actualizada");
-        expect(resultado.redirect).toBe("/login");
-        expect(resultado.error).toBeNull();
+        expect(resultado.success).to.equal("contrasena actualizada");
+        expect(resultado.redirect).to.equal("/login");
+        expect(resultado.error).to.be.null;
     });
 
     test("C2 - Correo no existe: response.ok=false, muestra error", async () => {
@@ -59,9 +61,9 @@ describe("cambiarContrasena", () => {
 
         const resultado = await cambiarContrasena("noexiste@x.com", "Clave456!", fetchFn);
 
-        expect(resultado.error).toBe("Usuario no encontrado");
-        expect(resultado.redirect).toBeNull();
-        expect(resultado.success).toBeNull();
+        expect(resultado.error).to.equal("Usuario no encontrado");
+        expect(resultado.redirect).to.be.null;
+        expect(resultado.success).to.be.null;
     });
 
     test("C3 - Error de red: fetch lanza excepción, muestra error de servidor", async () => {
@@ -69,9 +71,9 @@ describe("cambiarContrasena", () => {
 
         const resultado = await cambiarContrasena("user@test.com", "Pass789!", fetchFn);
 
-        expect(resultado.error).toBe("Error al conectar con el servidor");
-        expect(resultado.success).toBeNull();
-        expect(resultado.redirect).toBeNull();
+        expect(resultado.error).to.equal("Error al conectar con el servidor");
+        expect(resultado.success).to.be.null;
+        expect(resultado.redirect).to.be.null;
     });
 
 });
