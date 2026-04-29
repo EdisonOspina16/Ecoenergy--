@@ -1,0 +1,7 @@
+# serializer version: 1
+# name: test_regression_mostrar_estados_dispositivos
+  dict({
+    'message': 'Dispositivo encendido correctamente',
+    'success': True,
+  })
+# ---

@@ -1,26 +1,26 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useRecuperar } from '../src/hooks/useRecuperar';
-import { postRecuperar } from '../src/lib/api/recuperar';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import { useRecuperar } from "@/hooks/useRecuperar";
+import { postRecuperar } from "@/lib/api/recuperar";
 
 // Mock: Simulamos postRecuperar aislando esta prueba del ecosistema de fetch/backend.
-vi.mock('../src/lib/api/recuperar', () => ({
+vi.mock("@/lib/api/recuperar", () => ({
   postRecuperar: vi.fn(),
 }));
 
-describe('Hook: useRecuperar', () => {
-  const originalLocation = window.location;
+describe("Hook: useRecuperar", () => {
+  const originalLocation = globalThis.location;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
-    // Fake Timers: Falsificamos el reloj de ejecución de JS. 
+
+    // Fake Timers: Falsificamos el reloj de ejecución de JS.
     // Ésto evita esperar 2000ms en el test para verificar la redirección (Caso Normal).
     vi.useFakeTimers();
 
     // Mockeamos el location para constatar a dónde redirige el script.
-    Object.defineProperty(window, 'location', {
-      value: { href: '' },
+    Object.defineProperty(globalThis, "location", {
+      value: { href: "" },
       writable: true,
     });
   });
@@ -28,26 +28,30 @@ describe('Hook: useRecuperar', () => {
   afterEach(() => {
     // Restauramos Timers reales
     vi.useRealTimers();
-    Object.defineProperty(window, 'location', {
+    Object.defineProperty(globalThis, "location", {
       value: originalLocation,
       writable: true,
     });
   });
 
-  it('debería setear éxito, esperar e ir a redirect (Camino Normal)', async () => {
+  it("debería setear éxito, esperar e ir a redirect (Camino Normal)", async () => {
     // === Arrange ===
     // Stub: Configuración controlada para éxito puro de recuperación
     (postRecuperar as any).mockResolvedValue({
       ok: true,
-      data: { error: undefined, message: "Contraseña enviada a su correo", redirect: "/login" }
+      data: {
+        error: undefined,
+        message: "Contraseña enviada a su correo",
+        redirect: "/login",
+      },
     });
 
     const { result } = renderHook(() => useRecuperar());
     const eventMock = { preventDefault: vi.fn() } as any;
 
     act(() => {
-      result.current.setCorreo('test@example.com');
-      result.current.setNuevacontrasena('1234');
+      result.current.setCorreo("test@example.com");
+      result.current.setNuevacontrasena("1234");
     });
 
     // === Act ===
@@ -56,9 +60,12 @@ describe('Hook: useRecuperar', () => {
     });
 
     // === Assert ===
-    expect(postRecuperar).toHaveBeenCalledWith({ correo: 'test@example.com', nueva_contrasena: '1234' });
+    expect(postRecuperar).toHaveBeenCalledWith({
+      correo: "test@example.com",
+      nueva_contrasena: "1234",
+    });
     expect(result.current.success).toBe("Contraseña enviada a su correo");
-    expect(result.current.error).toBe('');
+    expect(result.current.error).toBe("");
 
     // === Act 2 (Fake Timers) ===
     // Avanzamos el reloj virtual de forma sincrona para ejecutar los setTimeout
@@ -67,14 +74,14 @@ describe('Hook: useRecuperar', () => {
     });
 
     // Validamos redirección
-    expect(window.location.href).toBe('/login');
+    expect(globalThis.location.href).toBe("/login");
   });
 
-  it('debería setear error recibido si back retorna error con .ok=true (Caso de Error Manejado)', async () => {
+  it("debería setear error recibido si back retorna error con .ok=true (Caso de Error Manejado)", async () => {
     // === Arrange ===
     (postRecuperar as any).mockResolvedValue({
       ok: true,
-      data: { error: "El correo no existe" }
+      data: { error: "El correo no existe" },
     });
 
     const { result } = renderHook(() => useRecuperar());
@@ -87,15 +94,15 @@ describe('Hook: useRecuperar', () => {
 
     // === Assert ===
     expect(result.current.error).toBe("El correo no existe");
-    expect(result.current.success).toBe('');
+    expect(result.current.success).toBe("");
   });
 
-  it('debería setear error interno o de red si status no es ok (Caso Borde/Red)', async () => {
+  it("debería setear error interno o de red si status no es ok (Caso Borde/Red)", async () => {
     // === Arrange ===
     // Stub simulando rotura de red o status 500
     (postRecuperar as any).mockResolvedValue({
       ok: false,
-      message: "Gateway timeout"
+      message: "Gateway timeout",
     });
 
     const { result } = renderHook(() => useRecuperar());
@@ -110,18 +117,18 @@ describe('Hook: useRecuperar', () => {
     expect(result.current.error).toBe("Gateway timeout");
   });
 
-  it('debería setear fallback error/success si data devuelta no los tiene explícitamente (Fallback Messages)', async () => {
+  it("debería setear fallback error/success si data devuelta no los tiene explícitamente (Fallback Messages)", async () => {
     // === Arrange ===
     (postRecuperar as any).mockResolvedValue({
       ok: true,
-      data: { } // error y message vacios
+      data: {}, // error y message vacios
     });
 
     const { result } = renderHook(() => useRecuperar());
     const eventMock = { preventDefault: vi.fn() } as any;
 
     act(() => {
-      result.current.setCorreo('test@correo.com');
+      result.current.setCorreo("test@correo.com");
     });
 
     // === Act ===
@@ -134,18 +141,18 @@ describe('Hook: useRecuperar', () => {
     expect(result.current.success).toBe("Contraseña actualizada exitosamente");
   });
 
-  it('debería setear fallback error al fallar sin mensaje expreso si data.error está vacío (Fallback Errors)', async () => {
+  it("debería setear fallback error al fallar sin mensaje expreso si data.error está vacío (Fallback Errors)", async () => {
     // === Arrange ===
     (postRecuperar as any).mockResolvedValue({
       ok: true,
-      data: { error: undefined, success: false, redirect: undefined }
+      data: { error: undefined, success: false, redirect: undefined },
     });
 
     // Para forzar el error debemos lograr que `!result.data.error` de falso, pero esta es logica: if (!result.data.error) entra a succes.
     // Si queremos el error debemos mandar result.data.error = ''. Como en js '' es falso entrara al success...
     // Sin embargo, si simulamos que falla el OK, veamos los fallbacks...
     (postRecuperar as any).mockResolvedValue({
-      ok: false
+      ok: false,
     });
 
     const { result } = renderHook(() => useRecuperar());
@@ -161,11 +168,13 @@ describe('Hook: useRecuperar', () => {
     expect(result.current.error).toBe("Error al conectar con el servidor");
   });
 
-  it('debería capturar errores de ejecución y mostrar el fallback genérico de catch (Catch Exception)', async () => {
+  it("debería capturar errores de ejecución y mostrar el fallback genérico de catch (Catch Exception)", async () => {
     // === Arrange ===
-    (postRecuperar as any).mockRejectedValue(new Error("Fatal error backend crashed"));
+    (postRecuperar as any).mockRejectedValue(
+      new Error("Fatal error backend crashed"),
+    );
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const { result } = renderHook(() => useRecuperar());
     const eventMock = { preventDefault: vi.fn() } as any;

@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
+from hamcrest import assert_that, is_, equal_to
 
 with patch("google.genai.Client") as FakeClient:
     fake_models = Mock()
@@ -82,18 +83,18 @@ def test_cp_tom_001_registro_valido(client):
     resp = client.post("/perfil", json={"deviceId": "TOM001", "nickname": "Nevera"})
     data = resp.get_json()
 
-    assert resp.status_code == 201
-    assert data["success"] is True
-    assert data["dispositivo"]["alias"] == "Nevera"
-    assert data["dispositivo"]["id_dispositivo_iot"] == "TOM001"
+    assert_that(resp.status_code, is_(equal_to(201)))
+    assert_that(data["success"], is_(equal_to(True)))
+    assert_that(data["dispositivo"]["alias"], is_(equal_to("Nevera")))
+    assert_that(data["dispositivo"]["id_dispositivo_iot"], is_(equal_to("TOM001")))
 
 
 def test_cp_campos_vacios(client):
     _seed_session(client)
     resp = client.post("/perfil", json={"deviceId": "", "nickname": ""})
     data = resp.get_json()
-    assert resp.status_code == 400
-    assert data["success"] is False
+    assert_that(resp.status_code, is_(equal_to(400)))
+    assert_that(data["success"], is_(equal_to(False)))
     assert "requeridos" in data["error"].lower()
 
 
@@ -101,16 +102,16 @@ def test_cp_id_vacio_apodo_valido(client):
     _seed_session(client)
     resp = client.post("/perfil", json={"deviceId": "", "nickname": "TV Sala"})
     data = resp.get_json()
-    assert resp.status_code == 400
-    assert data["success"] is False
+    assert_that(resp.status_code, is_(equal_to(400)))
+    assert_that(data["success"], is_(equal_to(False)))
 
 
 def test_cp_tom_002_id_valido_apodo_vacio(client):
     _seed_session(client)
     resp = client.post("/perfil", json={"deviceId": "TOM002", "nickname": ""})
     data = resp.get_json()
-    assert resp.status_code == 400
-    assert data["success"] is False
+    assert_that(resp.status_code, is_(equal_to(400)))
+    assert_that(data["success"], is_(equal_to(False)))
 
 
 def test_cp_tom_001_dispositivo_existente(client, monkeypatch):
@@ -120,8 +121,8 @@ def test_cp_tom_001_dispositivo_existente(client, monkeypatch):
 
     resp = client.post("/perfil", json={"deviceId": "TOM001", "nickname": "Microondas"})
     data = resp.get_json()
-    assert resp.status_code == 400
-    assert data["success"] is False
+    assert_that(resp.status_code, is_(equal_to(400)))
+    assert_that(data["success"], is_(equal_to(False)))
     assert "ya está registrado" in data["error"].lower()
 
 
@@ -131,8 +132,8 @@ def test_cp_tom_003_sin_hogar_previo(client, monkeypatch):
 
     resp = client.post("/perfil", json={"deviceId": "TOM003", "nickname": "Lavadora"})
     data = resp.get_json()
-    assert resp.status_code == 400
-    assert data["success"] is False
+    assert_that(resp.status_code, is_(equal_to(400)))
+    assert_that(data["success"], is_(equal_to(False)))
     assert "hogar" in data["error"].lower()
 
 
@@ -149,9 +150,8 @@ def test_cp_tom_004_apodo_muy_largo(client, monkeypatch):
     apodo_largo = "Este es un apodo extremadamente largo que supera los 50 caracteres permitidos por el sistema"
     resp = client.post("/perfil", json={"deviceId": "TOM004", "nickname": apodo_largo})
     data = resp.get_json()
-    assert resp.status_code == 500
-    assert data["success"] is False
-
+    assert_that(resp.status_code, is_(equal_to(500)))
+    assert_that(data["success"], is_(equal_to(False)))
 
 def test_cp_registros_multiples_consecutivos(client, stub_dispositivos):
     _seed_session(client)
@@ -164,19 +164,19 @@ def test_cp_registros_multiples_consecutivos(client, stub_dispositivos):
 
     for device_id, alias in dispositivos:
         resp = client.post("/perfil", json={"deviceId": device_id, "nickname": alias})
-        assert resp.status_code == 201
-        assert resp.get_json()["success"] is True
+        assert_that(resp.status_code, is_(equal_to(201)))
+        assert_that(resp.get_json()["success"], is_(equal_to(True)))
 
-    assert stub_dispositivos["registrados"] == {"TOM005", "TOM006", "TOM007"}
+    assert_that(stub_dispositivos["registrados"], is_(equal_to({"TOM005", "TOM006", "TOM007"})))
 
 
 def test_cp_tom_008_apodo_caracteres_especiales(client):
     _seed_session(client)
     resp = client.post("/perfil", json={"deviceId": "TOM008", "nickname": "Cargador@Móvil#2024"})
     data = resp.get_json()
-    assert resp.status_code == 201
-    assert data["success"] is True
-    assert data["dispositivo"]["alias"] == "Cargador@Móvil#2024"
+    assert_that(resp.status_code, is_(equal_to(201)))
+    assert_that(resp.get_json()["success"], is_(equal_to(True)))
+    assert_that(data["dispositivo"]["alias"], is_(equal_to("Cargador@Móvil#2024")))
 
 
 def test_perfil_payload_redirige_a_seleccionar(monkeypatch, client):
@@ -189,8 +189,8 @@ def test_perfil_payload_redirige_a_seleccionar(monkeypatch, client):
         json={"address": "Calle 1", "nombre_hogar": "Casa"},
     )
 
-    assert resp.status_code == 200
-    assert resp.get_json()["message"] == "perfil"
+    assert_that(resp.status_code, is_(equal_to(200)))
+    assert_that(resp.get_json()["message"], is_(equal_to("perfil")))
     seleccionar_mock.assert_called_once()
 
 
@@ -199,7 +199,7 @@ def test_payload_invalido_retorna_error(client):
 
     resp = client.post("/perfil", json={"foo": "bar"})
 
-    assert resp.status_code == 400
+    assert_that(resp.status_code, is_(equal_to(400)))
     data = resp.get_json()
-    assert data["success"] is False
+    assert_that(data["success"], is_(equal_to(False)))
     assert "no coincide" in data["error"].lower()

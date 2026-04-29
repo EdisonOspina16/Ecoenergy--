@@ -1,0 +1,17 @@
+# serializer version: 1
+# name: test_regression_listar_tomacorrientes_hogar
+  dict({
+    'dispositivos': list([
+      dict({
+        'alias': 'Enchufe 1',
+        'estado_activo': True,
+        'id_dispositivo': 1,
+      }),
+    ]),
+    'hogar': dict({
+      'id_hogar': 1,
+      'nombre_hogar': 'Hogar A',
+    }),
+    'success': True,
+  })
+# ---

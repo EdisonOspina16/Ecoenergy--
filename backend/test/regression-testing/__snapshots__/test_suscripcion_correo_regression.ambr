@@ -1,0 +1,6 @@
+# serializer version: 1
+# name: test_regression_suscripcion_correo
+  dict({
+    'message': 'Correo enviado correctamente',
+  })
+# ---

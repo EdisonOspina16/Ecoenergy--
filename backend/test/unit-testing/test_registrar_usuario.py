@@ -1,8 +1,8 @@
-from sys import exc_info
-
 import psycopg2
 import pytest
 from typing import Any
+from unittest.mock import patch, MagicMock
+from hamcrest import assert_that, is_, contains_string, instance_of
 from src.aplication.service import usuario_service as us
 from src.domain.errors import PersistenciaError, CorreoDuplicadoError, ValidacionError, ConexionError
 from psycopg2 import Error as DatabaseError
@@ -58,7 +58,7 @@ class DummyConnection:
 
 
 @pytest.fixture(autouse=True)
-def fake_db(monkeypatch: pytest.MonkeyPatch) -> DummyConnection:
+def fake_db():
     """
     Fixture compartido (Arrange global):
     - Reemplaza la conexión real a BD por DummyConnection.
@@ -66,9 +66,9 @@ def fake_db(monkeypatch: pytest.MonkeyPatch) -> DummyConnection:
     Se aplica automáticamente a todas las pruebas del módulo.
     """
     conn = DummyConnection()
-    monkeypatch.setattr(us, "obtener_conexion", lambda: conn)
-    monkeypatch.setattr(us, "generate_password_hash", lambda pwd: f"hashed-{pwd}")
-    return conn
+    with patch("src.aplication.service.usuario_service.obtener_conexion", return_value=conn), \
+         patch("src.aplication.service.usuario_service.generate_password_hash", side_effect=lambda pwd: f"hashed-{pwd}"):
+        yield conn
 
 
 # ==============================================================
@@ -92,7 +92,7 @@ def test_nombre_valido_simple() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 def test_nombre_vacio() -> None:
@@ -113,7 +113,7 @@ def test_nombre_vacio() -> None:
     )
 
     # Assert
-    assert "nombre inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("nombre inválido"))
 
 
 def test_nombre_con_numeros() -> None:
@@ -134,7 +134,7 @@ def test_nombre_con_numeros() -> None:
     )
 
     # Assert
-    assert "nombre inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("nombre inválido"))
 
 
 def test_nombre_dos_caracteres_minimo_valido() -> None:
@@ -154,7 +154,7 @@ def test_nombre_dos_caracteres_minimo_valido() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-004: Nombre de 2 caracteres debería retornar True"
+    assert_that(resultado, is_(True), reason="CP-004: Nombre de 2 caracteres debería retornar True")
 
 
 def test_nombre_51_caracteres_excede_maximo() -> None:
@@ -175,7 +175,7 @@ def test_nombre_51_caracteres_excede_maximo() -> None:
     )
 
     # Assert
-    assert "nombre inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("nombre inválido"))
 
 
 # ==============================================================
@@ -199,7 +199,7 @@ def test_apellido_simple_valido() -> None:
     )
 
     # Assert
-    assert resultado is True, "CP-006: Apellido simple válido debería retornar True"
+    assert_that(resultado, is_(True), reason="CP-006: Apellido simple válido debería retornar True")
 
 
 def test_apellido_con_guion() -> None:
@@ -219,7 +219,7 @@ def test_apellido_con_guion() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 def test_apellido_vacio() -> None:
@@ -240,7 +240,7 @@ def test_apellido_vacio() -> None:
     )
 
     # Assert
-    assert "apellidos inválidos" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("apellidos inválidos"))
 
 
 def test_apellido_dos_caracteres_minimo_valido() -> None:
@@ -260,7 +260,7 @@ def test_apellido_dos_caracteres_minimo_valido() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 def test_apellido_nulo() -> None:
@@ -281,7 +281,7 @@ def test_apellido_nulo() -> None:
     )
 
     # Assert
-    assert "apellidos inválidos" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("apellidos inválidos"))
 
 
 # ==============================================================
@@ -305,7 +305,7 @@ def test_correo_valido_estandar() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 def test_correo_sin_arroba() -> None:
@@ -326,7 +326,7 @@ def test_correo_sin_arroba() -> None:
     )
 
     # Assert
-    assert "correo inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("correo inválido"))
 
 
 def test_correo_duplicado() -> None:
@@ -347,7 +347,7 @@ def test_correo_duplicado() -> None:
         )
     
     # Assert
-    assert "el correo ya está registrado" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("el correo ya está registrado"))
 
 
 def test_error_generico_base_datos() -> None:
@@ -370,7 +370,7 @@ def test_error_generico_base_datos() -> None:
         )
 
     # Assert
-    assert "error en base de datos" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("error en base de datos"))
 
 
 def test_correo_vacio() -> None:
@@ -391,7 +391,7 @@ def test_correo_vacio() -> None:
     )
 
     # Assert
-    assert "correo inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("correo inválido"))
 
 
 def test_correo_mayor_254_caracteres() -> None:
@@ -412,7 +412,7 @@ def test_correo_mayor_254_caracteres() -> None:
     )
 
     # Assert
-    assert "correo inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("correo inválido"))
 
 
 def test_correo_sin_dominio() -> None:
@@ -433,7 +433,7 @@ def test_correo_sin_dominio() -> None:
     )
 
     # Assert
-    assert "correo inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("correo inválido"))
 
 
 def test_correo_sin_extension() -> None:
@@ -454,7 +454,7 @@ def test_correo_sin_extension() -> None:
     )
 
     # Assert
-    assert "correo inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("correo inválido"))
 
 
 def test_correo_doble_arroba() -> None:
@@ -474,7 +474,7 @@ def test_correo_doble_arroba() -> None:
     )
 
     # Assert
-    assert "correo inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("correo inválido"))
 
 
 def test_correo_con_espacios() -> None:
@@ -495,7 +495,7 @@ def test_correo_con_espacios() -> None:
     )
 
     # Assert
-    assert "correo inválido" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("correo inválido"))
 
 
 def test_correo_con_mayusculas() -> None:
@@ -515,7 +515,7 @@ def test_correo_con_mayusculas() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 # ==============================================================
@@ -539,7 +539,7 @@ def test_contrasena_valida_fuerte() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 def test_contrasena_solo_minusculas() -> None:
@@ -560,7 +560,7 @@ def test_contrasena_solo_minusculas() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_solo_numeros() -> None:
@@ -581,7 +581,7 @@ def test_contrasena_solo_numeros() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_solo_mayusculas() -> None:
@@ -602,7 +602,7 @@ def test_contrasena_solo_mayusculas() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_vacia() -> None:
@@ -623,7 +623,7 @@ def test_contrasena_vacia() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_nula() -> None:
@@ -644,7 +644,7 @@ def test_contrasena_nula() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_menos_de_8_caracteres() -> None:
@@ -665,7 +665,7 @@ def test_contrasena_menos_de_8_caracteres() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_exactamente_8_caracteres() -> None:
@@ -685,7 +685,7 @@ def test_contrasena_exactamente_8_caracteres() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 def test_contrasena_con_espacios() -> None:
@@ -706,7 +706,7 @@ def test_contrasena_con_espacios() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_caracteres_especiales_validos() -> None:
@@ -726,7 +726,7 @@ def test_contrasena_caracteres_especiales_validos() -> None:
     )
 
     # Assert
-    assert resultado is True
+    assert_that(resultado, is_(True))
 
 
 def test_contrasena_mayor_128_caracteres() -> None:
@@ -747,7 +747,7 @@ def test_contrasena_mayor_128_caracteres() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 
 def test_contrasena_con_emoji() -> None:
@@ -768,16 +768,16 @@ def test_contrasena_con_emoji() -> None:
     )
 
     # Assert
-    assert "contraseña inválida" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("contraseña inválida"))
 
 # ==============================================================
 # PRUEBA DE SIN CONEXIÓN A BASE DE DATOS
 # ==============================================================
 
-def test_sin_conexion_bd(monkeypatch: pytest.MonkeyPatch) -> None:
+@patch("src.aplication.service.usuario_service.obtener_conexion", return_value=None)
+def test_sin_conexion_bd(mock_obtener_conexion) -> None:
     """Stub: cuando obtener_conexion() retorna None debe lanzar ConexionError."""
     # Arrange
-    monkeypatch.setattr(us, "obtener_conexion", lambda: None)
     nombre = "Carlos"
     apellidos = "Gómez"
     correo = "usuario@gmail.com"
@@ -792,4 +792,4 @@ def test_sin_conexion_bd(monkeypatch: pytest.MonkeyPatch) -> None:
             contrasena=contrasena,
         )
 
-    assert "no se pudo conectar" in str(exc_info.value).lower()
+    assert_that(str(exc_info.value).lower(), contains_string("no se pudo conectar"))

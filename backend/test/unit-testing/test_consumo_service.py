@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
+from hamcrest import assert_that, is_, equal_to, has_length
 
 from src.aplication.service.consumo_service import (
     _obtener_hogar,
@@ -24,11 +25,13 @@ class TestConsumoService:
         mock_repo_instance.obtener_hogar_por_usuario.return_value = "Hogar_Dummy"
         mock_repo_class.return_value = mock_repo_instance
         
+        # Act
         resultado = _obtener_hogar(1)
         
+        # Assert
         mock_repo_class.assert_called_once_with(mock_conn)
         mock_repo_instance.obtener_hogar_por_usuario.assert_called_once_with(1)
-        assert resultado == "Hogar_Dummy"
+        assert_that(resultado, is_(equal_to("Hogar_Dummy")))
 
 
     # ---------------------------------------------------------
@@ -40,9 +43,10 @@ class TestConsumoService:
         
         resultado = procesar_recomendacion(1500, "Aire Acondicionado")
         
-        assert resultado["recomendacion"] == "Cuidado, hay un pico de consumo ⚠️"
-        assert resultado["esAlerta"] is True
-        assert resultado["dispositivo"] == "Aire Acondicionado"
+        # Assert
+        assert_that(resultado["recomendacion"], is_(equal_to("Cuidado, hay un pico de consumo ⚠️")))
+        assert_that(resultado["esAlerta"], is_(True))
+        assert_that(resultado["dispositivo"], is_(equal_to("Aire Acondicionado")))
 
     @patch('src.aplication.service.consumo_service.llamar_recomendacion')
     def test_procesar_recomendacion_normal(self, mock_llamar_recomendacion):
@@ -50,7 +54,8 @@ class TestConsumoService:
         
         resultado = procesar_recomendacion(100, "TV")
         
-        assert resultado["esAlerta"] is False
+        # Assert
+        assert_that(resultado["esAlerta"], is_(False))
 
 
     # ---------------------------------------------------------
@@ -62,8 +67,11 @@ class TestConsumoService:
         mock_obtener_disp.return_value = [{"nombre": "Nevera", "consumo_watts": 400}]
         mock_llamar.return_value = {"ahorro": "1000 COP"}
         
+        # Act
         res = procesar_ahorro_estimado()
-        assert res == {"ahorro": "1000 COP"}
+
+        # Assert
+        assert_that(res, is_(equal_to({"ahorro": "1000 COP"})))
 
     @patch('src.aplication.service.consumo_service.obtener_dispositivos_con_ultimo_consumo')
     def test_procesar_ahorro_estimado_error_sin_dispositivos(self, mock_obtener_disp):
@@ -79,8 +87,11 @@ class TestConsumoService:
     def test_obtener_recomendacion_diaria_sin_hogar(self, mock_obtener_hogar):
         mock_obtener_hogar.return_value = None
         
+        # Act
         res = obtener_recomendacion_diaria_hogar_por_usuario(1)
-        assert res["encontrado"] is False
+
+        # Assert
+        assert_that(res["encontrado"], is_(False))
 
     @patch('src.aplication.service.consumo_service.obtener_recomendacion_diaria')
     @patch('src.aplication.service.consumo_service._obtener_hogar')
@@ -90,9 +101,12 @@ class TestConsumoService:
         mock_obtener_hogar.return_value = mock_hogar
         mock_obtener_rec.return_value = {"datos": "existen"}
         
+        # Act
         res = obtener_recomendacion_diaria_hogar_por_usuario(1)
-        assert res["encontrado"] is True
-        assert res["datos"] == "existen"
+
+        # Assert
+        assert_that(res["encontrado"], is_(True))
+        assert_that(res["datos"], is_(equal_to("existen")))
 
     @patch('src.aplication.service.consumo_service.obtener_recomendacion_diaria')
     @patch('src.aplication.service.consumo_service._obtener_hogar')
@@ -102,9 +116,12 @@ class TestConsumoService:
         mock_obtener_hogar.return_value = mock_hogar
         mock_obtener_rec.return_value = None
         
+        # Act
         res = obtener_recomendacion_diaria_hogar_por_usuario(1)
-        assert res["encontrado"] is True
-        assert res["recomendaciones"] == []
+
+        # Assert
+        assert_that(res["encontrado"], is_(True))
+        assert_that(res["recomendaciones"], is_(equal_to([])))
 
 
     # ---------------------------------------------------------
@@ -124,9 +141,12 @@ class TestConsumoService:
         mock_obtener_hogar.return_value = mock_hogar
         mock_obtener_rec.return_value = {"ya_existe": True}
         
+        # Act
         res = generar_y_guardar_recomendacion_diaria(1)
-        assert res["generada"] is True
-        assert res["ya_existe"] is True
+
+        # Assert
+        assert_that(res["generada"], is_(True))
+        assert_that(res["ya_existe"], is_(True))
 
     @patch('src.aplication.service.consumo_service._obtener_hogar')
     @patch('src.aplication.service.consumo_service.obtener_recomendacion_diaria')
@@ -160,8 +180,10 @@ class TestConsumoService:
             "indicador_didactico": "1 arbol"
         }
         
+        # Act
         res = generar_y_guardar_recomendacion_diaria(1)
-        
-        assert res["generada"] is True
-        assert res["recomendaciones"] == [{"recomendacion": "Ok"}]
+
+        # Assert
+        assert_that(res["generada"], is_(True))
+        assert_that(res["recomendaciones"], is_(equal_to([{"recomendacion": "Ok"}])))
         mock_guardar.assert_called_once()

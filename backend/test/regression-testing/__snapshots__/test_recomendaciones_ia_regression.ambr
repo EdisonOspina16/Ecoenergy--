@@ -1,0 +1,8 @@
+# serializer version: 1
+# name: test_regression_modulo_ia_recomendaciones
+  dict({
+    'fecha': '2026-04-27',
+    'recomendacion': 'La IA sugiere apagar los equipos inactivos por la noche.',
+    'success': True,
+  })
+# ---

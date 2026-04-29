@@ -1,0 +1,19 @@
+# serializer version: 1
+# name: test_regression_listar_dispositivos_conectados
+  dict({
+    'dispositivos': list([
+      dict({
+        'alias': 'TV',
+        'estado_activo': False,
+        'id_dispositivo': 10,
+      }),
+      dict({
+        'alias': 'PC',
+        'estado_activo': True,
+        'id_dispositivo': 11,
+      }),
+    ]),
+    'hogar': None,
+    'success': True,
+  })
+# ---

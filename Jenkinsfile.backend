@@ -1,0 +1,137 @@
+pipeline {
+    agent any
+
+    environment {
+        SONAR_HOST_URL        = 'http://sonarqube:9000'
+        SONAR_BACKEND_PROJECT = 'EcoEnergy-Backend'
+    }
+
+    stages {
+
+        // ════════════════════════════════════════════════════════════
+        // 1. CHECKOUT
+        // ════════════════════════════════════════════════════════════
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 2. INSTALL DEPENDENCIES
+        // ════════════════════════════════════════════════════════════
+        stage('Install Dependencies') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        echo "══ Creating Python virtual environment ══"
+                        python3 -m venv venv
+                        . venv/bin/activate
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                    '''
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 3. RUN TESTS
+        // ════════════════════════════════════════════════════════════
+        stage('Run Tests') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        echo "══ Running pytest with coverage ══"
+                        . venv/bin/activate
+                        python -m pytest \
+                            --junitxml=test-results.xml \
+                            --cov=src \
+                            --cov-report=xml:coverage.xml \
+                            --cov-report=term-missing \
+                            -v
+                    '''
+                }
+            }
+            post {
+                always {
+                    junit 'backend/test-results.xml'
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 4. SONARQUBE ANALYSIS
+        // ════════════════════════════════════════════════════════════
+        stage('SonarQube Analysis') {
+            steps {
+                dir('backend') {
+                    withCredentials([string(credentialsId: 'sonar-backend-token', variable: 'SONAR_TOKEN')]) {
+                        withSonarQubeEnv('Sonarqube') {
+                            script {
+                                def scannerHome = tool 'SonarQube'
+                                sh """
+                                    ${scannerHome}/bin/sonar-scanner \
+                                        -Dsonar.projectKey=${SONAR_BACKEND_PROJECT} \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.token=\$SONAR_TOKEN \
+                                        -Dsonar.sources=src \
+                                        -Dsonar.tests=test \
+                                        -Dsonar.python.version=3.12 \
+                                        -Dsonar.python.coverage.reportPaths=coverage.xml \
+                                        -Dsonar.exclusions=venv/**,__pycache__/**,.pytest_cache/** \
+                                        -Dsonar.sourceEncoding=UTF-8
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 5. QUALITY GATE
+        // ════════════════════════════════════════════════════════════
+        stage('Quality Gate') {
+            steps {
+                echo '══ Waiting for SonarQube Quality Gate ══'
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // 6. DEPLOY BACKEND
+        // Solo se ejecuta si tests y Quality Gate pasaron
+        // Backend disponible en http://localhost:5000
+        // ════════════════════════════════════════════════════════════
+        stage('Deploy Backend') {
+            steps {
+                echo '🚀 Deploying Backend on localhost:5000...'
+                sh '''
+                    docker compose -p ecoenergy stop backend || true
+                    docker compose -p ecoenergy rm -f backend || true
+                    docker compose -p ecoenergy up -d --build backend
+                    echo "✅ Backend running on http://localhost:5000"
+                '''
+            }
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // POST-BUILD ACTIONS
+    // ════════════════════════════════════════════════════════════════
+    post {
+        success {
+            echo '✅ Backend pipeline completed — tests passed, Quality Gate met, deployed successfully.'
+        }
+        failure {
+            echo '❌ Backend pipeline FAILED — check test results or SonarQube Quality Gate.'
+        }
+        always {
+            echo '📋 Archiving backend reports…'
+            archiveArtifacts artifacts: 'backend/coverage.xml, backend/test-results.xml', allowEmptyArchive: true
+            cleanWs()
+        }
+    }
+}

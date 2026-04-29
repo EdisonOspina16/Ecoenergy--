@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
+from hamcrest import assert_that, is_, equal_to
 
 with patch("google.genai.Client") as FakeClient:
     fake_models = Mock()
@@ -94,8 +95,8 @@ def test_eliminar_desconectado(client, dispositivo_state):
     resp = client.delete("/perfil/dispositivo/1")
     data = resp.get_json()
 
-    assert resp.status_code == 200
-    assert data["success"] is True
+    assert_that(resp.status_code, is_(equal_to(200)))
+    assert_that(data["success"], is_(equal_to(True)))
     assert "eliminado" in data["message"].lower()
 
 
@@ -104,8 +105,8 @@ def test_eliminar_conectado(client, dispositivo_state):
     dispositivo_state["set_devices"]([DispositivoFake(2, "Lavadora", True)])
 
     resp = client.delete("/perfil/dispositivo/2")
-    assert resp.status_code == 200
-    assert resp.get_json()["success"] is True
+    assert_that(resp.status_code, is_(equal_to(200)))
+    assert_that(resp.get_json()["success"], is_(equal_to(True)))
 
 
 def test_mensaje_exito(client, dispositivo_state):
@@ -138,8 +139,8 @@ def test_eliminar_clicks_rapidos(client, dispositivo_state):
     first = client.delete("/perfil/dispositivo/7")
     second = client.delete("/perfil/dispositivo/7")
 
-    assert first.status_code == 200
-    assert second.status_code == 404
+    assert_that(first.status_code, is_(equal_to(200)))
+    assert_that(second.status_code, is_(equal_to(404)))
 
 
 def test_eliminar_sin_dispositivos(client, dispositivo_state):
@@ -147,8 +148,8 @@ def test_eliminar_sin_dispositivos(client, dispositivo_state):
     dispositivo_state["set_devices"]([])
 
     resp = client.delete("/perfil/dispositivo/8")
-    assert resp.status_code == 404
-    assert resp.get_json()["success"] is False
+    assert_that(resp.status_code, is_(equal_to(404)))
+    assert_that(resp.get_json()["success"], is_(equal_to(False)))
 
 
 def test_no_aparece_despues_de_eliminar(client, dispositivo_state):
@@ -160,7 +161,7 @@ def test_no_aparece_despues_de_eliminar(client, dispositivo_state):
 
     assert "Lavadora" not in [d["alias"] for d in data["dispositivos"]]
 
-    assert data["success"] is True
+    assert_that(data["success"], is_(equal_to(True)))
 
 
 def test_eliminar_dispositivo_error_500(monkeypatch, client):
@@ -175,7 +176,7 @@ def test_eliminar_dispositivo_error_500(monkeypatch, client):
     data = resp.get_json()
 
     # Assert
-    assert resp.status_code == 500
-    assert data["success"] is False
+    assert_that(resp.status_code, is_(equal_to(500)))
+    assert_that(data["success"], is_(equal_to(False)))
     assert "fallo eliminando" in data["error"]
     eliminar_mock.assert_called_once_with(123, 7)

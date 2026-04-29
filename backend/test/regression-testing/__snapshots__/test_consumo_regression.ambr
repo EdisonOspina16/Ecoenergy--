@@ -1,0 +1,18 @@
+# serializer version: 1
+# name: test_regression_ahorro_estimado
+  dict({
+    'data': dict({
+      'ahorro_financiero': '$50.00 al mes',
+      'impacto_ambiental': 'Menos huella de carbono',
+      'indicador_didactico': '10 árboles salvados',
+    }),
+    'success': True,
+  })
+# ---
+# name: test_regression_recomendacion
+  dict({
+    'dispositivo': 'Aire Acondicionado',
+    'esAlerta': False,
+    'recomendacion': 'Deberías apagar el aire acondicionado por las noches.',
+  })
+# ---

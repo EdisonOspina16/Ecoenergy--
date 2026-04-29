@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
+from hamcrest import assert_that, is_, equal_to
 
 with patch("google.genai.Client") as FakeClient:
     fake_models = Mock()
@@ -26,9 +27,9 @@ def _seed_session(client):
 
 def test_logout_vacia_sin_sesion(client):
     resp = client.post("/logout")
-    assert resp.status_code == 200
+    assert_that(resp.status_code, is_(equal_to(200)))
     data = resp.get_json()
-    assert data["success"] is True
+    assert_that(data["success"], is_(equal_to(True)))
     with client.session_transaction() as sess:
         assert "usuario" not in sess
 
@@ -37,9 +38,9 @@ def test_logout_con_sesion_la_limpia(client):
     _seed_session(client)
 
     resp = client.post("/logout")
-    assert resp.status_code == 200
+    assert_that(resp.status_code, is_(equal_to(200)))
     data = resp.get_json()
-    assert data["success"] is True
+    assert_that(data["success"], is_(equal_to(True)))
 
     with client.session_transaction() as sess:
         assert "usuario" not in sess
@@ -49,13 +50,13 @@ def test_logout_es_idempotente(client):
     # Primera vez con sesión
     _seed_session(client)
     first = client.post("/logout")
-    assert first.status_code == 200
+    assert_that(first.status_code, is_(equal_to(200)))
 
     # Segunda vez sin sesión: se sigue devolviendo 200
     second = client.post("/logout")
-    assert second.status_code == 200
+    assert_that(second.status_code, is_(equal_to(200)))
     data = second.get_json()
-    assert data["success"] is True
+    assert_that(data["success"], is_(equal_to(True)))
 
 
 def test_no_acceso_perfil_tras_logout(client):
@@ -65,9 +66,9 @@ def test_no_acceso_perfil_tras_logout(client):
 
     # el intento de acceder a /perfil debe dar 401
     resp = client.get("/perfil")
-    assert resp.status_code == 401
+    assert_that(resp.status_code, is_(equal_to(401)))
     data = resp.get_json()
-    assert data["error"]
+    assert_that(data["error"])
 
 
 @pytest.mark.parametrize("veces", [1, 2, 3], ids=lambda v: f"CP-LOG-idempotente-x{v}")
@@ -76,8 +77,8 @@ def test_logout_repetido_idempotente(client, veces):
 
     for _ in range(veces):
         resp = client.post("/logout")
-        assert resp.status_code == 200
-        assert resp.get_json()["success"] is True
+        assert_that(resp.status_code, is_(equal_to(200)))
+        assert_that(resp.get_json()["success"], is_(equal_to(True)))
 
     with client.session_transaction() as sess:
         assert "usuario" not in sess
@@ -92,16 +93,16 @@ def test_logout_y_luego_perfil_y_luego_logout(client):
 
     # Logout inicial
     first = client.post("/logout")
-    assert first.status_code == 200
+    assert_that(first.status_code, is_(equal_to(200)))
 
     # Intento de acceder a /perfil después de hacer logout
     resp_perfil = client.get("/perfil")
-    assert resp_perfil.status_code == 401
+    assert_that(resp_perfil.status_code, is_(equal_to(401)))
 
     # Segundo logout (sin sesión)
     second = client.post("/logout")
-    assert second.status_code == 200
-    assert second.get_json()["success"] is True
+    assert_that(second.status_code, is_(equal_to(200)))
+    assert_that(second.get_json()["success"], is_(equal_to(True)))
 
 
 def test_logout_no_rehabilita_sesion_en_refresh(client):
@@ -111,6 +112,6 @@ def test_logout_no_rehabilita_sesion_en_refresh(client):
 
     # un Refresh con un GET público o vacío (/) no debe recrear usuario en sesión
     resp_root = client.get("/")
-    assert resp_root.status_code == 404
+    assert_that(resp_root.status_code, is_(equal_to(404)))
     with client.session_transaction() as sess:
         assert "usuario" not in sess

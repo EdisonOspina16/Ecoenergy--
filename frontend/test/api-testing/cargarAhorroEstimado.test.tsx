@@ -5,8 +5,9 @@
  */
 
 import React from "react";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cargarAhorroEstimado } from "../src/lib/cargarAhorroEstimado";
+import { afterEach, beforeEach, describe, test, vi } from "vitest";
+import { cargarAhorroEstimado } from "@/lib/cargarAhorroEstimado";
+import { expect } from "chai";
 
 const mockFetch = vi.fn();
 const vacio = {
@@ -50,7 +51,8 @@ describe("cargarAhorroEstimado - caja blanca", () => {
     await cargarAhorroEstimado({ setSavingData, setLoading });
 
     // C1: setSavingData con los tres campos completos
-    expect(setSavingData).toHaveBeenCalledWith({
+    expect(setSavingData.mock.calls.length).to.equal(1);
+    expect(setSavingData.mock.calls[0][0]).to.deep.equal({
       ahorro_financiero,
       impacto_ambiental,
       indicador_didactico,
@@ -66,7 +68,8 @@ describe("cargarAhorroEstimado - caja blanca", () => {
     await cargarAhorroEstimado({ setSavingData, setLoading });
 
     // C2: setSavingData con valores vacíos
-    expect(setSavingData).toHaveBeenCalledWith(vacio);
+    expect(setSavingData.mock.calls.length).to.equal(1);
+    expect(setSavingData.mock.calls[0][0]).to.deep.equal(vacio);
   });
 
   test("cargarAhorroEstimado - HTTP error 4xx/5xx: catch, setSavingData vacío, finally loading(false)", async () => {
@@ -79,9 +82,12 @@ describe("cargarAhorroEstimado - caja blanca", () => {
     await cargarAhorroEstimado({ setSavingData, setLoading });
 
     // C3: catch ejecutado -> setSavingData vacío
-    expect(setSavingData).toHaveBeenCalledWith(vacio);
+    expect(setSavingData.mock.calls.length).to.equal(1);
+    expect(setSavingData.mock.calls[0][0]).to.deep.equal(vacio);
     // C3: finally -> setLoading(false)
-    expect(setLoading).toHaveBeenLastCalledWith(false);
+    const loadingCalls = setLoading.mock.calls;
+    expect(loadingCalls.length).to.be.greaterThan(0);
+    expect(loadingCalls[loadingCalls.length - 1][0]).to.equal(false);
   });
 
   test("cargarAhorroEstimado - excepción de red: console.error y setSavingData vacío", async () => {
@@ -90,9 +96,11 @@ describe("cargarAhorroEstimado - caja blanca", () => {
     await cargarAhorroEstimado({ setSavingData, setLoading });
 
     // C4: console.error llamado
-    expect(console.error).toHaveBeenCalled();
+    const consoleCalls = vi.mocked(console.error).mock.calls;
+    expect(consoleCalls.length).to.be.greaterThan(0);
     // C4: setSavingData vacío
-    expect(setSavingData).toHaveBeenCalledWith(vacio);
+    expect(setSavingData.mock.calls.length).to.equal(1);
+    expect(setSavingData.mock.calls[0][0]).to.deep.equal(vacio);
   });
 
   test("cargarAhorroEstimado - JSON malformado: console.error y setSavingData vacío", async () => {
@@ -104,8 +112,10 @@ describe("cargarAhorroEstimado - caja blanca", () => {
     await cargarAhorroEstimado({ setSavingData, setLoading });
 
     // C5: console.error llamado
-    expect(console.error).toHaveBeenCalled();
+    const consoleCalls = vi.mocked(console.error).mock.calls;
+    expect(consoleCalls.length).to.be.greaterThan(0);
     // C5: setSavingData vacío
-    expect(setSavingData).toHaveBeenCalledWith(vacio);
+    expect(setSavingData.mock.calls.length).to.equal(1);
+    expect(setSavingData.mock.calls[0][0]).to.deep.equal(vacio);
   });
 });

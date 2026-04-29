@@ -1,20 +1,21 @@
 import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import Profile from "../src/app/perfil/page";
-import { registerDevice } from "../src/lib/api/devices";
+import { afterEach, describe, it, vi } from "vitest";
+import Profile from "@/app/perfil/page";
+import { registerDevice } from "@/lib/api/devices";
+import { expect } from "chai";
 
-vi.mock("../src/lib/api/devices", () => ({ registerDevice: vi.fn() }));
+vi.mock("@/lib/api/devices", () => ({ registerDevice: vi.fn() }));
 
 const makeResponse = (body: any, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
-  }) as any;
+  });
 
 const renderPerfil = () => {
-  vi.spyOn(global, "fetch").mockResolvedValue(
-    makeResponse({ success: true, hogar: {}, dispositivos: [] }) as any,
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    makeResponse({ success: true, hogar: {}, dispositivos: [] }),
   );
   return render(<Profile />);
 };
@@ -53,7 +54,7 @@ describe("Registrar tomacorriente - handleDeviceRegister", () => {
     submitRegistro();
 
     await screen.findByText(/Ingresa el ID del dispositivo/i);
-    expect(registerDevice).not.toHaveBeenCalled();
+    expect(vi.mocked(registerDevice).mock.calls.length).to.equal(0);
   }, 8000);
 
   it("agrega el dispositivo y limpia el formulario cuando el registro es exitoso", async () => {
@@ -74,13 +75,15 @@ describe("Registrar tomacorriente - handleDeviceRegister", () => {
     const { idInput, nicknameInput } = fillAllFields();
     submitRegistro();
 
-    await waitFor(() => expect(registerDevice).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(vi.mocked(registerDevice).mock.calls.length).to.be.at.least(1);
+    });
     await screen.findByText(/Dispositivo registrado exitosamente/i);
     await screen.findByDisplayValue("Tomacorriente Patio");
 
     await waitFor(() => {
-      expect(idInput).toHaveValue("");
-      expect(nicknameInput).toHaveValue("");
+      expect((idInput as HTMLInputElement).value).to.equal("");
+      expect((nicknameInput as HTMLInputElement).value).to.equal("");
     });
   }, 8000);
 
@@ -102,7 +105,9 @@ describe("Registrar tomacorriente - handleDeviceRegister", () => {
 
     submitRegistro();
 
-    await waitFor(() => expect(registerDevice).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(vi.mocked(registerDevice).mock.calls.length).to.be.at.least(1);
+    });
     await screen.findByText(/Error al registrar el dispositivo/i);
   }, 8000);
 });
