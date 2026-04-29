@@ -9,6 +9,7 @@ PyHamcrest
 locust
 pytest
 pytest-cov
+pytest-bdd
 bandit
 pip-audit
 syrupy
