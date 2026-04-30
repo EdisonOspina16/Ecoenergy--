@@ -1,3 +1,6 @@
+# Package-lock.json
+fronend/package-lock.json
+package-lock.json
 
 # SonarQube
 /backend/.coverage
@@ -122,3 +125,4 @@ venv/
 # Pruebas de performance
 backend/test/performance-testing/locust
 
+frontend/package-lock.json
