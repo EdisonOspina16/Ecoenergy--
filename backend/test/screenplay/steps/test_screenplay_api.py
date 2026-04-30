@@ -4,6 +4,8 @@ import src.routes.vista_perfil as vp
 import src.routes.vista_usuarios as vu
 import src.aplication.service.consumo_service as cs
 import src.aplication.service.usuario_service as us
+import src.routes.vista_dispositivos as vd
+import src.routes.vista_email as ve
 
 from test.screenplay.actions.login import IniciarSesion
 from test.screenplay.actions.logout import CerrarSesion
@@ -20,6 +22,13 @@ from test.screenplay.actions.ahorro_impacto_huella import (
 from test.screenplay.actions.session import SeedSession
 from test.screenplay.questions.last_response import response_json, response_status
 
+# Nuevas acciones
+from test.screenplay.actions.cambiar_contrasena import CambiarContrasena
+from test.screenplay.actions.crear_perfil_hogar import CrearPerfilHogar
+from test.screenplay.actions.mostrar_estado import CambiarEstadoDispositivo
+from test.screenplay.actions.listar_dispositivos import ListarDispositivos
+from test.screenplay.actions.suscripcion_correo import SuscripcionCorreo
+
 
 # ---------------------------------------------------------------------------
 # Registro de escenarios por feature
@@ -32,6 +41,11 @@ scenarios("../features/eliminar_tomacorriente.feature")
 scenarios("../features/registrar_usuario.feature")
 scenarios("../features/generar_recomendaciones.feature")
 scenarios("../features/ahorro_impacto_huella.feature")
+scenarios("../features/cambiar_contrasena.feature")
+scenarios("../features/crear_perfil_hogar.feature")
+scenarios("../features/mostrar_estado.feature")
+scenarios("../features/listar_dispositivos.feature")
+scenarios("../features/suscripcion_correo.feature")
 
 
 # ===========================================================================
@@ -386,3 +400,78 @@ def resultado_ahorro_contiene_campo(actor, campo):
     assert campo in data["data"], (
         f"Campo '{campo}' no encontrado en data: {data['data']}"
     )
+
+# ===========================================================================
+# NUEVOS STEPS (5 Funcionalidades)
+# ===========================================================================
+
+# --- GIVEN ---
+@given(parsers.parse('el usuario esta registrado con correo "{correo}"'))
+def usuario_registrado_correo(monkeypatch, correo):
+    monkeypatch.setattr(vu, "cambiar_contrasena", lambda c, nc: True)
+
+@given("existen dispositivos registrados globales")
+def dispositivos_registrados_globales(monkeypatch):
+    class FakeCursor:
+        def execute(self, q): pass
+        def fetchall(self): return [("Nevera", 1500, True, "Electrodomestico")]
+        def close(self): pass
+    class FakeConn:
+        def cursor(self): return FakeCursor()
+        def close(self): pass
+    monkeypatch.setattr(vd, "obtener_conexion", lambda: FakeConn())
+
+@given("el sistema de correos esta disponible")
+def sistema_correos_disponible(monkeypatch):
+    monkeypatch.setattr(ve, "send_welcome_email", lambda email: True)
+
+# --- WHEN ---
+@when(parsers.parse('intenta recuperar contrasena con correo "{correo}" y nueva contrasena "{nueva_contrasena}"'))
+def recuperar_contrasena(actor, correo, nueva_contrasena):
+    actor.attempts_to(CambiarContrasena(correo, nueva_contrasena))
+
+@when(parsers.parse('guarda su perfil de hogar con direccion "{direccion}" y nombre "{nombre}"'))
+def guarda_perfil_hogar(actor, direccion, nombre, monkeypatch):
+    monkeypatch.setattr(vp, "obtener_hogar_por_usuario", lambda _uid: None)
+    monkeypatch.setattr(vp, "crear_o_actualizar_hogar", lambda id_usuario, direccion, nombre_hogar: HogarStub(99))
+    actor.attempts_to(CrearPerfilHogar(direccion, nombre))
+
+@when(parsers.parse('cambia el estado del dispositivo con id {dispositivo_id:d} a encendido'))
+def cambia_estado_dispositivo(actor, dispositivo_id, monkeypatch):
+    monkeypatch.setattr(vp, "actualizar_estado_dispositivo", lambda id_dispositivo, id_usuario, estado: True)
+    actor.attempts_to(CambiarEstadoDispositivo(dispositivo_id, True))
+
+@when("lista los dispositivos")
+def lista_los_dispositivos(actor):
+    actor.attempts_to(ListarDispositivos())
+
+@when(parsers.parse('el usuario se suscribe con el correo "{correo}"'))
+def se_suscribe_correo(actor, correo):
+    actor.attempts_to(SuscripcionCorreo(correo))
+
+# --- THEN ---
+@then("el mensaje de respuesta indica contrasena actualizada")
+def mensaje_contrasena_actualizada(actor):
+    data = response_json(actor)
+    assert "contrasena actualizada" in data["message"].lower()
+
+@then("la respuesta indica perfil creado o actualizado")
+def respuesta_indica_perfil_creado(actor):
+    data = response_json(actor)
+    assert "perfil" in data["message"].lower()
+
+@then("el mensaje indica dispositivo encendido o apagado")
+def mensaje_dispositivo_encendido(actor):
+    data = response_json(actor)
+    assert "encendido" in data["message"].lower() or "apagado" in data["message"].lower()
+
+@then(parsers.parse('se listan al menos {cantidad:d} dispositivos'))
+def listan_al_menos_dispositivos(actor, cantidad):
+    data = response_json(actor)
+    assert len(data["dispositivos"]) >= cantidad
+
+@then("el mensaje indica correo enviado correctamente")
+def mensaje_correo_enviado(actor):
+    data = response_json(actor)
+    assert "correo enviado correctamente" in data["message"].lower()
+
